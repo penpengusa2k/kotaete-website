@@ -36,32 +36,6 @@
 
     <section class="py-12">
       <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">最新記事</h2>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <img src="https://via.placeholder.com/400x250/E0F2F7/2C3E50?text=Article+Image" alt="記事画像" class="w-full h-48 object-cover">
-          <div class="p-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">プログラミングで自動化ツールを作る第一歩</h3>
-            <p class="text-gray-600 text-sm mb-4 line-clamp-3">Pythonを使って日々のルーティン作業を自動化する方法について解説します。初心者でも理解しやすいように、具体的なコード例を交えながら説明します。</p>
-            <NuxtLink to="/articles/programming-automation" class="text-blue-600 hover:text-blue-800 font-medium text-sm">続きを読む &rarr;</NuxtLink>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <img src="https://via.placeholder.com/400x250/E8F5E9/2C3E50?text=Tool+Review" alt="記事画像" class="w-full h-48 object-cover">
-          <div class="p-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">おすすめのノーコードツール5選</h3>
-            <p class="text-gray-600 text-sm mb-4 line-clamp-3">プログラミング知識がなくてもビジネスを自動化できるノーコードツールをご紹介。それぞれの特徴と活用事例を詳しく解説。</p>
-            <NuxtLink to="/articles/nocode-tools" class="text-blue-600 hover:text-blue-800 font-medium text-sm">続きを読む &rarr;</NuxtLink>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <img src="https://via.placeholder.com/400x250/FFF3E0/2C3E50?text=Passive+Income" alt="記事画像" class="w-full h-48 object-cover">
-          <div class="p-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">ブログで月5万円稼ぐロードマップ</h3>
-            <p class="text-gray-600 text-sm mb-4 line-clamp-3">ブログをゼロから立ち上げ、収益化するための具体的なステップを解説。SEO対策からコンテンツ作成、収益化戦略まで。</p>
-            <NuxtLink to="/articles/blog-roadmap" class="text-blue-600 hover:text-blue-800 font-medium text-sm">続きを読む &rarr;</NuxtLink>
-          </div>
-        </div>
-      </div>
       <div class="text-center mt-10">
         <NuxtLink to="/articles" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
           すべての記事を見る

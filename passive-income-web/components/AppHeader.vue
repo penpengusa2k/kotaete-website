@@ -17,12 +17,6 @@
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/tools" class="relative py-2 px-3 group text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm md:text-base font-medium">
-              ツール
-              <span class="absolute bottom-0 left-0 w-full h-0.5 bg-gray-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
-            </NuxtLink>
-          </li>
-          <li>
             <NuxtLink to="/about" class="relative py-2 px-3 group text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm md:text-base font-medium">
               サイトについて
               <span class="absolute bottom-0 left-0 w-full h-0.5 bg-gray-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
@@ -61,11 +55,6 @@
             <li>
               <NuxtLink @click="isMenuOpen = false" to="/articles" class="block hover:bg-gray-100 py-2 px-3 rounded-md transition duration-200 text-base font-medium">
                 記事
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink @click="isMenuOpen = false" to="/tools" class="block hover:bg-gray-100 py-2 px-3 rounded-md transition duration-200 text-base font-medium">
-                ツール
               </NuxtLink>
             </li>
             <li>
