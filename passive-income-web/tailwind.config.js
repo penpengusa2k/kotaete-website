@@ -24,6 +24,7 @@ export default {
     },
   },
   plugins: [
-    require('@tailwindcss/typography'), // typographyプラグインは維持
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'), // アスペクト比を管理するプラグイン
   ],
 }
