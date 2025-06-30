@@ -4,15 +4,11 @@
 
     <nav class="container mx-auto px-4 py-4 text-sm text-gray-500" aria-label="breadcrumb">
       <ol class="list-none p-0 inline-flex flex-wrap items-center">
-        <li class="flex items-center">
-          <NuxtLink to="/" class="breadcrumb-link">ホーム</NuxtLink>
-        </li>
         <template v-if="breadcrumbs.length > 0">
           <li v-for="(crumb, index) in breadcrumbs" :key="index" class="flex items-center">
-            <span class="material-icons-outlined text-sm mx-2">chevron_right</span>
+            <span v-if="index > 0" class="material-icons-outlined text-sm mx-2">chevron_right</span>
             <NuxtLink
-              v-if="index < breadcrumbs.length - 1 || crumb.isLink"
-              :to="crumb.path"
+              v-if="crumb.isLink" :to="crumb.path"
               class="breadcrumb-link"
             >
               {{ crumb.name }}
@@ -35,16 +31,16 @@
 <script setup>
 import { computed, watch, ref } from 'vue';
 import { useRoute } from 'vue-router';
+// AppHeader, AppFooter はすでにインポートされているものと仮定
 
 const route = useRoute();
 const articleDataForBreadcrumb = ref(null);
 
-const { query } = route;
-
-watch(() => route.params.slug, async (newSlug) => {
-  if (route.path.startsWith('/articles/') && newSlug) {
+// route.path の変更を監視し、記事詳細ページの場合のみ記事データをフェッチ
+watch(() => route.path, async (newPath) => {
+  if (newPath.startsWith('/articles/') && route.params.slug) {
     try {
-      articleDataForBreadcrumb.value = await $fetch(`/api/article/${newSlug}`);
+      articleDataForBreadcrumb.value = await $fetch(`/api/article/${route.params.slug}`);
     } catch (e) {
       console.error('Failed to fetch article data for breadcrumb:', e);
       articleDataForBreadcrumb.value = null;
@@ -52,17 +48,21 @@ watch(() => route.params.slug, async (newSlug) => {
   } else {
     articleDataForBreadcrumb.value = null;
   }
-}, { immediate: true });
+}, { immediate: true }); // 初回ロード時にも実行
 
 const breadcrumbs = computed(() => {
   const crumbs = [];
+  crumbs.push({ name: 'ホーム', path: '/', isLink: true });
+
   const pathParts = route.path.split('/').filter(part => part !== '');
   let currentPath = '';
 
   pathParts.forEach((part, index) => {
     currentPath += `/${part}`;
     let name = part;
+    let isLink = true; // デフォルトはリンク
 
+    // パスセグメントに対応する表示名を設定
     if (part === 'articles') {
       name = '記事一覧';
     } else if (part === 'about') {
@@ -73,32 +73,55 @@ const breadcrumbs = computed(() => {
 
     const isLastSegment = index === pathParts.length - 1;
 
-    if (route.path.startsWith('/articles/') && route.params.slug === part) {
-      return;
+    // 記事詳細ページのslug部分の処理 (記事タイトルを表示)
+    if (part === route.params.slug && route.path.startsWith('/articles/')) {
+        name = articleDataForBreadcrumb.value ? articleDataForBreadcrumb.value.title : '記事タイトル';
+        isLink = false; // 記事詳細の最終項目なのでリンクではない
+    } else if (isLastSegment && route.path !== '/articles') { // `/articles` 以外の最終セグメントはリンクにしない
+      isLink = false;
     }
 
-    crumbs.push({ name: name, path: currentPath, isLink: !isLastSegment });
+    crumbs.push({ name: name, path: currentPath, isLink: isLink });
   });
 
+  // `/articles` ページでカテゴリや検索クエリがある場合、パンくずリストに項目を追加
   if (route.path === '/articles') {
-    if (query.category) {
-      crumbs.push({ name: query.category, path: `/articles?category=${query.category}`, isLink: false });
-    } else if (query.search) {
-      crumbs.push({ name: `検索結果: "${query.search}"`, path: `/articles?search=${query.search}`, isLink: false });
-    }
-  }
-
-  if (route.path.startsWith('/articles/') && route.params.slug) {
-    if (articleDataForBreadcrumb.value) {
-      crumbs.push({ name: articleDataForBreadcrumb.value.title, path: route.path, isLink: false });
+    if (route.query.category) {
+      crumbs.push({ name: route.query.category, path: route.fullPath, isLink: false });
+    } else if (route.query.search) {
+      crumbs.push({ name: `検索結果: "${route.query.search}"`, path: route.fullPath, isLink: false });
     }
   }
 
   return crumbs;
 });
+
+// Google Analytics (GA4) のタグ設定
+useHead({
+  script: [
+    {
+      hid: 'gtag', // Vue Server Rendererで重複を避けるためのユニークなID
+      src: 'https://www.googletagmanager.com/gtag/js?id=G-YOUR_MEASUREMENT_ID', // YOUR_MEASUREMENT_ID はGA4の測定IDに置き換える
+      async: true,
+      defer: true,
+    },
+    {
+      hid: 'gtag-config',
+      children: `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-YOUR_MEASUREMENT_ID'); // ここもGA4の測定IDに置き換える
+      `,
+      type: 'text/javascript',
+      charset: 'UTF-8',
+    },
+  ],
+});
 </script>
 
 <style>
+/* Material Icons のインポートと基本スタイル */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
 body {

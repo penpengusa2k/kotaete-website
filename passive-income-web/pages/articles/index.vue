@@ -2,8 +2,8 @@
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">記事一覧</h1>
     <p class="text-lg text-gray-600 mb-10">
-      不労所得構築に関する最新の知見や実践的なノウハウをお届けします。
-      新しい記事を随時追加していきますので、ぜひ定期的にチェックしてください。
+      不労所得構築のために試行錯誤した軌跡をありのまま全て公開しています。
+      <br class="hidden sm:inline">新しい記事を随時追加していきますので、ぜひ定期的にチェックしてください。
     </p>
 
     <div class="md:grid md:grid-cols-4 md:gap-8">
@@ -35,23 +35,23 @@
               <div class="p-6 flex-grow">
                 <h3 class="text-xl font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">{{ article.title }}</h3>
                 <div class="text-gray-500 text-sm mb-3 flex items-center space-x-3">
-                  <span class="flex items-center">
-                    <span class="material-icons-outlined text-base mr-1">calendar_today</span>
-                    {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
-                  </span>
-                  <span class="flex items-center">
-                    <span class="material-icons-outlined text-base mr-1">category</span>
-                    <div class="flex flex-wrap gap-1">
-                      <button
-                        v-for="catName in article.category"
-                        :key="catName"
-                        @click.prevent="goToCategoryPage(catName)" class="px-1 py-0.5 bg-gray-100 text-gray-800 text-xs font-semibold rounded-lg hover:bg-blue-200 hover:text-blue-900 transition-colors duration-200 cursor-pointer"
-                      >
-                        {{ catName }}
-                      </button>
-                    </div>
-                  </span>
-                </div>
+                <span class="flex items-center">
+                  <span class="material-icons-outlined text-base mr-1">calendar_today</span>
+                  {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
+                </span>
+                <span class="flex items-center">
+                  <span class="material-icons-outlined text-base mr-1">category</span>
+                  <div class="flex flex-wrap gap-1">
+                    <button
+                      v-for="catName in article.category"
+                      :key="catName"
+                      @click.prevent="selectCategory(catName)" class="px-1 py-0.5 bg-gray-100 text-gray-800 text-xs font-semibold rounded-lg hover:bg-blue-200 hover:text-blue-900 transition-colors duration-200 cursor-pointer"
+                    >
+                      {{ catName }}
+                    </button>
+                  </div>
+                </span>
+              </div>
                 <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ article.description }}</p>
               </div>
             </NuxtLink>
@@ -142,50 +142,45 @@ const { data: allArticles, pending, error } = await useAsyncData(
   }
 );
 
+watch(
+  () => route.query,
+  (query) => {
+    selectedCategory.value = query.category || null;
+    searchQuery.value = query.search || '';
+    currentPage.value = parseInt(query.page) || 1;
+  },
+  { immediate: true }
+);
+
 watch([currentPage, selectedCategory, searchQuery], () => {
   const query = {};
-  if (currentPage.value !== 1) {
-    query.page = currentPage.value;
-  }
-  if (selectedCategory.value) {
-    query.category = selectedCategory.value;
-  }
-  if (searchQuery.value) {
-    query.search = searchQuery.value;
-  }
-  router.push({ query: query });
+  if (currentPage.value !== 1) query.page = currentPage.value;
+  if (selectedCategory.value) query.category = selectedCategory.value;
+  if (searchQuery.value) query.search = searchQuery.value;
+
+  router.push({ query });
 });
 
 const uniqueCategoriesWithCount = computed(() => {
   if (!allArticles.value) return [];
 
-  const categoryCounts = {};
+  const counts = {};
   allArticles.value.forEach(article => {
-    if (article.category && Array.isArray(article.category)) {
-      article.category.forEach(cat => {
-        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
-      });
-    }
+    article.category?.forEach(cat => {
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
   });
 
-  const categoriesWithCount = Object.keys(categoryCounts)
-    .map(name => ({ name, count: categoryCounts[name] }))
+  return Object.entries(counts)
+    .map(([name, count]) => ({ name, count }))
     .sort((a, b) => a.name.localeCompare(b.name));
-
-  return categoriesWithCount;
 });
-
 
 const selectCategory = (category) => {
   selectedCategory.value = category;
   searchQuery.value = '';
   currentPage.value = 1;
 };
-
-const goToCategoryPage = (catName) => {
-  router.push({ path: '/articles', query: { category: catName } });
-};
-
 
 const goToPage = (pageNumber) => {
   if (pageNumber >= 1 && pageNumber <= totalPages.value) {
@@ -196,44 +191,47 @@ const goToPage = (pageNumber) => {
 const filteredArticles = computed(() => {
   if (!allArticles.value) return [];
 
-  let result = allArticles.value;
+  let result = [...allArticles.value];
 
   if (selectedCategory.value) {
     result = result.filter(article =>
-      article.category && Array.isArray(article.category) && article.category.includes(selectedCategory.value)
+      article.category?.includes(selectedCategory.value)
     );
   }
 
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
+    const q = searchQuery.value.toLowerCase();
     result = result.filter(article =>
-      (article.title && article.title.toLowerCase().includes(query)) ||
-      (article.description && article.description.toLowerCase().includes(query))
+      article.title?.toLowerCase().includes(q) ||
+      article.description?.toLowerCase().includes(q)
     );
   }
 
-  result.sort((a, b) => {
-    const dateA = a.date ? new Date(a.date).getTime() : 0;
-    const dateB = b.date ? new Date(b.date).getTime() : 0;
-    return dateB - dateA;
-  });
+  result.sort((a, b) =>
+    new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+  );
 
   return result;
 });
 
-const totalPages = computed(() => Math.ceil(filteredArticles.value.length / articlesPerPage));
+const totalPages = computed(() =>
+  Math.ceil(filteredArticles.value.length / articlesPerPage)
+);
+
 const paginatedArticles = computed(() => {
   const start = (currentPage.value - 1) * articlesPerPage;
-  const end = start + articlesPerPage;
-  return filteredArticles.value.slice(start, end);
+  return filteredArticles.value.slice(start, start + articlesPerPage);
 });
 
 useHead({
   title: '記事一覧 - 不労所得への道',
   meta: [
-    { name: 'description', content: '不労所得構築に関するプログラミング、自動化、オンラインビジネスなどの記事一覧。' }
+    {
+      name: 'description',
+      content: '不労所得構築に関するプログラミング、自動化、オンラインビジネスなどの記事一覧。'
+    }
   ]
-})
+});
 </script>
 
 <style scoped>

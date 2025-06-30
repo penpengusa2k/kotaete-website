@@ -17,9 +17,14 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
+    gaPrivateKeyId: process.env.GA_PRIVATE_KEY_ID,
+    gaPrivateKey: process.env.GA_PRIVATE_KEY,
+    gaClientEmail: process.env.GA_CLIENT_EMAIL,
     notionSecret: process.env.NOTION_SECRET,
     notionArticlesDatabaseId: process.env.NOTION_ARTICLES_DATABASE_ID,
     public: {
+      gaMeasurementId: process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID, // layouts/default.vueで使用するGA4測定ID (G-...)
+      ga4PropertyId: process.env.NUXT_PUBLIC_GA4_PROPERTY_ID,   // 実績ページで使用するGA4プロパティID (数値のみ)
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'https://furoshotoku.net'
     }
   },

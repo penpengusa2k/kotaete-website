@@ -4,12 +4,12 @@
       <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-4 tracking-tight">
         不労所得への道
         <span class="block text-xl md:text-2xl font-semibold text-gray-700 mt-2">
-          IT×??で始める資産形成・FIREへのロードマップ
+          ITを駆使した資産形成・FIREへのロードマップ
         </span>
       </h1>
       <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
         このサイトは、ウェブサイトの広告収入を通じて不労所得を達成するまでの道のりを記録し、その過程をすべて公開します。
-        <br class="hidden sm:inline">副業やちょっとしたお小遣い稼ぎ、在宅での収益化を目指す方々に向けて、私が人柱となり、実際に試行錯誤した内容を共有します。
+        <br class="hidden sm:inline">副業やお小遣い稼ぎ、在宅での副収入を目指す皆々様に向けて、私が人柱となり、試行錯誤した内容を共有します。
       </p>
       <NuxtLink to="/articles" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
         <span class="material-icons-outlined mr-2">article</span> すべての記事を見る
@@ -27,7 +27,7 @@
         <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200">
           <span class="material-icons-outlined text-green-500 text-5xl mb-4">code</span>
           <h3 class="text-xl font-semibold text-gray-800 mb-2">実践的なIT技術の公開</h3>
-          <p class="text-gray-600 text-sm">プログラミング、自動化、システム構築の具体的なノウハウを共有。</p>
+          <p class="text-gray-600 text-sm">プログラミング、自動化、システム構築の具体的な軌跡を共有。</p>
         </div>
         <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200">
           <span class="material-icons-outlined text-purple-500 text-5xl mb-4">build_circle</span>
@@ -72,7 +72,7 @@
                     v-for="catName in article.category"
                     :key="catName"
                     @click.prevent="goToCategoryPage(catName)"
-                    class="px-1 py-0.5 bg-blue-100 text-blue-800 text-xs font-semibold rounded-lg hover:bg-blue-200 hover:text-blue-900 transition-colors duration-200 cursor-pointer"
+                    class="px-1 py-0.5 bg-gray-100 text-gray-800 text-xs font-semibold rounded-lg hover:bg-blue-200 hover:text-blue-900 transition-colors duration-200 cursor-pointer"
                   >
                     {{ catName }}
                   </button>
@@ -129,9 +129,9 @@ const goToCategoryPage = (catName) => {
 };
 
 useHead({
-  title: '不労所得への道 | ITスキル×副業で始める資産形成・FIREへのロードマップ',
+  title: '不労所得への道 | ITを駆使した資産形成・FIREへのロードマップ',
   meta: [
-    { name: 'description', content: 'ITスキルを活用した不労所得構築に特化した情報サイト。副業、自動化、Webサイト収益化、FIREなどの実践的なノウハウと過程を全て公開します。' }
+    { name: 'description', content: 'ITスキルを活用した不労所得構築に特化した情報サイト。副業、自動化、Webサイト収益化、FIREへの過程を全て公開します。' }
   ]
 })
 </script>
