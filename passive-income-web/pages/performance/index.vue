@@ -10,15 +10,15 @@
       <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">主な達成実績</h2>
       <div class="grid md:grid-cols-3 gap-6 text-center">
         <div class="bg-white rounded-lg shadow-md p-5">
-          <p class="text-blue-600 text-4xl font-bold mb-1">30+</p>
+          <p class="text-blue-600 text-4xl font-bold mb-1">0+</p>
           <p class="text-gray-700 text-base">開発ツール数</p>
         </div>
         <div class="bg-orange-500 text-white rounded-lg shadow-md p-5">
-          <p class="text-4xl font-bold mb-1">¥XXX万+</p>
+          <p class="text-4xl font-bold mb-1">¥{{ totalRevenue }}万+</p>
           <p class="text-base">累計収益</p>
         </div>
         <div class="bg-white rounded-lg shadow-md p-5">
-          <p class="text-purple-600 text-4xl font-bold mb-1">1,000+</p>
+          <p class="text-purple-600 text-4xl font-bold mb-1">{{ totalArticles }}+</p>
           <p class="text-gray-700 text-base">公開記事数</p>
         </div>
       </div>
@@ -125,15 +125,26 @@ const cumulativePvChartData = computed(() => {
 
 // 累計収益推移のダミーデータ (手動更新)
 const cumulativeRevenueChartData = {
-  labels: ['2025年1月', '2025年2月', '2025年3月', '2025年4月', '2025年5月', '2025年6月'],
+  labels: ['2025年6月'],
   datasets: [
     {
       label: '累計収益 (万円)',
       backgroundColor: '#3B82F6',
-      data: [10, 25, 47, 65, 90, 120]
+      data: [0]
     }
   ]
 };
+
+const totalRevenue = computed(() => {
+  const data = cumulativeRevenueChartData.datasets[0].data;
+  // データがある場合は最後の値を返し、ない場合は0を返す
+  return data.length > 0 ? data[data.length - 1] : 0;
+});
+
+// 取得した記事数をリアクティブなcomputedプロパティで表示
+const totalArticles = computed(() => {
+  return config.public.articleCount ?? 0; // runtimeConfigから取得
+});
 
 // グラフの共通オプション
 const chartOptions = {

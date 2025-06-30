@@ -66,6 +66,12 @@ export default defineNuxtConfig({
         // 記事データを非同期で取得
         const { data: articles } = await axios.get(`${baseURL}/api/articles`);
 
+        // performanceページで使用する記事数をruntimeConfigに設定
+        if (nitroConfig.runtimeConfig && nitroConfig.runtimeConfig.public) {
+          nitroConfig.runtimeConfig.public.articleCount = articles.length;
+          console.log(`[Nitro Config] Article Count: ${articles.length}`);
+        }
+
         // 取得した記事データ（articles）を元に、動的な記事ページのルートを生成
         // 各記事のスラッグ（URLの一部になる識別子）を使って '/articles/スラッグ' の形式のパスを作成
         const dynamicRoutes = articles.map((article: any) => `/articles/${article.slug}`);
