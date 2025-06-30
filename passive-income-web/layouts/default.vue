@@ -31,10 +31,10 @@
 <script setup>
 import { computed, watch, ref } from 'vue';
 import { useRoute } from 'vue-router';
-// AppHeader, AppFooter はすでにインポートされているものと仮定
 
 const route = useRoute();
 const articleDataForBreadcrumb = ref(null);
+const config = useRuntimeConfig();
 
 // route.path の変更を監視し、記事詳細ページの場合のみ記事データをフェッチ
 watch(() => route.path, async (newPath) => {
@@ -97,27 +97,35 @@ const breadcrumbs = computed(() => {
 });
 
 // Google Analytics (GA4) のタグ設定
-useHead({
-  script: [
-    {
-      hid: 'gtag', // Vue Server Rendererで重複を避けるためのユニークなID
-      src: 'https://www.googletagmanager.com/gtag/js?id=G-YOUR_MEASUREMENT_ID', // YOUR_MEASUREMENT_ID はGA4の測定IDに置き換える
-      async: true,
-      defer: true,
-    },
-    {
-      hid: 'gtag-config',
-      children: `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-YOUR_MEASUREMENT_ID'); // ここもGA4の測定IDに置き換える
-      `,
-      type: 'text/javascript',
-      charset: 'UTF-8',
-    },
-  ],
-});
+// 環境変数からGA4測定IDを読み込む
+const gaMeasurementId = config.public.gaMeasurementId;
+
+// 測定IDが設定されている場合のみGAタグを埋め込む
+if (gaMeasurementId) {
+  useHead({
+    script: [
+      {
+        hid: 'gtag', // Vue Server Rendererで重複を避けるためのユニークなID
+        src: `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`, // 環境変数を使用
+        async: true,
+        defer: true,
+      },
+      {
+        hid: 'gtag-config',
+        children: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${gaMeasurementId}'); // 環境変数を使用
+        `,
+        type: 'text/javascript',
+        charset: 'UTF-8',
+      },
+    ],
+  });
+} else {
+  console.warn('Google Analytics Measurement ID (NUXT_PUBLIC_GA_MEASUREMENT_ID) is not set in environment variables. GA tracking will be disabled.');
+}
 </script>
 
 <style>

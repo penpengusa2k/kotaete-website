@@ -11,28 +11,41 @@
       <div class="grid md:grid-cols-3 gap-6 text-center">
         <div class="bg-white rounded-lg shadow-md p-5">
           <p class="text-blue-600 text-4xl font-bold mb-1">30+</p>
-          <p class="text-gray-700 text-base">開発ツール数</p> </div>
-        <div class="bg-orange-500 text-white rounded-lg shadow-md p-5"> <p class="text-4xl font-bold mb-1">¥XXX万+</p> <p class="text-base">累計収益</p> </div>
+          <p class="text-gray-700 text-base">開発ツール数</p>
+        </div>
+        <div class="bg-orange-500 text-white rounded-lg shadow-md p-5">
+          <p class="text-4xl font-bold mb-1">¥XXX万+</p>
+          <p class="text-base">累計収益</p>
+        </div>
         <div class="bg-white rounded-lg shadow-md p-5">
           <p class="text-purple-600 text-4xl font-bold mb-1">1,000+</p>
-          <p class="text-gray-700 text-base">公開記事数</p> </div>
+          <p class="text-gray-700 text-base">公開記事数</p>
+        </div>
       </div>
     </section>
 
     <section class="py-6 mb-8">
       <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">累計PV推移</h2>
       <div class="bg-white rounded-lg shadow-md p-4 h-96">
-        <LineChart v-if="cumulativePvChartData && cumulativePvChartData.datasets && cumulativePvChartData.datasets.length > 0" :data="cumulativePvChartData" :options="chartOptions" />
-        <p v-else class="text-center text-gray-600 text-sm mt-4">データを読み込み中...</p>
+        <LineChart
+          v-if="!pvPending && !pvError && cumulativePvChartData && cumulativePvChartData.datasets && cumulativePvChartData.datasets.length > 0"
+          :data="cumulativePvChartData"
+          :options="chartOptions"
+        />
+        <p v-else-if="pvPending" class="text-center text-gray-600 text-sm mt-4">累計PVデータを読み込み中...</p>
+        <p v-else-if="pvError" class="text-center text-red-600 text-sm mt-4">累計PVデータの取得に失敗しました。<br>{{ pvError.message }}</p>
+        <p v-else class="text-center text-gray-600 text-sm mt-4">データがありません。</p>
         <p class="text-center text-gray-600 text-sm mt-2">ウェブサイトの累計ページビュー</p>
       </div>
     </section>
 
     <section class="py-6 mb-8">
-      <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">累計収益推移</h2> <div class="bg-white rounded-lg shadow-md p-4 h-96">
+      <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">累計収益推移</h2>
+      <div class="bg-white rounded-lg shadow-md p-4 h-96">
         <BarChart v-if="cumulativeRevenueChartData && cumulativeRevenueChartData.datasets && cumulativeRevenueChartData.datasets.length > 0" :data="cumulativeRevenueChartData" :options="chartOptions" />
         <p v-else class="text-center text-gray-600 text-sm mt-4">データを読み込み中...</p>
-        <p class="text-center text-gray-600 text-sm mt-2">広告収入などを含む累計収益</p> </div>
+        <p class="text-center text-gray-600 text-sm mt-2">広告収入などを含む累計収益</p>
+      </div>
     </section>
 
     <section class="py-6">
@@ -46,7 +59,7 @@
 </template>
 
 <script setup>
-import { Line as LineChart, Bar as BarChart } from 'vue-chartjs'
+import { Line as LineChart, Bar as BarChart } from 'vue-chartjs';
 import {
   Chart as ChartJS,
   Title,
@@ -57,7 +70,7 @@ import {
   CategoryScale,
   PointElement,
   BarElement
-} from 'chart.js'
+} from 'chart.js';
 
 ChartJS.register(
   Title,
@@ -68,36 +81,61 @@ ChartJS.register(
   CategoryScale,
   PointElement,
   BarElement
-)
+);
 
-// ★累計PV推移のダミーデータ (変更なし)★
-const cumulativePvChartData = {
-  labels: ['2025年1月', '2025年2月', '2025年3月', '2025年4月', '2025年5月', '2025年6月'], // ラベルを年月に変更
-  datasets: [
-    {
-      label: '累計PV',
-      backgroundColor: '#EF4444', // Tailwind red-500
-      borderColor: '#EF4444',
-      data: [65, 124, 204, 285, 341, 416], // ダミーデータなので、実際の値に合わせて更新してください
-      tension: 0.3,
-      fill: false
+const config = useRuntimeConfig();
+const NUXT_PUBLIC_GA4_PROPERTY_ID = config.public.ga4PropertyId;
+
+// 累計PVデータの取得 (ビルド時にサーバーサイドで取得される)
+const { data: rawPvData, pending: pvPending, error: pvError } = await useAsyncData(
+  'cumulative-pv-data',
+  async () => {
+    // NUXT_PUBLIC_GA4_PROPERTY_ID が undefined の場合を考慮
+    if (!NUXT_PUBLIC_GA4_PROPERTY_ID) {
+      console.warn('NUXT_PUBLIC_GA4_PROPERTY_ID is not defined. PV data will not be fetched.');
+      return { labels: [], data: [] }; // デフォルトデータを返す
     }
-  ]
-}
+    return await $fetch(`/api/analytics/pv?propertyId=${NUXT_PUBLIC_GA4_PROPERTY_ID}`);
+  },
+  {
+    server: true,
+    lazy: false,
+  }
+);
 
-// ★累計収益推移のダミーデータ (月間から累計に変更)★
+// 累計PVグラフデータ整形
+const cumulativePvChartData = computed(() => {
+  if (!rawPvData.value || rawPvData.value.labels.length === 0) {
+    return null;
+  }
+  return {
+    labels: rawPvData.value.labels,
+    datasets: [
+      {
+        label: '累計PV',
+        backgroundColor: '#EF4444',
+        borderColor: '#EF4444',
+        data: rawPvData.value.data,
+        tension: 0.3,
+        fill: false,
+      },
+    ],
+  };
+});
+
+// 累計収益推移のダミーデータ (手動更新)
 const cumulativeRevenueChartData = {
-  labels: ['2025年1月', '2025年2月', '2025年3月', '2025年4月', '2025年5月', '2025年6月'], // ラベルを年月に変更
+  labels: ['2025年1月', '2025年2月', '2025年3月', '2025年4月', '2025年5月', '2025年6月'],
   datasets: [
     {
-      label: '累計収益 (万円)', // ラベル変更
-      backgroundColor: '#3B82F6', // Tailwind blue-500 (視覚的にPVと区別するため)
-      data: [10, 25, 47, 65, 90, 120] // 月間収益の累計 (10, 10+15, 25+22, 47+18, ...) ダミーデータなので、実際の値に合わせて更新してください
+      label: '累計収益 (万円)',
+      backgroundColor: '#3B82F6',
+      data: [10, 25, 47, 65, 90, 120]
     }
   ]
-}
+};
 
-// グラフの共通オプション (変更なし)
+// グラフの共通オプション
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -116,14 +154,14 @@ const chartOptions = {
       beginAtZero: true,
     }
   }
-}
+};
 
 useHead({
   title: '実績 - 不労所得への道',
   meta: [
     { name: 'description', content: 'ITを活用した不労所得構築に関する具体的な実績、データ、そして今後の展望を公開。累計収益とPV推移。' }
   ]
-})
+});
 </script>
 
 <style scoped>
