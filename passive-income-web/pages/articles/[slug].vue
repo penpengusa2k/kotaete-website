@@ -1,47 +1,49 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div v-if="pending" class="text-center py-16 text-gray-600 text-xl">
-      <p>記事を読み込み中...</p>
-      <div class="mt-4 animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto"></div>
+    <div v-if="pending" class="text-center py-16 text-neutral-dark text-xl">
+      <p>挑戦の記録を読み込んでいます...</p>
+      <div class="mt-4 animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
     </div>
-    <div v-else-if="error" class="text-center py-16 text-red-600 text-xl">
-      <p>記事の読み込みに失敗しました。</p>
-      <p class="text-sm text-red-400 mt-2">エラー: {{ error.message }}</p>
-      <NuxtLink to="/articles" class="text-blue-600 hover:text-blue-800 mt-4 inline-block">&larr; 記事一覧へ戻る</NuxtLink>
+    <div v-else-if="error" class="text-center py-16 text-danger text-xl">
+      <p>記録の読み込みに失敗しました。</p>
+      <p class="text-sm text-danger/80 mt-2">エラー: {{ error.message }}</p>
+      <NuxtLink to="/articles" class="text-primary hover:text-primary-dark mt-4 inline-block">&larr; 記録一覧へ戻る</NuxtLink>
     </div>
-    <div v-else-if="article">
-      <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">{{ article.title }}</h1>
-        <p class="text-lg text-gray-600 mb-4">{{ article.description }}</p>
+    <div v-else-if="article" class="max-w-3xl mx-auto">
+      <article class="bg-white shadow-lg rounded-lg p-6 md:p-8 mb-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-neutral-darkest mb-4">{{ article.title }}</h1>
+        <p class="text-lg text-neutral-dark/80 mb-6">{{ article.description }}</p>
 
-        <div class="text-gray-500 text-sm flex items-center space-x-4">
+        <div class="text-neutral-dark/70 text-sm flex items-center space-x-4 border-t border-b border-neutral-light py-3 mb-6">
           <span class="flex items-center">
-            <span class="material-icons-outlined text-base mr-1">calendar_today</span>
+            <span class="material-icons-outlined text-base mr-1.5">calendar_today</span>
             {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
           </span>
           <span class="flex items-center">
-            <span class="material-icons-outlined text-base mr-1">category</span>
-            <div class="flex flex-wrap gap-2"> <span
+            <span class="material-icons-outlined text-base mr-1.5">folder_open</span>
+            <div class="flex flex-wrap gap-2">
+              <span
                 v-for="catName in article.category"
                 :key="catName"
-                class="px-1 py-0.5 bg-gray-100 text-gray-800 text-sm font-semibold rounded-lg"
+                class="px-2 py-1 bg-neutral-light text-neutral-darkest text-xs font-medium rounded-full"
               >
                 {{ catName }}
               </span>
             </div>
           </span>
         </div>
-        <hr class="my-6 border-gray-200">
 
-        <div class="prose lg:prose-lg max-w-none text-gray-800 leading-relaxed"> <div v-html="article.renderedHtmlContent"></div>
-        </div>
-      </div>
+        <div class="prose prose-lg max-w-none text-neutral-darkest leading-relaxed" v-html="article.renderedHtmlContent"></div>
+      </article>
 
-      <NuxtLink to="/articles" class="text-blue-600 hover:text-blue-800 mt-12 inline-block font-medium">&larr; 記事一覧へ戻る</NuxtLink>
+      <NuxtLink to="/articles" class="inline-flex items-center text-primary hover:text-primary-dark font-medium transition-colors duration-200">
+        <span class="material-icons-outlined mr-1">arrow_back</span>
+        すべての記録に戻る
+      </NuxtLink>
     </div>
-    <div v-else class="text-center py-16 text-gray-600 text-xl">
-      <p>指定された記事は見つかりませんでした。</p>
-      <NuxtLink to="/articles" class="text-blue-600 hover:text-blue-800 mt-4 inline-block">&larr; 記事一覧へ戻る</NuxtLink>
+    <div v-else class="text-center py-16 text-neutral-dark text-xl">
+      <p>指定された記録は見つかりませんでした。</p>
+      <NuxtLink to="/articles" class="text-primary hover:text-primary-dark mt-4 inline-block">&larr; 記録一覧へ戻る</NuxtLink>
     </div>
   </div>
 </template>
@@ -56,9 +58,9 @@ const { data: article, pending, error } = await useAsyncData(`article-${slug}`, 
 });
 
 useHead({
-  title: article.value?.title ? `${article.value.title} - 不労所得への道` : '記事詳細 - 不労所得への道',
+  title: article.value?.title ? `${article.value.title}` : '挑戦の記録',
   meta: [
-    { name: 'description', content: article.value?.description || '不労所得構築に関する記事の詳細ページです。' }
+    { name: 'description', content: article.value?.description || 'ITスキルを活用した不労所得への挑戦を記録しています。' }
   ]
 });
 </script>

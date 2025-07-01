@@ -1,21 +1,21 @@
 <template>
-  <footer class="bg-gray-50 text-gray-600 py-6 mt-12 shadow-inner">
+  <footer class="bg-neutral-lightest text-neutral-dark py-8 mt-16 border-t border-neutral-light">
     <div class="container mx-auto px-4 text-center">
       <p class="text-sm">
         &copy; {{ currentYear }} 不労所得への道. All rights reserved.
       </p>
 
-      <div class="mt-4 space-x-4">
-        <a href="https://github.com/penpengusa2k/" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+      <div class="mt-4 space-x-6">
+        <a href="https://github.com/penpengusa2k/" target="_blank" rel="noopener noreferrer" class="text-sm text-neutral-dark hover:text-primary transition-colors duration-200">
           GitHub
         </a>
-        <NuxtLink to="/privacy-policy" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
-          privacy-policy
+        <NuxtLink to="/privacy-policy" class="text-sm text-neutral-dark hover:text-primary transition-colors duration-200">
+          プライバシーポリシー
         </NuxtLink>
       </div>
 
-      <div class="mt-6 text-xs text-gray-500">
-        <p>ITを活用した不労所得構築のための情報を提供しています。</p>
+      <div class="mt-6 text-xs text-neutral-dark">
+        <p>ITの力で、自由な働き方と安定した収入源を。このサイトは、その挑戦の記録です。</p>
       </div>
     </div>
   </footer>

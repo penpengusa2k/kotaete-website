@@ -1,19 +1,20 @@
 <template>
-  <div class="flex flex-col min-h-screen font-sans text-gray-800">
+  <div class="flex flex-col min-h-screen font-sans bg-neutral-lightest text-neutral-darkest">
     <AppHeader />
 
-    <nav class="container mx-auto px-4 py-4 text-sm text-gray-500" aria-label="breadcrumb">
+    <nav class="container mx-auto px-4 py-3 text-sm text-neutral-dark" aria-label="breadcrumb">
       <ol class="list-none p-0 inline-flex flex-wrap items-center">
         <template v-if="breadcrumbs.length > 0">
           <li v-for="(crumb, index) in breadcrumbs" :key="index" class="flex items-center">
-            <span v-if="index > 0" class="material-icons-outlined text-sm mx-2">chevron_right</span>
+            <span v-if="index > 0" class="material-icons-outlined text-base mx-1">chevron_right</span>
             <NuxtLink
-              v-if="crumb.isLink" :to="crumb.path"
+              v-if="crumb.isLink"
+              :to="crumb.path"
               class="breadcrumb-link"
             >
               {{ crumb.name }}
             </NuxtLink>
-            <span v-else class="text-gray-700 whitespace-nowrap">
+            <span v-else class="text-neutral-darkest font-medium whitespace-nowrap">
               {{ crumb.name }}
             </span>
           </li>

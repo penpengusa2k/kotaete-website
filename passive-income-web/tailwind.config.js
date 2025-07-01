@@ -7,24 +7,41 @@ export default {
     "./plugins/**/*.{js,ts}",
     "./app.vue",
     "./error.vue",
-    "./nuxt.config.{js,ts}", // 必要であれば、nuxt.config.ts 内のクラスも対象にする
+    "./nuxt.config.{js,ts}",
   ],
   theme: {
     extend: {
       colors: {
-        primary: '#3b82f6', // カスタムの青
-        secondary: '#10b981', // カスタムの緑
-        // ... 他の色
+        // Google-inspired color palette
+        primary: {
+          DEFAULT: '#1a73e8', // Google Blue
+          dark: '#1765cc',
+        },
+        secondary: {
+          DEFAULT: '#34a853', // Google Green
+        },
+        accent: {
+          DEFAULT: '#fbbc05', // Google Yellow
+        },
+        danger: {
+          DEFAULT: '#ea4335', // Google Red
+        },
+        neutral: {
+          lightest: '#f8f9fa',
+          light: '#e9ecef',
+          DEFAULT: '#dee2e6',
+          dark: '#adb5bd',
+          darkest: '#202124', // Google Dark Grey
+        },
       },
       fontFamily: {
-        // ★ここを修正★ Noto Sans JP の後に Inter が来るように調整
-        sans: ['Inter', '"Noto Sans JP"', 'sans-serif'], // 英数字はInter, 日本語はNoto Sans JP, フォールバックは標準のサンセリフ
-        serif: ['Merriweather', 'serif'], // セリフ体はそのまま
+        sans: ['Inter', '"Noto Sans JP"', 'sans-serif'],
+        serif: ['Merriweather', 'serif'],
       },
     },
   },
   plugins: [
     require('@tailwindcss/typography'),
-    require('@tailwindcss/aspect-ratio'), // アスペクト比を管理するプラグイン
+    require('@tailwindcss/aspect-ratio'),
   ],
 }

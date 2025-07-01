@@ -1,122 +1,110 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">記事一覧</h1>
-    <p class="text-lg text-gray-600 mb-10">
-      不労所得構築のために試行錯誤した軌跡をありのまま全て公開しています。
-      <br class="hidden sm:inline">新しい記事を随時追加していきますので、ぜひ定期的にチェックしてください。
+    <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest mb-4">挑戦の記録</h1>
+    <p class="text-lg text-neutral-dark/80 mb-10">
+      不労所得を構築するための試行錯誤の全記録です。
+      <br class="hidden sm:inline">新しい挑戦は随時追加されていきます。
     </p>
 
     <div class="md:grid md:grid-cols-4 md:gap-8">
       <div class="md:col-span-3">
         <section class="py-6">
-          <div v-if="pending" class="text-center py-16 text-gray-600 text-xl">
-            <p>記事を読み込み中...</p>
-            <div class="mt-4 animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto"></div>
+          <div v-if="pending" class="text-center py-16 text-neutral-dark text-xl">
+            <p>記録を読み込んでいます...</p>
+            <div class="mt-4 animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           </div>
-          <div v-else-if="error" class="text-center py-16 text-red-600 text-xl">
-            <p>記事の読み込みに失敗しました。</p>
-            <p class="text-sm text-red-400 mt-2">エラー: {{ error.message }}</p>
+          <div v-else-if="error" class="text-center py-16 text-danger text-xl">
+            <p>記録の読み込みに失敗しました。</p>
+            <p class="text-sm text-danger/80 mt-2">エラー: {{ error.message }}</p>
           </div>
           <div v-else-if="filteredArticles && filteredArticles.length > 0" class="grid grid-cols-1 gap-8">
             <NuxtLink
               v-for="article in paginatedArticles"
               :key="article.id"
               :to="`/articles/${article.slug}`"
-              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col md:flex-row group"
+              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col md:flex-row group"
               style="text-decoration: none;"
             >
               <div class="w-full md:w-1/3 flex-shrink-0">
                 <img
                   :src="article.image"
                   :alt="article.title"
-                  class="w-full aspect-[4/3] object-cover rounded-t-lg md:rounded-t-none md:rounded-l-lg"
+                  class="w-full h-48 md:h-full object-cover"
                 />
               </div>
-              <div class="p-6 flex-grow">
-                <h3 class="text-xl font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">{{ article.title }}</h3>
-                <div class="text-gray-500 text-sm mb-3 flex items-center space-x-3">
-                  <span class="flex items-center">
-                    <span class="material-icons-outlined text-base mr-1">calendar_today</span>
-                    {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
-                  </span>
-                  <span class="flex items-center">
-                    <span class="material-icons-outlined text-base mr-1">category</span>
-                    <div class="flex flex-wrap gap-1">
-                      <button
-                        v-for="catName in article.category"
-                        :key="catName"
-                        @click.prevent="selectCategory(catName)"
-                        class="px-1 py-0.5 bg-gray-100 text-gray-800 text-xs font-semibold rounded-lg hover:bg-blue-200 hover:text-blue-900 transition-colors duration-200 cursor-pointer"
-                      >
-                        {{ catName }}
-                      </button>
-                    </div>
-                  </span>
+              <div class="p-6 flex flex-col justify-between flex-grow">
+                <div>
+                  <h3 class="text-xl font-semibold text-neutral-darkest mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">{{ article.title }}</h3>
+                  <div class="text-neutral-dark/70 text-sm mb-3 flex items-center space-x-4">
+                    <span class="flex items-center">
+                      <span class="material-icons-outlined text-base mr-1.5">calendar_today</span>
+                      {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
+                    </span>
+                  </div>
+                  <p class="text-neutral-dark/80 text-sm mb-4 line-clamp-3">{{ article.description }}</p>
                 </div>
-                <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ article.description }}</p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                  <button
+                    v-for="catName in article.category"
+                    :key="catName"
+                    @click.prevent="selectCategory(catName)"
+                    class="px-2 py-1 bg-neutral-light text-neutral-darkest text-xs font-medium rounded-full hover:bg-primary/20 hover:text-primary-dark transition-colors duration-200 cursor-pointer"
+                  >
+                    {{ catName }}
+                  </button>
+                </div>
               </div>
             </NuxtLink>
 
-            <div v-if="totalPages > 1" class="flex justify-center items-center space-x-2 mt-8">
-              <button
-                @click="goToPage(currentPage - 1)"
-                :disabled="currentPage === 1"
-                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
-              >
-                前へ
+            <div v-if="totalPages > 1" class="flex justify-center items-center space-x-4 mt-8">
+              <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-button">
+                <span class="material-icons-outlined">chevron_left</span>
               </button>
-              <span class="text-gray-700">ページ {{ currentPage }} / {{ totalPages }}</span>
-              <button
-                @click="goToPage(currentPage + 1)"
-                :disabled="currentPage === totalPages"
-                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
-              >
-                次へ
+              <span class="text-neutral-dark font-medium">ページ {{ currentPage }} / {{ totalPages }}</span>
+              <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-button">
+                <span class="material-icons-outlined">chevron_right</span>
               </button>
             </div>
           </div>
-          <div v-else class="text-center py-16 text-gray-600 text-xl">
-            <p>現在、公開されている記事はありません。</p>
-            <p class="text-base mt-2">Notionデータベースに記事を追加し、「Published」にチェックを入れてください。</p>
+          <div v-else class="text-center py-16 text-neutral-dark text-xl">
+            <p>該当する記録はありません。</p>
+            <p class="text-base mt-2">新しい挑戦にご期待ください。</p>
           </div>
         </section>
       </div>
 
-      <aside class="md:col-span-1 mt-8 md:mt-0 px-4 py-6 bg-gray-50 rounded-lg shadow-sm">
-        <div class="mb-8">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">記事検索</h3>
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="キーワードを入力..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      <aside class="md:col-span-1 mt-8 md:mt-0">
+        <div class="sticky top-24">
+          <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-semibold text-neutral-darkest mb-4">検索</h3>
+            <div class="relative">
+              <input
+                type="text"
+                v-model="searchQuery"
+                placeholder="キーワードで探す..."
+                class="w-full pl-10 pr-4 py-2 border border-neutral-light rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-neutral-dark">search</span>
+            </div>
+          </div>
 
-        <div>
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">カテゴリ</h3>
-          <ul class="space-y-2">
-            <li>
-              <button
-                @click="selectCategory(null)"
-                :class="{ 'font-bold text-blue-600': !selectedCategory }"
-                class="text-gray-700 hover:text-blue-600 transition-colors duration-200 text-left w-full flex justify-between items-center"
-              >
-                <span>すべての記事</span>
-                <span class="text-xs px-2 py-0.5 bg-gray-200 rounded-full">{{ allArticles?.length || 0 }}</span>
-              </button>
-            </li>
-            <li v-for="category in uniqueCategoriesWithCount" :key="category.name">
-              <button
-                @click="selectCategory(category.name)"
-                :class="{ 'font-bold text-blue-600': selectedCategory === category.name }"
-                class="text-gray-700 hover:text-blue-600 transition-colors duration-200 text-left w-full flex justify-between items-center"
-              >
-                <span>{{ category.name }}</span>
-                <span class="text-xs px-2 py-0.5 bg-gray-200 rounded-full">{{ category.count }}</span>
-              </button>
-            </li>
-          </ul>
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-semibold text-neutral-darkest mb-4">カテゴリ</h3>
+            <ul class="space-y-2">
+              <li>
+                <button @click="selectCategory(null)" :class="{ 'font-bold text-primary': !selectedCategory }" class="category-button">
+                  <span>すべての記録</span>
+                  <span class="category-count">{{ allArticles?.length || 0 }}</span>
+                </button>
+              </li>
+              <li v-for="category in uniqueCategoriesWithCount" :key="category.name">
+                <button @click="selectCategory(category.name)" :class="{ 'font-bold text-primary': selectedCategory === category.name }" class="category-button">
+                  <span>{{ category.name }}</span>
+                  <span class="category-count">{{ category.count }}</span>
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </aside>
     </div>
@@ -225,17 +213,29 @@ const paginatedArticles = computed(() => {
 });
 
 useHead({
-  title: '記事一覧 - 不労所得への道',
+  title: '挑戦の記録一覧',
   meta: [
     {
       name: 'description',
-      content: '不労所得構築に関するプログラミング、自動化、オンラインビジネスなどの記事一覧。'
+      content: '不労所得構築に関するプログラミング、自動化、オンラインビジネスなどの挑戦の記録一覧。'
     }
   ]
 });
 </script>
 
 <style scoped>
+.pagination-button {
+  @apply w-10 h-10 flex items-center justify-center bg-white text-neutral-dark rounded-full shadow-md hover:bg-neutral-light transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.category-button {
+  @apply text-neutral-dark/80 hover:text-primary transition-colors duration-200 text-left w-full flex justify-between items-center py-1;
+}
+
+.category-count {
+  @apply text-xs px-2 py-0.5 bg-neutral-light text-neutral-darkest font-medium rounded-full;
+}
+
 /* Material Icons のスタイルはそのまま維持 */
 .material-icons-outlined {
   font-family: 'Material Symbols Outlined';

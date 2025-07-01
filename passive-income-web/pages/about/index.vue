@@ -1,37 +1,57 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">サイトについて</h1>
-    
-    <div class="prose max-w-none text-gray-800 leading-relaxed mb-10">
-      <p>このサイト「不労所得への道」は、IT技術を最大限に活用し、<strong>ウェブサイトの広告収入から永続的な不労所得を築く</strong>ことを究極の目標としています。</p>
-      <p>現代社会において経済的自由への願望は高まっていますが、私たちはプログラミング、自動化、オンラインビジネスといったITスキルが、時間や場所に縛られない新たな収入源を創出する鍵であると信じています。</p>
-      <p>本サイトでは、その実現に向けた**実践的なノウハウ、開発過程、成功・失敗事例**を包み隠さず共有することで、同じ志を持つ皆さんが不労所得への道を歩むための一助となることを目指します。これはまさに「怠惰を求めて勤勉になる」という精神を体現する試みです。</p>
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest mb-6 text-center">このサイトについて</h1>
       
-      <h2>本サイトのビジョン</h2>
-      <p>私たちは、ITの力を活用することで、誰もが経済的に自立し、より創造的で豊かな人生を送れる社会を実現したいと考えています。従来の労働集約型モデルから脱却を図り、個人の自由な時間と選択肢を最大化するための道筋を示します。</p>
-      
-      <h2>裏目標：ITエンジニアとしての成長</h2>
-      <p>本サイトの運営は、私自身がITエンジニアとして継続的にスキルアップするための場でもあります。不労所得の構築という具体的な目標を通じて、最新技術の習得、ツール・アプリケーション開発、そしてそれらを運用する実践的な経験を積むことを重視しています。</p>
+      <div class="prose max-w-none text-neutral-dark/90 leading-relaxed mb-10">
+        <p class="text-lg text-center mb-8">「不労所得への道」へようこそ。このサイトは、一個人のエンジニアがITの力を駆使して、<strong class="font-semibold text-primary">ゼロから不労所得を構築するまでの全過程を記録する、リアルタイムドキュメンタリー</strong>です。</p>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md border border-neutral-light mb-8">
+          <h2 class="text-2xl font-bold text-neutral-darkest mb-3">私たちのミッション</h2>
+          <p>私たちのミッションは、<strong class="font-semibold text-secondary">「ITスキルは、最強の資産である」</strong>という信念を証明することです。プログラミング、データ分析、自動化といった技術が、時間や場所に縛られない新しい働き方と、経済的な自由をもたらす力を持っていると信じています。このサイトでは、その可能性を具体的な形で示し、誰もが再現可能な知識として共有することを目指します。</p>
+        </div>
 
-      <h2>提供コンテンツと活動</h2>
-      <ul>
-        <li>**実践的なハウツー記事**: 不労所得構築に直結する具体的な手順やコード例を交え、スキル習得をサポートします。</li>
-        <li>**独自ツール・アプリ開発**: 収益化プロセスを効率化するツールやアプリケーションの開発を行い、その過程を公開します。将来的には無料・有料での配布も検討します。</li>
-        <li>**リアルな収益報告**: 実際に得られた収益データ、成功・失敗の分析を定期的に公開します。これにより、透明性をもってモチベーションを高め合い、共に成長できるコミュニティを目指します。</li>
-      </ul>
+        <h2 class="text-2xl font-bold text-neutral-darkest mb-3">3つの約束</h2>
+        <ul class="space-y-4">
+          <li class="flex items-start">
+            <span class="material-icons-outlined text-primary mr-3 mt-1">check_circle</span>
+            <div>
+              <h3 class="font-semibold text-lg">徹底した透明性</h3>
+              <p class="text-sm">収益、PV数、成功した施策から失敗した実験まで、全てのデータを公開します。</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <span class="material-icons-outlined text-primary mr-3 mt-1">code</span>
+            <div>
+              <h3 class="font-semibold text-lg">実践的なコードとノウハウ</h3>
+              <p class="text-sm">実際にウェブサイト構築やツール開発で使用したコード、具体的な設定手順、問題解決のプロセスを詳細に解説します。</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <span class="material-icons-outlined text-primary mr-3 mt-1">school</span>
+            <div>
+              <h3 class="font-semibold text-lg">共に学ぶコミュニティ</h3>
+              <p class="text-sm">このサイトは、私自身の成長の記録でもあります。読者の皆さんと情報を交換し、共に学び、成長できる場でありたいと考えています。</p>
+            </div>
+          </li>
+        </ul>
 
-      <p class="mt-8">ご質問やご要望がありましたら、お気軽に<NuxtLink to="/contact" class="text-blue-600 hover:text-blue-800 font-medium">お問い合わせください</NuxtLink>。</p>
+        <div class="text-center mt-12">
+          <p class="mb-4">私たちの挑戦に、あなたも参加しませんか？</p>
+          <NuxtLink to="/contact" class="inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200">
+            ご意見・ご感想はこちら
+          </NuxtLink>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 useHead({
-  // タイトルを新しいキーワード戦略に合わせて更新
-  title: 'サイトについて | 不労所得への道 - ITスキル×副業で資産形成・FIREを目指す',
+  title: 'このサイトについて | 不労所得への道',
   meta: [
-    // ディスクリプションもキーワードとサイトの目的を明確に
-    { name: 'description', content: '「不労所得への道」のサイト目的、ビジョン、提供コンテンツ。ITスキル、副業、自動化、Webサイト収益化を通じて経済的自由とITエンジニアとしての成長を目指します。' }
+    { name: 'description', content: '「不労所得への道」のミッションと3つの約束。ITスキルを資産に変える挑戦の記録。透明性、実践的ノウハウ、共に学ぶコミュニティを大切にしています。' }
   ]
 })
 </script>

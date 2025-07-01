@@ -1,58 +1,58 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">実績</h1>
-    <p class="text-lg text-gray-600 mb-8">
-      ITを活用した不労所得構築の過程で得られた具体的な成果とデータを公開します。
-      透明性を持って、取り組みと達成状況をご紹介します。
+    <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest mb-4">実績とデータ</h1>
+    <p class="text-lg text-neutral-dark/80 mb-10">
+      このサイトの成長記録を、具体的なデータで公開します。透明性を第一に、挑戦の成果をご覧ください。
     </p>
 
-    <section class="py-6 mb-8">
-      <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">主な達成実績</h2>
+    <section class="py-6 mb-12">
+      <h2 class="text-3xl font-bold text-center text-neutral-darkest mb-8">サマリー</h2>
       <div class="grid md:grid-cols-3 gap-6 text-center">
-        <div class="bg-white rounded-lg shadow-md p-5">
-          <p class="text-blue-600 text-4xl font-bold mb-1">0+</p>
-          <p class="text-gray-700 text-base">開発ツール数</p>
+        <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-primary">
+          <p class="text-sm text-neutral-dark font-semibold">開発ツール数</p>
+          <p class="text-primary text-5xl font-bold mt-2">0+</p>
         </div>
-        <div class="bg-orange-500 text-white rounded-lg shadow-md p-5">
-          <p class="text-4xl font-bold mb-1">¥{{ totalRevenue }}万+</p>
-          <p class="text-base">累計収益</p>
+        <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-secondary">
+          <p class="text-sm text-neutral-dark font-semibold">累計収益</p>
+          <p class="text-secondary text-5xl font-bold mt-2">¥{{ totalRevenue.toLocaleString() }}</p>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-5">
-          <p class="text-purple-600 text-4xl font-bold mb-1">{{ totalArticles }}+</p>
-          <p class="text-gray-700 text-base">公開記事数</p>
+        <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-accent">
+          <p class="text-sm text-neutral-dark font-semibold">公開記事数</p>
+          <p class="text-accent text-5xl font-bold mt-2">{{ totalArticles }}+</p>
         </div>
       </div>
     </section>
 
-    <section class="py-6 mb-8">
-      <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">累計PV推移</h2>
-      <div class="bg-white rounded-lg shadow-md p-4 h-96">
+    <section class="py-6 mb-12">
+      <h2 class="text-3xl font-bold text-center text-neutral-darkest mb-8">サイトPV推移</h2>
+      <div class="bg-white rounded-lg shadow-md p-4 md:p-6 h-96">
         <LineChart
           v-if="!pvPending && !pvError && cumulativePvChartData && cumulativePvChartData.datasets && cumulativePvChartData.datasets.length > 0"
           :data="cumulativePvChartData"
           :options="chartOptions"
         />
-        <p v-else-if="pvPending" class="text-center text-gray-600 text-sm mt-4">累計PVデータを読み込み中...</p>
-        <p v-else-if="pvError" class="text-center text-red-600 text-sm mt-4">累計PVデータの取得に失敗しました。<br>{{ pvError.message }}</p>
-        <p v-else class="text-center text-gray-600 text-sm mt-4">データがありません。</p>
-        <p class="text-center text-gray-600 text-sm mt-2">ウェブサイトの累計ページビュー</p>
+        <div v-else class="flex items-center justify-center h-full text-neutral-dark">
+          <p v-if="pvPending">PVデータを読み込み中...</p>
+          <p v-else-if="pvError">PVデータの取得に失敗しました。<br>{{ pvError.message }}</p>
+          <p v-else>データがありません。</p>
+        </div>
       </div>
     </section>
 
-    <section class="py-6 mb-8">
-      <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">累計収益推移</h2>
-      <div class="bg-white rounded-lg shadow-md p-4 h-96">
+    <section class="py-6 mb-12">
+      <h2 class="text-3xl font-bold text-center text-neutral-darkest mb-8">収益レポート</h2>
+      <div class="bg-white rounded-lg shadow-md p-4 md:p-6 h-96">
         <BarChart v-if="cumulativeRevenueChartData && cumulativeRevenueChartData.datasets && cumulativeRevenueChartData.datasets.length > 0" :data="cumulativeRevenueChartData" :options="chartOptions" />
-        <p v-else class="text-center text-gray-600 text-sm mt-4">データを読み込み中...</p>
-        <p class="text-center text-gray-600 text-sm mt-2">広告収入などを含む累計収益</p>
+        <div v-else class="flex items-center justify-center h-full text-neutral-dark">
+          <p>データを読み込み中...</p>
+        </div>
       </div>
     </section>
 
     <section class="py-6">
-      <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">今後の展望</h2>
-      <div class="prose max-w-none text-gray-800 leading-relaxed text-center mx-auto">
-        <p>ITを活用した不労所得の可能性を追求し、より多くの人々が経済的自由を達成できるよう（そして私自身のITエンジニアとしての成長を願って）、実践的で質の高い情報提供とツールの開発を継続します。</p>
-        <p>今後の活動にもご期待ください。</p>
+      <h2 class="text-3xl font-bold text-center text-neutral-darkest mb-8">今後のマイルストーン</h2>
+      <div class="prose max-w-none text-neutral-dark/90 leading-relaxed text-center mx-auto">
+        <p>ITの力を活用した不労所得の実現は、まだ始まったばかりです。今後も新たなツールの開発、コンテンツの拡充、そして収益化手法の最適化に挑戦し続けます。このページのデータが、右肩上がりに成長していく様子にご期待ください。</p>
       </div>
     </section>
   </div>
@@ -113,8 +113,8 @@ const cumulativePvChartData = computed(() => {
     datasets: [
       {
         label: '累計PV',
-        backgroundColor: '#EF4444',
-        borderColor: '#EF4444',
+        backgroundColor: '#1a73e8',
+        borderColor: '#1a73e8',
         data: rawPvData.value.data,
         tension: 0.3,
         fill: false,
@@ -128,8 +128,8 @@ const cumulativeRevenueChartData = {
   labels: ['2025年6月'],
   datasets: [
     {
-      label: '累計収益 (万円)',
-      backgroundColor: '#3B82F6',
+      label: '累計収益 (円)',
+      backgroundColor: '#34a853',
       data: [0]
     }
   ]
@@ -168,7 +168,7 @@ const chartOptions = {
 };
 
 useHead({
-  title: '実績 - 不労所得への道',
+  title: '実績とデータ',
   meta: [
     { name: 'description', content: 'ITを活用した不労所得構築に関する具体的な実績、データ、そして今後の展望を公開。累計収益とPV推移。' }
   ]
