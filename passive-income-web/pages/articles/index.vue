@@ -25,33 +25,34 @@
               class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 flex flex-col md:flex-row group"
               style="text-decoration: none;"
             >
-              <div class="w-full md:w-1/3 flex-shrink-0 h-full flex items-center justify-center bg-gray-100">
+              <div class="w-full md:w-1/3 flex-shrink-0">
                 <img
                   :src="article.image"
                   :alt="article.title"
-                  class="w-full aspect-[4/3] object-cover md:rounded-l-lg md:rounded-r-none"
-                  
-                  > </div>
+                  class="w-full aspect-[4/3] object-cover rounded-t-lg md:rounded-t-none md:rounded-l-lg"
+                />
+              </div>
               <div class="p-6 flex-grow">
                 <h3 class="text-xl font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">{{ article.title }}</h3>
                 <div class="text-gray-500 text-sm mb-3 flex items-center space-x-3">
-                <span class="flex items-center">
-                  <span class="material-icons-outlined text-base mr-1">calendar_today</span>
-                  {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
-                </span>
-                <span class="flex items-center">
-                  <span class="material-icons-outlined text-base mr-1">category</span>
-                  <div class="flex flex-wrap gap-1">
-                    <button
-                      v-for="catName in article.category"
-                      :key="catName"
-                      @click.prevent="selectCategory(catName)" class="px-1 py-0.5 bg-gray-100 text-gray-800 text-xs font-semibold rounded-lg hover:bg-blue-200 hover:text-blue-900 transition-colors duration-200 cursor-pointer"
-                    >
-                      {{ catName }}
-                    </button>
-                  </div>
-                </span>
-              </div>
+                  <span class="flex items-center">
+                    <span class="material-icons-outlined text-base mr-1">calendar_today</span>
+                    {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
+                  </span>
+                  <span class="flex items-center">
+                    <span class="material-icons-outlined text-base mr-1">category</span>
+                    <div class="flex flex-wrap gap-1">
+                      <button
+                        v-for="catName in article.category"
+                        :key="catName"
+                        @click.prevent="selectCategory(catName)"
+                        class="px-1 py-0.5 bg-gray-100 text-gray-800 text-xs font-semibold rounded-lg hover:bg-blue-200 hover:text-blue-900 transition-colors duration-200 cursor-pointer"
+                      >
+                        {{ catName }}
+                      </button>
+                    </div>
+                  </span>
+                </div>
                 <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ article.description }}</p>
               </div>
             </NuxtLink>
