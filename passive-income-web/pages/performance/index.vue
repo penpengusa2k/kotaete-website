@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">実績とデータ</h1>
     <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-10">
-      このサイトの成長記録を、具体的なデータで公開します。透明性を第一に、挑戦の成果をご覧ください。
+      このサイトの成長記録を、具体的なデータで公開します。
     </p>
 
     <section class="py-6 mb-12">

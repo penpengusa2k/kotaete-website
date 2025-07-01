@@ -3,7 +3,7 @@
     <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">挑戦の記録</h1>
     <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-10">
       不労所得を構築するための試行錯誤の全記録です。
-      <br class="hidden sm:inline">新しい挑戦は随時追加されていきます。
+      <br class="hidden sm:inline">週１を目安に随時更新します。
     </p>
 
     <div class="md:grid md:grid-cols-4 md:gap-8">
