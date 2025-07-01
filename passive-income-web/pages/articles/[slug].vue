@@ -12,9 +12,9 @@
     <div v-else-if="article" class="max-w-3xl mx-auto">
       <article class="bg-white dark:bg-neutral-dark shadow-lg rounded-lg p-6 md:p-8 mb-8">
         <h1 class="text-3xl md:text-4xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">{{ article.title }}</h1>
-        <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-6">{{ article.description }}</p>
+        <p class="text-lg text-neutral-darkest/80 dark:text-neutral-light/80 mb-6">{{ article.description }}</p>
 
-        <div class="text-neutral-dark/70 dark:text-neutral-light/70 text-sm flex items-center space-x-4 border-t border-b border-neutral-light dark:border-neutral-darkest py-3 mb-6">
+        <div class="text-neutral-darkest/70 dark:text-neutral-light/70 text-sm flex items-center space-x-4 border-t border-b border-neutral-light dark:border-neutral-darkest py-3 mb-6">
           <span class="flex items-center">
             <span class="material-icons-outlined text-base mr-1.5">calendar_today</span>
             {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}

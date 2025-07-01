@@ -11,7 +11,7 @@
       <nav class="hidden md:block">
         <ul class="flex items-center space-x-2">
           <li v-for="link in navLinks" :key="link.to">
-            <NuxtLink :to="link.to" class="relative py-2 px-4 group text-neutral-dark dark:text-neutral-light hover:text-primary transition-colors duration-200 text-sm md:text-base font-medium">
+            <NuxtLink :to="link.to" class="relative py-2 px-4 group text-neutral-darkest dark:text-neutral-light hover:text-primary transition-colors duration-200 text-sm md:text-base font-medium">
               {{ link.text }}
               <span :class="['absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center', { 'scale-x-100': $route.path === link.to }]"></span>
             </NuxtLink>

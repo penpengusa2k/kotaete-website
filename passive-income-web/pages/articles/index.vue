@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">挑戦の記録</h1>
-    <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-10">
+    <p class="text-lg text-neutral-darkest/80 dark:text-neutral-light/80 mb-10">
       不労所得を構築するための試行錯誤の全記録です。
       <br class="hidden sm:inline">週１を目安に随時更新します。
     </p>
@@ -226,23 +226,23 @@ useHead({
 <style scoped>
 .category-button {
   @apply text-sm transition-colors duration-200 text-left w-full flex justify-between items-center py-1;
-  color: rgba(17, 24, 39, 0.8); /* text-neutral-dark/80 */
+  color: #202124; /* text-neutral-darkest */
 }
 
 .dark .category-button {
-  color: rgba(243, 244, 246, 0.8); /* text-neutral-light/80 */
+  color: #e9ecef; /* text-neutral-light */
 }
 
-.pagination-button {
-  @apply w-10 h-10 flex items-center justify-center bg-white text-neutral-dark rounded-full shadow-md hover:bg-neutral-light transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+.category-button.font-bold {
+  color: #1a73e8; /* primary */
 }
 
-.category-button {
-  @apply text-neutral-dark/80 hover:text-primary transition-colors duration-200 text-left w-full flex justify-between items-center py-1;
+.dark .category-button.font-bold {
+  color: #1a73e8; /* primary */
 }
 
 .category-count {
-  @apply text-xs px-2 py-0.5 bg-neutral-light text-neutral-darkest font-medium rounded-full;
+  @apply text-xs px-2 py-0.5 bg-neutral-light dark:bg-neutral-darkest text-neutral-darkest dark:text-neutral-lightest font-medium rounded-full;
 }
 
 /* Material Icons のスタイルはそのまま維持 */

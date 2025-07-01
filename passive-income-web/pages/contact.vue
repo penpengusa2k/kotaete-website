@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto text-center">
       <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">お問い合わせ</h1>
-      <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-8">
+      <p class="text-lg text-neutral-darkest/80 dark:text-neutral-light/80 mb-8">
         サイトに関するご質問、ご意見、または協力のご提案など、お気軽にご連絡ください。
       </p>
     </div>

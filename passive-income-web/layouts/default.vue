@@ -2,7 +2,7 @@
   <div class="flex flex-col min-h-screen font-sans bg-neutral-lightest dark:bg-neutral-darkest text-neutral-darkest dark:text-neutral-lightest">
     <AppHeader />
 
-    <nav class="container mx-auto px-4 py-3 text-sm text-neutral-dark dark:text-neutral-light" aria-label="breadcrumb">
+    <nav class="container mx-auto px-4 py-3 text-sm text-neutral-darkest dark:text-neutral-light" aria-label="breadcrumb">
       <ol class="list-none p-0 inline-flex flex-wrap items-center">
         <template v-if="breadcrumbs.length > 0">
           <li v-for="(crumb, index) in breadcrumbs" :key="index" class="flex items-center">
