@@ -17,14 +17,14 @@
             <span class="material-icons-outlined text-primary mr-3 mt-1">check_circle</span>
             <div>
               <h3 class="font-semibold text-lg text-neutral-darkest dark:text-neutral-lightest">徹底した透明性</h3>
-              <p class="text-sm text-neutral-dark/80 dark:text-neutral-light/80">収益、PV数、成功した施策から失敗した実験まで、全てのデータを公開します。良い結果も悪い結果も、あなたの学びの糧となるはずです。</p>
+              <p class="text-sm text-neutral-dark/80 dark:text-neutral-light/80">収益、PV数、成功した施策から失敗した実験まで、全てのデータを公開します。</p>
             </div>
           </li>
           <li class="flex items-start">
             <span class="material-icons-outlined text-primary mr-3 mt-1">code</span>
             <div>
               <h3 class="font-semibold text-lg text-neutral-darkest dark:text-neutral-lightest">実践的なコードとノウハウ</h3>
-              <p class="text-sm text-neutral-dark/80 dark:text-neutral-light/80">机上の空論は語りません。実際にウェブサイト構築やツール開発で使用したコード、具体的な設定手順、問題解決のプロセスを詳細に解説します。</p>
+              <p class="text-sm text-neutral-dark/80 dark:text-neutral-light/80">実際にウェブサイト構築やツール開発で使用したコード、具体的な設定手順、問題解決のプロセスを詳細に解説します。</p>
             </div>
           </li>
           <li class="flex items-start">
@@ -37,7 +37,7 @@
         </ul>
 
         <div class="text-center mt-12">
-          <p class="mb-4 text-neutral-dark/90 dark:text-neutral-light/90">私たちの挑戦に、あなたも参加しませんか？</p>
+          <p class="mb-4 text-neutral-dark/90 dark:text-neutral-light/90">この挑戦に、あなたも参加しませんか？</p>
           <NuxtLink to="/contact" class="inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200">
             ご意見・ご感想はこちら
           </NuxtLink>

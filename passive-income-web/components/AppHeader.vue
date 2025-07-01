@@ -55,13 +55,6 @@
                 {{ link.text }}
               </NuxtLink>
             </li>
-            <li>
-              <button @click="toggleDarkMode" class="block hover:bg-neutral-light dark:hover:bg-neutral-dark py-2 px-3 rounded-md transition duration-200 text-base font-medium text-neutral-darkest dark:text-neutral-lightest w-full text-left flex items-center">
-                <span v-if="isDarkMode" class="material-icons-outlined mr-2 text-purple-400">dark_mode</span>
-                <span v-else class="material-icons-outlined mr-2 text-yellow-500">light_mode</span>
-                <span>{{ isDarkMode ? 'ダークモード' : 'ライトモード' }}</span>
-              </button>
-            </li>
           </ul>
         </nav>
       </div>

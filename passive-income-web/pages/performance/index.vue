@@ -10,7 +10,7 @@
       <div class="grid md:grid-cols-3 gap-6 text-center">
         <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6 border-t-4 border-primary">
           <p class="text-sm text-neutral-dark dark:text-neutral-light font-semibold">開発ツール数</p>
-          <p class="text-primary text-5xl font-bold mt-2">0+</p>
+          <p class="text-primary text-5xl font-bold mt-2">0</p>
         </div>
         <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6 border-t-4 border-secondary">
           <p class="text-sm text-neutral-dark dark:text-neutral-light font-semibold">累計収益</p>
@@ -18,7 +18,7 @@
         </div>
         <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6 border-t-4 border-accent">
           <p class="text-sm text-neutral-dark dark:text-neutral-light font-semibold">公開記事数</p>
-          <p class="text-accent text-5xl font-bold mt-2">{{ totalArticles }}+</p>
+          <p class="text-accent text-5xl font-bold mt-2">{{ totalArticles }}</p>
         </div>
       </div>
     </section>

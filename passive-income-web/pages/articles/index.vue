@@ -224,6 +224,15 @@ useHead({
 </script>
 
 <style scoped>
+.category-button {
+  @apply text-sm transition-colors duration-200 text-left w-full flex justify-between items-center py-1;
+  color: rgba(17, 24, 39, 0.8); /* text-neutral-dark/80 */
+}
+
+.dark .category-button {
+  color: rgba(243, 244, 246, 0.8); /* text-neutral-light/80 */
+}
+
 .pagination-button {
   @apply w-10 h-10 flex items-center justify-center bg-white text-neutral-dark rounded-full shadow-md hover:bg-neutral-light transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
 }
