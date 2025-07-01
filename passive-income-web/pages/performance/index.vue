@@ -1,37 +1,37 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest mb-4">実績とデータ</h1>
-    <p class="text-lg text-neutral-dark/80 mb-10">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">実績とデータ</h1>
+    <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-10">
       このサイトの成長記録を、具体的なデータで公開します。透明性を第一に、挑戦の成果をご覧ください。
     </p>
 
     <section class="py-6 mb-12">
-      <h2 class="text-3xl font-bold text-center text-neutral-darkest mb-8">サマリー</h2>
+      <h2 class="text-3xl font-bold text-center text-neutral-darkest dark:text-neutral-lightest mb-8">サマリー</h2>
       <div class="grid md:grid-cols-3 gap-6 text-center">
-        <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-primary">
-          <p class="text-sm text-neutral-dark font-semibold">開発ツール数</p>
+        <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6 border-t-4 border-primary">
+          <p class="text-sm text-neutral-dark dark:text-neutral-light font-semibold">開発ツール数</p>
           <p class="text-primary text-5xl font-bold mt-2">0+</p>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-secondary">
-          <p class="text-sm text-neutral-dark font-semibold">累計収益</p>
+        <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6 border-t-4 border-secondary">
+          <p class="text-sm text-neutral-dark dark:text-neutral-light font-semibold">累計収益</p>
           <p class="text-secondary text-5xl font-bold mt-2">¥{{ totalRevenue.toLocaleString() }}</p>
         </div>
-        <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-accent">
-          <p class="text-sm text-neutral-dark font-semibold">公開記事数</p>
+        <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6 border-t-4 border-accent">
+          <p class="text-sm text-neutral-dark dark:text-neutral-light font-semibold">公開記事数</p>
           <p class="text-accent text-5xl font-bold mt-2">{{ totalArticles }}+</p>
         </div>
       </div>
     </section>
 
     <section class="py-6 mb-12">
-      <h2 class="text-3xl font-bold text-center text-neutral-darkest mb-8">サイトPV推移</h2>
-      <div class="bg-white rounded-lg shadow-md p-4 md:p-6 h-96">
+      <h2 class="text-3xl font-bold text-center text-neutral-darkest dark:text-neutral-lightest mb-8">サイトPV推移</h2>
+      <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-4 md:p-6 h-96">
         <LineChart
           v-if="!pvPending && !pvError && cumulativePvChartData && cumulativePvChartData.datasets && cumulativePvChartData.datasets.length > 0"
           :data="cumulativePvChartData"
           :options="chartOptions"
         />
-        <div v-else class="flex items-center justify-center h-full text-neutral-dark">
+        <div v-else class="flex items-center justify-center h-full text-neutral-dark dark:text-neutral-light">
           <p v-if="pvPending">PVデータを読み込み中...</p>
           <p v-else-if="pvError">PVデータの取得に失敗しました。<br>{{ pvError.message }}</p>
           <p v-else>データがありません。</p>
@@ -40,18 +40,18 @@
     </section>
 
     <section class="py-6 mb-12">
-      <h2 class="text-3xl font-bold text-center text-neutral-darkest mb-8">収益レポート</h2>
-      <div class="bg-white rounded-lg shadow-md p-4 md:p-6 h-96">
+      <h2 class="text-3xl font-bold text-center text-neutral-darkest dark:text-neutral-lightest mb-8">収益レポート</h2>
+      <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-4 md:p-6 h-96">
         <BarChart v-if="cumulativeRevenueChartData && cumulativeRevenueChartData.datasets && cumulativeRevenueChartData.datasets.length > 0" :data="cumulativeRevenueChartData" :options="chartOptions" />
-        <div v-else class="flex items-center justify-center h-full text-neutral-dark">
+        <div v-else class="flex items-center justify-center h-full text-neutral-dark dark:text-neutral-light">
           <p>データを読み込み中...</p>
         </div>
       </div>
     </section>
 
     <section class="py-6">
-      <h2 class="text-3xl font-bold text-center text-neutral-darkest mb-8">今後のマイルストーン</h2>
-      <div class="prose max-w-none text-neutral-dark/90 leading-relaxed text-center mx-auto">
+      <h2 class="text-3xl font-bold text-center text-neutral-darkest dark:text-neutral-lightest mb-8">今後のマイルストーン</h2>
+      <div class="prose max-w-none text-neutral-dark/90 dark:text-neutral-light/90 leading-relaxed text-center mx-auto">
         <p>ITの力を活用した不労所得の実現は、まだ始まったばかりです。今後も新たなツールの開発、コンテンツの拡充、そして収益化手法の最適化に挑戦し続けます。このページのデータが、右肩上がりに成長していく様子にご期待ください。</p>
       </div>
     </section>

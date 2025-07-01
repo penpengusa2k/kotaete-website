@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest mb-4">挑戦の記録</h1>
-    <p class="text-lg text-neutral-dark/80 mb-10">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">挑戦の記録</h1>
+    <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-10">
       不労所得を構築するための試行錯誤の全記録です。
       <br class="hidden sm:inline">新しい挑戦は随時追加されていきます。
     </p>
@@ -9,7 +9,7 @@
     <div class="md:grid md:grid-cols-4 md:gap-8">
       <div class="md:col-span-3">
         <section class="py-6">
-          <div v-if="pending" class="text-center py-16 text-neutral-dark text-xl">
+          <div v-if="pending" class="text-center py-16 text-neutral-dark dark:text-neutral-light text-xl">
             <p>記録を読み込んでいます...</p>
             <div class="mt-4 animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           </div>
@@ -22,7 +22,7 @@
               v-for="article in paginatedArticles"
               :key="article.id"
               :to="`/articles/${article.slug}`"
-              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col md:flex-row group"
+              class="bg-white dark:bg-neutral-dark rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col md:flex-row group"
               style="text-decoration: none;"
             >
               <div class="w-full md:w-1/3 flex-shrink-0">
@@ -34,21 +34,21 @@
               </div>
               <div class="p-6 flex flex-col justify-between flex-grow">
                 <div>
-                  <h3 class="text-xl font-semibold text-neutral-darkest mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">{{ article.title }}</h3>
-                  <div class="text-neutral-dark/70 text-sm mb-3 flex items-center space-x-4">
+                  <h3 class="text-xl font-semibold text-neutral-darkest dark:text-neutral-lightest mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">{{ article.title }}</h3>
+                  <div class="text-neutral-dark/70 dark:text-neutral-light/70 text-sm mb-3 flex items-center space-x-4">
                     <span class="flex items-center">
                       <span class="material-icons-outlined text-base mr-1.5">calendar_today</span>
                       {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
                     </span>
                   </div>
-                  <p class="text-neutral-dark/80 text-sm mb-4 line-clamp-3">{{ article.description }}</p>
+                  <p class="text-neutral-dark/80 dark:text-neutral-light/80 text-sm mb-4 line-clamp-3">{{ article.description }}</p>
                 </div>
                 <div class="flex flex-wrap gap-2 mt-auto">
                   <button
                     v-for="catName in article.category"
                     :key="catName"
                     @click.prevent="selectCategory(catName)"
-                    class="px-2 py-1 bg-neutral-light text-neutral-darkest text-xs font-medium rounded-full hover:bg-primary/20 hover:text-primary-dark transition-colors duration-200 cursor-pointer"
+                    class="px-2 py-1 bg-neutral-light dark:bg-neutral-darkest text-neutral-darkest dark:text-neutral-lightest text-xs font-medium rounded-full hover:bg-primary/20 hover:text-primary-dark transition-colors duration-200 cursor-pointer"
                   >
                     {{ catName }}
                   </button>
@@ -60,13 +60,13 @@
               <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-button">
                 <span class="material-icons-outlined">chevron_left</span>
               </button>
-              <span class="text-neutral-dark font-medium">ページ {{ currentPage }} / {{ totalPages }}</span>
+              <span class="text-neutral-dark dark:text-neutral-light font-medium">ページ {{ currentPage }} / {{ totalPages }}</span>
               <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-button">
                 <span class="material-icons-outlined">chevron_right</span>
               </button>
             </div>
           </div>
-          <div v-else class="text-center py-16 text-neutral-dark text-xl">
+          <div v-else class="text-center py-16 text-neutral-dark dark:text-neutral-light text-xl">
             <p>該当する記録はありません。</p>
             <p class="text-base mt-2">新しい挑戦にご期待ください。</p>
           </div>
@@ -75,32 +75,32 @@
 
       <aside class="md:col-span-1 mt-8 md:mt-0">
         <div class="sticky top-24">
-          <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h3 class="text-xl font-semibold text-neutral-darkest mb-4">検索</h3>
+          <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-semibold text-neutral-darkest dark:text-neutral-lightest mb-4">検索</h3>
             <div class="relative">
               <input
                 type="text"
                 v-model="searchQuery"
                 placeholder="キーワードで探す..."
-                class="w-full pl-10 pr-4 py-2 border border-neutral-light rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+                class="w-full pl-10 pr-4 py-2 border border-neutral-light dark:border-neutral-darkest rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-neutral-dark text-neutral-darkest dark:text-neutral-lightest"
               />
-              <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-neutral-dark">search</span>
+              <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-neutral-dark dark:text-neutral-light">search</span>
             </div>
           </div>
 
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-xl font-semibold text-neutral-darkest mb-4">カテゴリ</h3>
+          <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-semibold text-neutral-darkest dark:text-neutral-lightest mb-4">カテゴリ</h3>
             <ul class="space-y-2">
               <li>
-                <button @click="selectCategory(null)" :class="{ 'font-bold text-primary': !selectedCategory }" class="category-button">
+                <button @click="selectCategory(null)" :class="{ 'font-bold text-primary': !selectedCategory }" class="category-button text-neutral-dark dark:text-neutral-light">
                   <span>すべての記録</span>
-                  <span class="category-count">{{ allArticles?.length || 0 }}</span>
+                  <span class="category-count bg-neutral-light dark:bg-neutral-darkest text-neutral-darkest dark:text-neutral-lightest">{{ allArticles?.length || 0 }}</span>
                 </button>
               </li>
               <li v-for="category in uniqueCategoriesWithCount" :key="category.name">
-                <button @click="selectCategory(category.name)" :class="{ 'font-bold text-primary': selectedCategory === category.name }" class="category-button">
+                <button @click="selectCategory(category.name)" :class="{ 'font-bold text-primary': selectedCategory === category.name }" class="category-button text-neutral-dark dark:text-neutral-light">
                   <span>{{ category.name }}</span>
-                  <span class="category-count">{{ category.count }}</span>
+                  <span class="category-count bg-neutral-light dark:bg-neutral-darkest text-neutral-darkest dark:text-neutral-lightest">{{ category.count }}</span>
                 </button>
               </li>
             </ul>

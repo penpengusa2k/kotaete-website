@@ -1,8 +1,8 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto text-center">
-      <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest mb-4">お問い合わせ</h1>
-      <p class="text-lg text-neutral-dark/80 mb-8">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">お問い合わせ</h1>
+      <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-8">
         サイトに関するご質問、ご意見、または協力のご提案など、お気軽にご連絡ください。
       </p>
     </div>
@@ -14,7 +14,7 @@
         frameborder="0"
         marginheight="0"
         marginwidth="0"
-        class="w-full max-w-2xl h-[600px] border-none rounded-lg shadow-lg"
+        class="w-full max-w-2xl h-[600px] border-none rounded-lg shadow-lg bg-white dark:bg-neutral-dark"
       >
         読み込んでいます…
       </iframe>

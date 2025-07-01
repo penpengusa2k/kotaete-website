@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div v-if="pending" class="text-center py-16 text-neutral-dark text-xl">
+    <div v-if="pending" class="text-center py-16 text-neutral-dark dark:text-neutral-light text-xl">
       <p>挑戦の記録を読み込んでいます...</p>
       <div class="mt-4 animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
     </div>
@@ -10,11 +10,11 @@
       <NuxtLink to="/articles" class="text-primary hover:text-primary-dark mt-4 inline-block">&larr; 記録一覧へ戻る</NuxtLink>
     </div>
     <div v-else-if="article" class="max-w-3xl mx-auto">
-      <article class="bg-white shadow-lg rounded-lg p-6 md:p-8 mb-8">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-neutral-darkest mb-4">{{ article.title }}</h1>
-        <p class="text-lg text-neutral-dark/80 mb-6">{{ article.description }}</p>
+      <article class="bg-white dark:bg-neutral-dark shadow-lg rounded-lg p-6 md:p-8 mb-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-neutral-darkest dark:text-neutral-lightest mb-4">{{ article.title }}</h1>
+        <p class="text-lg text-neutral-dark/80 dark:text-neutral-light/80 mb-6">{{ article.description }}</p>
 
-        <div class="text-neutral-dark/70 text-sm flex items-center space-x-4 border-t border-b border-neutral-light py-3 mb-6">
+        <div class="text-neutral-dark/70 dark:text-neutral-light/70 text-sm flex items-center space-x-4 border-t border-b border-neutral-light dark:border-neutral-darkest py-3 mb-6">
           <span class="flex items-center">
             <span class="material-icons-outlined text-base mr-1.5">calendar_today</span>
             {{ article.date ? new Date(article.date).toLocaleDateString('ja-JP') : '日付不明' }}
@@ -25,7 +25,7 @@
               <span
                 v-for="catName in article.category"
                 :key="catName"
-                class="px-2 py-1 bg-neutral-light text-neutral-darkest text-xs font-medium rounded-full"
+                class="px-2 py-1 bg-neutral-light dark:bg-neutral-darkest text-neutral-darkest dark:text-neutral-lightest text-xs font-medium rounded-full"
               >
                 {{ catName }}
               </span>
@@ -33,7 +33,7 @@
           </span>
         </div>
 
-        <div class="prose prose-lg max-w-none text-neutral-darkest leading-relaxed" v-html="article.renderedHtmlContent"></div>
+        <div class="prose prose-lg max-w-none text-neutral-darkest dark:text-neutral-lightest leading-relaxed" v-html="article.renderedHtmlContent"></div>
       </article>
 
       <NuxtLink to="/articles" class="inline-flex items-center text-primary hover:text-primary-dark font-medium transition-colors duration-200">
@@ -41,7 +41,7 @@
         すべての記録に戻る
       </NuxtLink>
     </div>
-    <div v-else class="text-center py-16 text-neutral-dark text-xl">
+    <div v-else class="text-center py-16 text-neutral-dark dark:text-neutral-light text-xl">
       <p>指定された記録は見つかりませんでした。</p>
       <NuxtLink to="/articles" class="text-primary hover:text-primary-dark mt-4 inline-block">&larr; 記録一覧へ戻る</NuxtLink>
     </div>
