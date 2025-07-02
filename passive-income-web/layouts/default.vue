@@ -36,22 +36,23 @@ import { useRoute } from 'vue-router';
 import { Analytics } from '@vercel/analytics/nuxt'
 
 const route = useRoute();
-const articleDataForBreadcrumb = ref(null);
 const config = useRuntimeConfig();
 
-// route.path の変更を監視し、記事詳細ページの場合のみ記事データをフェッチ
-watch(() => route.path, async (newPath) => {
-  if (newPath.startsWith('/articles/') && route.params.slug) {
-    try {
-      articleDataForBreadcrumb.value = await $fetch(`/api/article/${route.params.slug}`);
-    } catch (e) {
-      console.error('Failed to fetch article data for breadcrumb:', e);
-      articleDataForBreadcrumb.value = null;
+const { data: articleDataForBreadcrumb } = await useAsyncData(
+  () => `article-breadcrumb-${route.params.slug}`,
+  async () => {
+    if (route.path.startsWith('/articles/') && route.params.slug) {
+      try {
+        return await $fetch(`/api/article/${route.params.slug}`);
+      } catch (e) {
+        console.error('Failed to fetch article data for breadcrumb:', e);
+        return null;
+      }
     }
-  } else {
-    articleDataForBreadcrumb.value = null;
-  }
-}, { immediate: true }); // 初回ロード時にも実行
+    return null;
+  },
+  { watch: [() => route.params.slug] } // slug の変更を監視
+);
 
 const breadcrumbs = computed(() => {
   const crumbs = [];

@@ -19,6 +19,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     notionSecret: process.env.NOTION_SECRET,
     notionArticlesDatabaseId: process.env.NOTION_ARTICLES_DATABASE_ID,
+    vercelApiToken: process.env.VERCEL_API_TOKEN,
+    vercelProjectId: process.env.VERCEL_PROJECT_ID,
     public: {
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'https://furoshotoku.net'
     }
