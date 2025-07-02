@@ -84,18 +84,10 @@ ChartJS.register(
 );
 
 const config = useRuntimeConfig();
-const NUXT_PUBLIC_GA4_PROPERTY_ID = config.public.ga4PropertyId;
-
-// 累計PVデータの取得 (ビルド時にサーバーサイドで取得される)
 const { data: rawPvData, pending: pvPending, error: pvError } = await useAsyncData(
   'cumulative-pv-data',
   async () => {
-    // NUXT_PUBLIC_GA4_PROPERTY_ID が undefined の場合を考慮
-    if (!NUXT_PUBLIC_GA4_PROPERTY_ID) {
-      console.warn('NUXT_PUBLIC_GA4_PROPERTY_ID is not defined. PV data will not be fetched.');
-      return { labels: [], data: [] }; // デフォルトデータを返す
-    }
-    return await $fetch(`/api/analytics/pv?propertyId=${NUXT_PUBLIC_GA4_PROPERTY_ID}`);
+    return await $fetch('/api/analytics/pv');
   },
   {
     server: true,
@@ -103,16 +95,17 @@ const { data: rawPvData, pending: pvPending, error: pvError } = await useAsyncDa
   }
 );
 
-// 累計PVグラフデータ整形
+// デイリーPVグラフデータ整形
 const cumulativePvChartData = computed(() => {
   if (!rawPvData.value || rawPvData.value.labels.length === 0) {
     return null;
   }
+
   return {
     labels: rawPvData.value.labels,
     datasets: [
       {
-        label: '累計PV',
+        label: 'デイリーPV',
         backgroundColor: '#1a73e8',
         borderColor: '#1a73e8',
         data: rawPvData.value.data,

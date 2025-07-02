@@ -1,83 +1,82 @@
 // server/api/analytics/pv.ts
-import { BetaAnalyticsDataClient } from '@google-analytics/data';
+import { defineEventHandler, createError } from 'h3';
+import { ofetch } from 'ofetch';
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
-  const { propertyId } = getQuery(event);
 
-  if (!propertyId || !config.gaPrivateKeyId || !config.gaPrivateKey || !config.gaClientEmail) {
-    console.error('GA4 Property ID and/or service account credentials are not provided for Analytics API.');
+  const VERCEL_API_TOKEN = process.env.VERCEL_API_TOKEN;
+  const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
+  const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID; // Optional, if using a team
+
+  if (!VERCEL_API_TOKEN || !VERCEL_PROJECT_ID) {
+    console.error('Vercel API Token or Project ID is not provided.');
     throw createError({
       statusCode: 500,
-      statusMessage: 'Server configuration error: Analytics credentials missing.',
+      statusMessage: 'Server configuration error: Vercel credentials missing.',
     });
   }
 
-  const analyticsDataClient = new BetaAnalyticsDataClient({
-    credentials: {
-      client_email: config.gaClientEmail,
-      private_key: config.gaPrivateKey.replace(/\\n/g, '\n'),
-      private_key_id: config.gaPrivateKeyId,
-    },
-  });
+  // 過去90日間のデータを取得 (無料枠のデータ保持期間に合わせて調整)
+  const now = new Date();
+  const ninetyDaysAgo = new Date(now.setDate(now.getDate() - 90)); // 90日間に変更
+  const start = ninetyDaysAgo.toISOString();
+  const end = new Date().toISOString();
 
-  const today = new Date();
-  const startDate = '2025-06-25';
-  const endDate = today.toISOString().split('T')[0]; // 今日の日付
+  // metrics エンドポイントを使用し、granularity=day で日ごとのデータを取得
+  const baseUrl = `https://api.vercel.com/v6/analytics/metrics?projectId=${VERCEL_PROJECT_ID}`;
+  const teamIdParam = VERCEL_TEAM_ID ? `&teamId=${VERCEL_TEAM_ID}` : '';
+  const queryParams = `&start=${start}&end=${end}&metrics=pageviews&granularity=day`; // granularity=day を追加
+  const url = `${baseUrl}${teamIdParam}${queryParams}`;
 
   try {
-    const [response] = await analyticsDataClient.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [{ startDate: startDate, endDate: endDate }],
-      dimensions: [{ name: 'date' }],
-      metrics: [{ name: 'screenPageViews' }],
+    const response = await ofetch(url, {
+      headers: {
+        Authorization: `Bearer ${VERCEL_API_TOKEN}`,
+      },
     });
 
-    const monthlyDataMap = new Map();
+    if (response.status && response.status >= 400) {
+      console.error('Vercel Analytics API Error:', response.status, response.statusText, response.data);
+      throw createError({
+        statusCode: response.status,
+        statusMessage: `Vercel Analytics API returned an error: ${response.statusText || 'Unknown Error'}`,
+        data: response.data,
+      });
+    }
 
-    response.rows?.forEach(row => {
-      const dateStr = row.dimensionValues?.[0]?.value;
-      const pv = parseInt(row.metricValues?.[0]?.value || '0', 10);
+    // API レスポンスから日ごとの PV データを抽出
+    const dailyData = response.metrics.pageviews.map((item: any) => ({
+      date: item.timestamp,
+      value: item.value,
+    }));
 
-      if (!dateStr) {
-          // 日付データがない場合はスキップ
-          console.warn('Skipping row due to missing date dimension:', row);
-          return;
-      }
+    interface DailyPageview {
+      date: string;
+      value: number;
+    }
 
-      const year = dateStr.substring(0, 4);
-      const month = parseInt(dateStr.substring(4, 6), 10);
-      const monthKey = `${year}年${month}月`;
-
-      // 月ごとの累計PVを更新
-      const currentMonthCumulative = (monthlyDataMap.get(monthKey) || 0) + pv;
-      monthlyDataMap.set(monthKey, currentMonthCumulative);
+    const labels = dailyData.map((item: DailyPageview) => {
+      const date = new Date(item.date);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
     });
+    interface DailyData {
+      date: string;
+      value: number;
+    }
 
-    const labels = Array.from(monthlyDataMap.keys()).sort((a, b) => {
-    const parseDate = (dateStr: string): Date => {
-      const parts: string[] = dateStr.replace('年', '-').replace('月', '').split('-');
-      return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1);
-    };
-      return parseDate(a).getTime() - parseDate(b).getTime();
-    });
-
-    const data = labels.map(label => monthlyDataMap.get(label));
+    const data: number[] = dailyData.map((item: DailyData) => item.value);
 
     return {
       labels: labels,
       data: data,
     };
 
-  } catch (err) {
-    console.error('Error fetching GA4 PV data:', err);
-    let errorMessage = 'Unknown error';
-    if (err instanceof Error) {
-      errorMessage = err.message;
-    }
+  } catch (err: any) {
+    console.error('Error fetching Vercel Analytics data:', err.message || err);
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to fetch GA4 PV data: ${errorMessage}`,
+      statusMessage: `Failed to fetch Vercel Analytics data: ${err.message || 'unknown_error'}`,
     });
   }
 });

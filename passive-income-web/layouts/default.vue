@@ -95,33 +95,6 @@ const breadcrumbs = computed(() => {
   }
   return crumbs;
 });
-
-// Google Analytics (GA4) のタグ設定
-// 環境変数からGA4測定IDを読み込む
-const gaMeasurementId = config.public.gaMeasurementId;
-
-// 測定IDが設定されている場合のみGAタグを埋め込む
-if (process.client && gaMeasurementId) {
-  useHead({
-    script: [
-      {
-        hid: 'gtag', // Vue Server Rendererで重複を避けるためのユニークなID
-        src: `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`, // 環境変数を使用
-        async: true,
-        defer: true,
-      },
-    ],
-  });
-
-  // gtagのconfigをクライアントサイドで動的に呼び出す
-  onMounted(() => {
-    if (typeof window.gtag === 'function') {
-      window.gtag('config', gaMeasurementId);
-    }
-  });
-} else if (!process.client && !gaMeasurementId) {
-  console.warn('Google Analytics Measurement ID (NUXT_PUBLIC_GA_MEASUREMENT_ID) is not set in environment variables. GA tracking will be disabled.');
-}
 </script>
 
 <style>
