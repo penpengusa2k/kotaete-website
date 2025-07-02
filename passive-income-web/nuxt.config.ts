@@ -13,12 +13,6 @@ export default defineNuxtConfig({
       link: [
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap' },
-      ],
-      meta: [
-        {
-          'http-equiv': 'Content-Security-Policy',
-          content: "default-src 'self'; script-src 'self' www.googletagmanager.com www.google-analytics.com 'unsafe-inline'; connect-src 'self' www.google-analytics.com *.google-analytics.com *.analytics.google.com *.g.doubleclick.net; img-src 'self' data:; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com;"
-        }
       ]
     }
   },
