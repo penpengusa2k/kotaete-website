@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { computed, watch, ref } from 'vue';
+import { computed, watch, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -93,7 +93,6 @@ const breadcrumbs = computed(() => {
       crumbs.push({ name: `検索結果: "${route.query.search}"`, path: route.fullPath, isLink: false });
     }
   }
-
   return crumbs;
 });
 
@@ -102,7 +101,7 @@ const breadcrumbs = computed(() => {
 const gaMeasurementId = config.public.gaMeasurementId;
 
 // 測定IDが設定されている場合のみGAタグを埋め込む
-if (gaMeasurementId) {
+if (process.client && gaMeasurementId) {
   useHead({
     script: [
       {
@@ -111,20 +110,16 @@ if (gaMeasurementId) {
         async: true,
         defer: true,
       },
-      {
-        hid: 'gtag-config',
-        children: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${gaMeasurementId}'); // 環境変数を使用
-        `,
-        type: 'text/javascript',
-        charset: 'UTF-8',
-      },
     ],
   });
-} else {
+
+  // gtagのconfigをクライアントサイドで動的に呼び出す
+  onMounted(() => {
+    if (typeof window.gtag === 'function') {
+      window.gtag('config', gaMeasurementId);
+    }
+  });
+} else if (!process.client && !gaMeasurementId) {
   console.warn('Google Analytics Measurement ID (NUXT_PUBLIC_GA_MEASUREMENT_ID) is not set in environment variables. GA tracking will be disabled.');
 }
 </script>
