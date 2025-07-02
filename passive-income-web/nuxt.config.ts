@@ -7,7 +7,9 @@ export default defineNuxtConfig({
   css: [
     '~/assets/css/main.css',
   ],
-  modules: [],
+  modules: [
+    '@vercel/analytics/nuxt'
+  ],
   app: {
     head: {
       link: [
