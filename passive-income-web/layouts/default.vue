@@ -26,12 +26,14 @@
     </main>
 
     <AppFooter />
+    <Analytics />
   </div>
 </template>
 
 <script setup>
-import { computed, watch, ref, onMounted } from 'vue';
+import { computed, watch, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { Analytics } from '@vercel/analytics/nuxt'
 
 const route = useRoute();
 const articleDataForBreadcrumb = ref(null);
