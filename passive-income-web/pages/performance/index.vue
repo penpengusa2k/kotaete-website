@@ -25,17 +25,8 @@
 
     <section class="py-6 mb-12">
       <h2 class="text-3xl font-bold text-center text-neutral-darkest dark:text-neutral-lightest mb-8">サイトPV推移</h2>
-      <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-4 md:p-6 h-96">
-        <LineChart
-          v-if="!pvPending && !pvError && cumulativePvChartData && cumulativePvChartData.datasets && cumulativePvChartData.datasets.length > 0"
-          :data="cumulativePvChartData"
-          :options="chartOptions"
-        />
-        <div v-else class="flex items-center justify-center h-full text-neutral-dark dark:text-neutral-light">
-          <p v-if="pvPending">PVデータを読み込み中...</p>
-          <p v-else-if="pvError">PVデータの取得に失敗しました。<br>{{ pvError.message }}</p>
-          <p v-else>データがありません。</p>
-        </div>
+      <div class="bg-white dark:bg-neutral-dark rounded-lg shadow-md p-4 md:p-6 h-96 flex items-center justify-center">
+        <p class="text-neutral-dark dark:text-neutral-light">今後実装予定です。</p>
       </div>
     </section>
 
@@ -84,37 +75,7 @@ ChartJS.register(
 );
 
 const config = useRuntimeConfig();
-const { data: rawPvData, pending: pvPending, error: pvError } = await useAsyncData(
-  'cumulative-pv-data',
-  async () => {
-    return await $fetch('/api/analytics/pv');
-  },
-  {
-    server: true,
-    lazy: false,
-  }
-);
 
-// デイリーPVグラフデータ整形
-const cumulativePvChartData = computed(() => {
-  if (!rawPvData.value || rawPvData.value.labels.length === 0) {
-    return null;
-  }
-
-  return {
-    labels: rawPvData.value.labels,
-    datasets: [
-      {
-        label: 'デイリーPV',
-        backgroundColor: '#1a73e8',
-        borderColor: '#1a73e8',
-        data: rawPvData.value.data,
-        tension: 0.3,
-        fill: false,
-      },
-    ],
-  };
-});
 
 // 累計収益推移のダミーデータ (手動更新)
 const cumulativeRevenueChartData = {
