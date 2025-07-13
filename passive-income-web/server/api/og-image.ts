@@ -1,13 +1,24 @@
 import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import { html } from 'satori-html';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 
-// フォントデータを一度だけ読み込む
-const fontBuffer = readFileSync(resolve('./server/assets/NotoSansJP-Bold.woff2'));
+// ストレージからフォントを読み込む
+// パフォーマンスのため、一度読み込んだデータはキャッシュする
+let fontBuffer: ArrayBuffer | null = null;
+
+async function getFontData() {
+  if (!fontBuffer) {
+    const fontAsset = await useStorage('assets:server').getItem('NotoSansJP-Bold.woff2', { encoding: 'binary' });
+    if (!fontAsset) {
+      throw new Error('Font not found');
+    }
+    fontBuffer = fontAsset as ArrayBuffer;
+  }
+  return fontBuffer;
+}
 
 export default defineEventHandler(async (event) => {
+  const fontData = await getFontData();
 
   const { name1, name2, love, friendship, work } = getQuery(event);
 
@@ -42,7 +53,7 @@ export default defineEventHandler(async (event) => {
     fonts: [
       {
         name: 'Noto Sans JP',
-        data: fontBuffer,
+        data: fontData,
         weight: 700,
         style: 'normal',
       },
