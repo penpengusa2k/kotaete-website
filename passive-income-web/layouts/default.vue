@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col min-h-screen font-sans bg-neutral-lightest dark:bg-neutral-darkest text-neutral-darkest dark:text-neutral-lightest">
-    <AppHeader />
+    <component :is="isAppPage ? AppHeaderForApp : AppHeader" :app="appDataForHeader" />
 
     <nav class="container mx-auto px-4 py-3 text-sm text-neutral-darkest dark:text-neutral-light" aria-label="breadcrumb">
       <ol class="list-none p-0 inline-flex flex-wrap items-center">
@@ -34,9 +34,33 @@
 import { computed, watch, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { Analytics } from '@vercel/analytics/nuxt'
+import AppHeader from '~/components/AppHeader.vue';
+import AppHeaderForApp from '~/components/AppHeaderForApp.vue';
 
 const route = useRoute();
 const config = useRuntimeConfig();
+
+const appDataForHeader = ref(null);
+
+const isAppPage = computed(() => route.path.startsWith('/apps/') && route.params.slug);
+
+watch(() => route.params.slug, async (newSlug) => {
+  if (isAppPage.value && newSlug) {
+    try {
+      const response = await fetch(`/api/apps/${newSlug}`);
+      if (response.ok) {
+        appDataForHeader.value = await response.json();
+      } else {
+        appDataForHeader.value = null;
+      }
+    } catch (e) {
+      console.error('Failed to fetch app data for header:', e);
+      appDataForHeader.value = null;
+    }
+  } else {
+    appDataForHeader.value = null;
+  }
+}, { immediate: true });
 
 const { data: articleDataForBreadcrumb } = await useAsyncData(
   () => `article-breadcrumb-${route.params.slug}`,

@@ -1,17 +1,17 @@
 <template>
   <header class="bg-white dark:bg-neutral-darkest text-neutral-darkest dark:text-neutral-lightest shadow-sm py-3 relative z-20">
     <div class="container mx-auto flex justify-between items-center px-4">
-      <NuxtLink to="/" class="flex items-center text-xl md:text-2xl font-bold tracking-tight text-neutral-darkest dark:text-neutral-lightest hover:text-primary transition-colors duration-200">
-        <span class="material-icons-outlined text-primary text-3xl md:text-4xl mr-2">
+      <NuxtLink to="/" class="flex items-center text-xl lg:text-2xl font-bold tracking-tight text-neutral-darkest dark:text-neutral-lightest hover:text-primary transition-colors duration-200">
+        <span class="material-icons-outlined text-primary text-3xl lg:text-4xl mr-2">
           auto_graph
         </span>
         不労所得への道
       </NuxtLink>
 
-      <nav class="hidden md:block">
+      <nav class="hidden lg:block">
         <ul class="flex items-center space-x-2">
           <li v-for="link in navLinks" :key="link.to">
-            <NuxtLink :to="link.to" class="relative py-2 px-4 group text-neutral-darkest dark:text-neutral-light hover:text-primary transition-colors duration-200 text-sm md:text-base font-medium">
+            <NuxtLink :to="link.to" class="relative py-2 px-4 group text-neutral-darkest dark:text-neutral-light hover:text-primary transition-colors duration-200 text-sm lg:text-base font-medium">
               {{ link.text }}
               <span :class="['absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center', { 'scale-x-100': $route.path === link.to }]"></span>
             </NuxtLink>
@@ -25,7 +25,7 @@
         </ul>
       </nav>
 
-      <div class="md:hidden flex items-center">
+      <div class="lg:hidden flex items-center">
         <button @click="toggleDarkMode" class="p-2 rounded-md hover:bg-neutral-light dark:hover:bg-neutral-dark transition-colors duration-200 mr-2 flex items-center justify-center">
           <span v-if="isDarkMode" class="material-icons-outlined text-purple-400 text-2xl">dark_mode</span>
           <span v-else class="material-icons-outlined text-yellow-500 text-2xl">light_mode</span>
@@ -47,7 +47,7 @@
       leave-from-class="translate-y-0 opacity-100"
       leave-to-class="-translate-y-full opacity-0"
     >
-      <div v-if="isMenuOpen" class="md:hidden bg-white dark:bg-neutral-darkest shadow-lg absolute top-full left-0 w-full z-10">
+      <div v-if="isMenuOpen" class="lg:hidden bg-white dark:bg-neutral-darkest shadow-lg absolute top-full left-0 w-full z-10">
         <nav class="px-4 py-3">
           <ul class="space-y-2">
             <li v-for="link in navLinks" :key="link.to">
@@ -88,6 +88,7 @@ const toggleDarkMode = () => {
 
 const navLinks = [
   { to: '/articles', text: '記事' },
+  { to: '/apps', text: 'アプリ' },
   { to: '/performance', text: '実績' },
   { to: '/about', text: 'サイトについて' },
   { to: '/contact', text: 'お問い合わせ' },
