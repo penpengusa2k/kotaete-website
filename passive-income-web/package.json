@@ -29,6 +29,7 @@
     "nuxt": "^3.17.5",
     "satori": "^0.15.2",
     "satori-html": "^0.3.2",
+    "vue-chartjs": "^5.3.2",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
