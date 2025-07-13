@@ -135,7 +135,7 @@ onMounted(() => {
     results.value.love = {
       title: route.query.love_title as string,
       compatibility: parseInt(route.query.love_comp as string, 10),
-      description: route.query.love_desc as string,
+      description: ' ', // 説明は復元しない
       category: 'love',
     };
   }
@@ -143,7 +143,7 @@ onMounted(() => {
     results.value.friendship = {
       title: route.query.friend_title as string,
       compatibility: parseInt(route.query.friend_comp as string, 10),
-      description: route.query.friend_desc as string,
+      description: ' ', // 説明は復元しない
       category: 'friendship',
     };
   }
@@ -151,7 +151,7 @@ onMounted(() => {
     results.value.work = {
       title: route.query.work_title as string,
       compatibility: parseInt(route.query.work_comp as string, 10),
-      description: route.query.work_desc as string,
+      description: ' ', // 説明は復元しない
       category: 'work',
     };
   }
@@ -176,19 +176,16 @@ const diagnoseRelationship = async () => {
       params.set('love', `${response.love.title}（${response.love.compatibility}%）`);
       params.set('love_title', response.love.title);
       params.set('love_comp', response.love.compatibility.toString());
-      params.set('love_desc', response.love.description);
     }
     if (response.friendship) {
       params.set('friendship', `${response.friendship.title}（${response.friendship.compatibility}%）`);
       params.set('friend_title', response.friendship.title);
       params.set('friend_comp', response.friendship.compatibility.toString());
-      params.set('friend_desc', response.friendship.description);
     }
     if (response.work) {
       params.set('work', `${response.work.title}（${response.work.compatibility}%）`);
       params.set('work_title', response.work.title);
       params.set('work_comp', response.work.compatibility.toString());
-      params.set('work_desc', response.work.description);
     }
 
     if (process.client) {
