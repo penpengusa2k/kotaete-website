@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   css: [
     '~/assets/css/main.css',
   ],
-  modules: [],
+  modules: ['nuxt-og-image'],
   app: {
     head: {
       link: [

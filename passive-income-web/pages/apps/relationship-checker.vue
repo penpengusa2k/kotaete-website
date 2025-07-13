@@ -153,60 +153,25 @@ const averageCompatibility = computed(() => {
 const twitterShareUrl = computed(() => {
   const shareText = `【地獄の関係相性チェッカー】\n${name1.value} と ${name2.value} の関係は...${averageCompatibility.value !== null ? `総合相性度: ${averageCompatibility.value}%でした！` : ''}\n\n${results.value.love ? `💘恋愛: ${results.value.love.title} (${results.value.love.compatibility}%)\n` : ''}${results.value.friendship ? `👯友情: ${results.value.friendship.title} (${results.value.friendship.compatibility}%)\n` : ''}${results.value.work ? `💼仕事: ${results.value.work.title} (${results.value.work.compatibility}%)` : ''}\n#地獄の相性診断`;
 
-  const text = encodeURIComponent(shareText);
-  const url = encodeURIComponent(ogImageUrl.value);
-  return `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+  const url = window.location.href;
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
 });
 
-const ogImageUrl = computed(() => {
-  if (!results.value.love && !results.value.friendship && !results.value.work) {
-    return ''; // 診断結果がない場合はOGP画像を生成しない
-  }
-
-  const params = new URLSearchParams();
-  params.append('name1', name1.value);
-  params.append('name2', name2.value);
-  if (results.value.love) {
-    params.append('love', `${results.value.love.title}（${results.value.love.compatibility}%）`);
-  }
-  if (results.value.friendship) {
-    params.append('friendship', `${results.value.friendship.title}（${results.value.friendship.compatibility}%）`);
-  }
-  if (results.value.work) {
-    params.append('work', `${results.value.work.title}（${results.value.work.compatibility}%）`);
-  }
-
-  // Vercelにデプロイした場合のドメインを考慮
-  const baseURL = process.env.NODE_ENV === 'production' ? window.location.origin : 'http://localhost:3000';
-  return `${baseURL}/api/og-image?${params.toString()}`;
+defineOgImage({
+  component: 'OgImageRelationship',
+  props: {
+    name1: name1.value,
+    name2: name2.value,
+    love: results.value.love ? `${results.value.love.title}（${results.value.love.compatibility}%）` : '診断なし',
+    friendship: results.value.friendship ? `${results.value.friendship.title}（${results.value.friendship.compatibility}%）` : '診断なし',
+    work: results.value.work ? `${results.value.work.title}（${results.value.work.compatibility}%）` : '診断なし',
+  },
 });
-
-// 画像として保存する関数
-const saveAsImage = async () => {
-  const element = document.getElementById('diagnosis-results');
-  if (element) {
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2, // 高解像度でキャプチャ
-        useCORS: true, // 外部リソースを使用する場合に必要
-        y: -5, // Y座標を調整して文字のずれを補正
-      });
-      const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/png');
-      link.download = `relationship-diagnosis-${name1.value}-${name2.value}.png`;
-      link.click();
-    } catch (err) {
-      console.error('画像の保存中にエラーが発生しました:', err);
-      error.value = '画像の保存に失敗しました。';
-    }
-  }
-};
 
 useHead({
   title: 'なんちゃって関係診断',
   meta: [
     { name: 'description', content: '二人の名前から関係性を診断する、AIも心理学も使わないなんちゃって診断アプリです。' },
-    { property: 'og:image', content: ogImageUrl.value }
   ]
 });
 </script>
