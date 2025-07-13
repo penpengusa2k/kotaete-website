@@ -160,7 +160,6 @@ onMounted(() => {
 const diagnoseRelationship = async () => {
   loading.value = true;
   error.value = null;
-  // results.value = { love: null, friendship: null, work: null }; // 診断開始時にリセットしない
 
   try {
     const response = await $fetch<DiagnosisResults>('/api/relationship-checker', {
@@ -169,28 +168,29 @@ const diagnoseRelationship = async () => {
     });
     results.value = response;
 
-    // 診断結果をURLに反映
+    // OGP画像とページ表示に必要なクエリパラメータを生成
     const params = new URLSearchParams();
     params.set('name1', name1.value);
     params.set('name2', name2.value);
     if (response.love) {
+      params.set('love', `${response.love.title}（${response.love.compatibility}%）`);
       params.set('love_title', response.love.title);
       params.set('love_comp', response.love.compatibility.toString());
       params.set('love_desc', response.love.description);
-      params.set('love', `${response.love.title}（${response.love.compatibility}%）`);
     }
     if (response.friendship) {
+      params.set('friendship', `${response.friendship.title}（${response.friendship.compatibility}%）`);
       params.set('friend_title', response.friendship.title);
       params.set('friend_comp', response.friendship.compatibility.toString());
       params.set('friend_desc', response.friendship.description);
-      params.set('friendship', `${response.friendship.title}（${response.friendship.compatibility}%）`);
     }
     if (response.work) {
+      params.set('work', `${response.work.title}（${response.work.compatibility}%）`);
       params.set('work_title', response.work.title);
       params.set('work_comp', response.work.compatibility.toString());
       params.set('work_desc', response.work.description);
-      params.set('work', `${response.work.title}（${response.work.compatibility}%）`);
     }
+
     if (process.client) {
       window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
     }
