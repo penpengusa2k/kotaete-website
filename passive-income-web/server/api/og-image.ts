@@ -1,27 +1,13 @@
 import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import { html } from 'satori-html';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
-// Google Fontsから日本語フォントを読み込む
-async function getFontData() {
-  const API = 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&text=';
-  const text = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%.,!?'
-  const css = await (await fetch(API + encodeURIComponent(text))).text();
-  const fontUrl = css.match(/src: url\((.+)\) format\('woff2'\)/)?.[1];
-
-  if (!fontUrl) {
-    throw new Error('Font URL not found');
-  }
-
-  return await fetch(fontUrl).then((res) => res.arrayBuffer());
-}
-
-let fontBuffer: ArrayBuffer | null = null;
+// フォントデータを一度だけ読み込む
+const fontBuffer = readFileSync(resolve('./server/assets/NotoSansJP-Bold.woff2'));
 
 export default defineEventHandler(async (event) => {
-  if (!fontBuffer) {
-    fontBuffer = await getFontData();
-  }
 
   const { name1, name2, love, friendship, work } = getQuery(event);
 
