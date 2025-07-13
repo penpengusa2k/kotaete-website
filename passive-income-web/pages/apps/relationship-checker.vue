@@ -191,7 +191,9 @@ const diagnoseRelationship = async () => {
       params.set('work_desc', response.work.description);
       params.set('work', `${response.work.title}（${response.work.compatibility}%）`);
     }
-    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    if (process.client) {
+      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }
 
   } catch (e: any) {
     error.value = e.data?.statusMessage || '診断中にエラーが発生しました。';
@@ -221,8 +223,12 @@ const averageCompatibility = computed(() => {
 const twitterShareUrl = computed(() => {
   const shareText = `【地獄の関係相性チェッカー】\n${name1.value} と ${name2.value} の関係は...${averageCompatibility.value !== null ? `総合相性度: ${averageCompatibility.value}%でした！` : ''}\n\n${results.value.love ? `💘恋愛: ${results.value.love.title} (${results.value.love.compatibility}%)\n` : ''}${results.value.friendship ? `👯友情: ${results.value.friendship.title} (${results.value.friendship.compatibility}%)\n` : ''}${results.value.work ? `💼仕事: ${results.value.work.title} (${results.value.work.compatibility}%)` : ''}\n#地獄の相性診断`;
 
-  const url = window.location.href; // 現在のURL（クエリパラメータ付き）をそのまま使う
-  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
+  if (process.client) {
+    const url = window.location.href; // 現在のURL（クエリパラメータ付き）をそのまま使う
+    return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
+  }
+  // SSR時にはダミーのURLを返す
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
 });
 
 // 画像として保存する関数
