@@ -88,8 +88,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import html2canvas from 'html2canvas';
+
+// OGP画像を定義
+const route = useRoute();
+defineOgImage({
+  component: 'OgImageRelationship',
+  props: {
+    name1: route.query.name1 as string || '診断前',
+    name2: route.query.name2 as string || '診断前',
+    love: route.query.love as string || '診断前',
+    friendship: route.query.friendship as string || '診断前',
+    work: route.query.work as string || '診断前',
+  },
+});
 
 interface RelationshipResult {
   title: string;
@@ -114,10 +127,40 @@ const results = ref<DiagnosisResults>({
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+// ページ読み込み時にURLクエリから状態を復元
+onMounted(() => {
+  if (route.query.name1) name1.value = route.query.name1 as string;
+  if (route.query.name2) name2.value = route.query.name2 as string;
+  if (route.query.love_title) {
+    results.value.love = {
+      title: route.query.love_title as string,
+      compatibility: parseInt(route.query.love_comp as string, 10),
+      description: route.query.love_desc as string,
+      category: 'love',
+    };
+  }
+  if (route.query.friend_title) {
+    results.value.friendship = {
+      title: route.query.friend_title as string,
+      compatibility: parseInt(route.query.friend_comp as string, 10),
+      description: route.query.friend_desc as string,
+      category: 'friendship',
+    };
+  }
+  if (route.query.work_title) {
+    results.value.work = {
+      title: route.query.work_title as string,
+      compatibility: parseInt(route.query.work_comp as string, 10),
+      description: route.query.work_desc as string,
+      category: 'work',
+    };
+  }
+});
+
 const diagnoseRelationship = async () => {
   loading.value = true;
   error.value = null;
-  results.value = { love: null, friendship: null, work: null };
+  // results.value = { love: null, friendship: null, work: null }; // 診断開始時にリセットしない
 
   try {
     const response = await $fetch<DiagnosisResults>('/api/relationship-checker', {
@@ -125,6 +168,31 @@ const diagnoseRelationship = async () => {
       body: { name1: name1.value, name2: name2.value },
     });
     results.value = response;
+
+    // 診断結果をURLに反映
+    const params = new URLSearchParams();
+    params.set('name1', name1.value);
+    params.set('name2', name2.value);
+    if (response.love) {
+      params.set('love_title', response.love.title);
+      params.set('love_comp', response.love.compatibility.toString());
+      params.set('love_desc', response.love.description);
+      params.set('love', `${response.love.title}（${response.love.compatibility}%）`);
+    }
+    if (response.friendship) {
+      params.set('friend_title', response.friendship.title);
+      params.set('friend_comp', response.friendship.compatibility.toString());
+      params.set('friend_desc', response.friendship.description);
+      params.set('friendship', `${response.friendship.title}（${response.friendship.compatibility}%）`);
+    }
+    if (response.work) {
+      params.set('work_title', response.work.title);
+      params.set('work_comp', response.work.compatibility.toString());
+      params.set('work_desc', response.work.description);
+      params.set('work', `${response.work.title}（${response.work.compatibility}%）`);
+    }
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+
   } catch (e: any) {
     error.value = e.data?.statusMessage || '診断中にエラーが発生しました。';
   } finally {
@@ -153,20 +221,30 @@ const averageCompatibility = computed(() => {
 const twitterShareUrl = computed(() => {
   const shareText = `【地獄の関係相性チェッカー】\n${name1.value} と ${name2.value} の関係は...${averageCompatibility.value !== null ? `総合相性度: ${averageCompatibility.value}%でした！` : ''}\n\n${results.value.love ? `💘恋愛: ${results.value.love.title} (${results.value.love.compatibility}%)\n` : ''}${results.value.friendship ? `👯友情: ${results.value.friendship.title} (${results.value.friendship.compatibility}%)\n` : ''}${results.value.work ? `💼仕事: ${results.value.work.title} (${results.value.work.compatibility}%)` : ''}\n#地獄の相性診断`;
 
-  const url = window.location.href;
+  const url = window.location.href; // 現在のURL（クエリパラメータ付き）をそのまま使う
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
 });
 
-defineOgImage({
-  component: 'OgImageRelationship',
-  props: {
-    name1: name1.value,
-    name2: name2.value,
-    love: results.value.love ? `${results.value.love.title}（${results.value.love.compatibility}%）` : '診断なし',
-    friendship: results.value.friendship ? `${results.value.friendship.title}（${results.value.friendship.compatibility}%）` : '診断なし',
-    work: results.value.work ? `${results.value.work.title}（${results.value.work.compatibility}%）` : '診断なし',
-  },
-});
+// 画像として保存する関数
+const saveAsImage = async () => {
+  const element = document.getElementById('diagnosis-results');
+  if (element) {
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2, // 高解像度でキャプチャ
+        useCORS: true, // 外部リソースを使用する場合に必要
+        y: -5, // Y座標を調整して文字のずれを補正
+      });
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = `relationship-diagnosis-${name1.value}-${name2.value}.png`;
+      link.click();
+    } catch (err) {
+      console.error('画像の保存中にエラーが発生しました:', err);
+      error.value = '画像の保存に失敗しました。';
+    }
+  }
+};
 
 useHead({
   title: 'なんちゃって関係診断',

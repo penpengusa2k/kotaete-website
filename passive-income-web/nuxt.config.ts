@@ -7,7 +7,15 @@ export default defineNuxtConfig({
   css: [
     '~/assets/css/main.css',
   ],
-  modules: ['nuxt-og-image'],
+  ogImage: {
+    fonts: [
+      {
+        name: 'Noto Sans JP',
+        weight: 700,
+        path: '/fonts/NotoSansJP-Bold.woff2',
+      }
+    ]
+  },
   app: {
     head: {
       link: [

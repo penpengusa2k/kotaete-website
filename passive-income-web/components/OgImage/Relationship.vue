@@ -24,16 +24,6 @@
 </template>
 
 <script setup>
-// Noto Sans JPフォントを読み込む
-useHead({
-  link: [
-    {
-      rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap',
-    },
-  ],
-})
-
 defineProps({
   name1: String,
   name2: String,
