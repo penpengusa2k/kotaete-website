@@ -1,5 +1,5 @@
 import { ImageResponse } from '@vercel/og';
-import { getPairId, generateResultFromId } from '~/utils/resultGenerator.ts';
+import { getPairId, generateResultFromId } from '~/utils/resultGenerator';
 
 export default defineEventHandler(async (event) => {
   const { name1, name2 } = getQuery(event);

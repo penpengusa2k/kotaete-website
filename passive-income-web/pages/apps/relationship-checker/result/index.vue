@@ -114,6 +114,15 @@ defineOgImage({
   },
 });
 
+useHead({
+  meta: [
+    {
+      property: 'og:image',
+      content: `https://furoshotoku.net/api/og-image?name1=${encodeURIComponent(name1.value)}&name2=${encodeURIComponent(name2.value)}`,
+    }
+  ]
+});
+
 // X共有URL
 const twitterShareUrl = computed(() => {
   const shareText = `【地獄の関係相性チェッカー】\n${name1.value} と ${name2.value} の関係は...${averageCompatibility.value !== null ? `総合相性度: ${averageCompatibility.value}%でした！` : ''}\n\n${results.value?.love ? `💘恋愛: ${results.value.love.title} (${results.value.love.compatibility}%)\n` : ''}${results.value?.friendship ? `👯友情: ${results.value.friendship.title} (${results.value.friendship.compatibility}%)\n` : ''}${results.value?.work ? `💼仕事: ${results.value.work.title} (${results.value.work.compatibility}%)` : ''}\n#地獄の相性診断`;
