@@ -142,10 +142,12 @@ const diagnoseRelationship = async () => {
   error.value = null;
 
   try {
+    console.log('Attempting API call...');
     const response = await $fetch<DiagnosisResults>('/api/relationship-checker', {
       method: 'POST',
       body: { name1: name1.value, name2: name2.value },
     });
+    console.log('API call successful, navigating...');
     results.value = response;
 
     // OGP画像に必要な最小限のクエリパラメータを生成
@@ -156,25 +158,10 @@ const diagnoseRelationship = async () => {
       params.set('comp', averageCompatibility.value.toString());
     }
 
-    if (process.client) {
-      // ページ表示のために、診断結果をURLに追加（ただしOGPには影響しない）
-      const displayParams = new URLSearchParams(params.toString());
-      if (response.love) {
-        displayParams.set('love_title', response.love.title);
-        displayParams.set('love_comp', response.love.compatibility.toString());
-      }
-      if (response.friendship) {
-        displayParams.set('friend_title', response.friendship.title);
-        displayParams.set('friend_comp', response.friendship.compatibility.toString());
-      }
-      if (response.work) {
-        displayParams.set('work_title', response.work.title);
-        displayParams.set('work_comp', response.work.compatibility.toString());
-      }
-      window.history.replaceState({}, '', `${window.location.pathname}?${displayParams.toString()}`);
-    }
+    navigateTo(`/apps/relationship-checker/result?name1=${encodeURIComponent(name1.value)}&name2=${encodeURIComponent(name2.value)}`);
 
   } catch (e: any) {
+    console.error('API call failed:', e);
     error.value = e.data?.statusMessage || '診断中にエラーが発生しました。';
   } finally {
     loading.value = false;
@@ -202,12 +189,11 @@ const averageCompatibility = computed(() => {
 const twitterShareUrl = computed(() => {
   const shareText = `【地獄の関係相性チェッカー】\n${name1.value} と ${name2.value} の関係は...${averageCompatibility.value !== null ? `総合相性度: ${averageCompatibility.value}%でした！` : ''}\n\n${results.value.love ? `💘恋愛: ${results.value.love.title} (${results.value.love.compatibility}%)\n` : ''}${results.value.friendship ? `👯友情: ${results.value.friendship.title} (${results.value.friendship.compatibility}%)\n` : ''}${results.value.work ? `💼仕事: ${results.value.work.title} (${results.value.work.compatibility}%)` : ''}\n#地獄の相性診断`;
 
-  if (process.client) {
-    const url = window.location.href; // 現在のURL（クエリパラメータ付き）をそのまま使う
-    return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
-  }
-  // SSR時にはダミーのURLを返す
-  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+  // OGPに適した短いURLを生成
+  const baseUrl = process.client ? window.location.origin : 'https://furoshotoku.net'; // 本番環境のURLに合わせる
+  const shareUrl = `${baseUrl}/apps/relationship-checker/result?name1=${encodeURIComponent(name1.value)}&name2=${encodeURIComponent(name2.value)}`;
+
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 });
 
 // 画像として保存する関数
