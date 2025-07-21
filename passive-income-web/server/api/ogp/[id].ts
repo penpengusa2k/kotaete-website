@@ -2,6 +2,8 @@ import { defineEventHandler, getQuery, setHeader } from 'h3';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 // テキストをSVGとして生成するヘルパー関数
 interface GenerateSvgForTextOptions {
@@ -75,7 +77,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const basePath = process.cwd();
-  const ogpBaseImagePath = path.resolve(__dirname, '..' , '..' , 'public', 'ogp-base.jpg');
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = dirname(__filename)
+
+  const ogpBaseImagePath = join(__dirname, '../../../public/ogp-base.jpg');
   const fontPath = path.join(basePath, 'public', 'fonts', 'NotoSansJP-Bold.ttf'); // フォントファイルのパス
 
   try {
