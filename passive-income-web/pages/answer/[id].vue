@@ -265,13 +265,6 @@ const submitResponse = async () => {
 };
 
 const goToResults = async () => {
-  if (survey.value.result_restricted) {
-    const key = prompt('このKOTAETEの結果を確認するには閲覧キーを入力してください。');
-    if (key) {
-      navigateTo(`/result/${surveyId}?key=${key}`);
-    }
-  } else {
-    navigateTo(`/result/${surveyId}`);
-  }
+  navigateTo(`/result/${surveyId}`);
 };
 </script>
