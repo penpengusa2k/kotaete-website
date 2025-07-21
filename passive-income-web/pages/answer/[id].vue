@@ -46,6 +46,7 @@
               class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
               required 
               placeholder="あなたの名前を入力してください"
+              :disabled="loading"
             >
           </div>
 
@@ -56,12 +57,13 @@
             
             <div v-if="question.type === 'text'" class="mt-4">
               <input 
-                type="text" 
-                v-model="responses[index]" 
-                class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                required 
-                maxlength="500"
-              >
+              type="text" 
+              v-model="responses[index]" 
+              class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+              required 
+              maxlength="500"
+              :disabled="loading"
+            >
               <p class="text-right text-sm text-gray-500 mt-1">{{ responses[index]?.length || 0 }} / 500</p>
             </div>
 
@@ -75,6 +77,7 @@
                     v-model="responses[index]" 
                     class="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500 transition-colors duration-200" 
                     required
+                    :disabled="loading"
                   >
                   <span class="ml-3 text-base">{{ option.value }}</span>
                 </label>
@@ -85,11 +88,12 @@
                <div v-for="(option, oIndex) in question.options" :key="oIndex" class="flex items-center">
                   <label class="inline-flex items-center cursor-pointer text-gray-700">
                     <input 
-                      type="checkbox" 
-                      :value="option.value" 
-                      v-model="responses[index][oIndex]" 
-                      class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors duration-200"
-                    >
+                    type="checkbox" 
+                    :value="option.value" 
+                    v-model="responses[index][oIndex]" 
+                    class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors duration-200"
+                    :disabled="loading"
+                  >
                     <span class="ml-3 text-base">{{ option.value }}</span>
                   </label>
               </div>
@@ -129,6 +133,7 @@
             @keyup.enter="submitKey"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="閲覧キーを入力"
+            :disabled="loading"
           >
         </div>
         <p v-if="keyErrorMessage" class="text-red-500 text-sm mb-4">{{ keyErrorMessage }}</p>

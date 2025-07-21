@@ -11,7 +11,8 @@
 
       <div class="mb-4">
         <label for="creatorName" class="block text-gray-700 font-bold mb-2">作成者名 <span class="text-red-500">*</span></label>
-        <input type="text" id="creatorName" v-model="survey.creatorName" :class="[ 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', formSubmitted && !survey.creatorName.trim() ? 'border-red-500' : '' ]" required maxlength="50">
+        <input type="text" id="creatorName" v-model="survey.creatorName" :class="[ 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', formSubmitted && creatorNameError ? 'border-red-500' : '' ]" required maxlength="50" @blur="validateCreatorName">
+        <p v-if="formSubmitted && creatorNameError" class="text-red-500 text-xs italic mt-1">作成者名は必須です。</p>
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.creatorName.length }} / 50</p>
       </div>
 
@@ -187,6 +188,7 @@ const createdUrl = ref('');
 const resultUrl = ref('');
 const createdSurveyTitle = ref(''); // 作成されたKOTAETEのタイトルを保持
 const formSubmitted = ref(false);
+const creatorNameError = ref(false); // 作成者名のエラー状態
 
 // 作成完了後に表示する閲覧キーと制限設定
 const displayViewingKey = ref('');
@@ -210,6 +212,11 @@ const lineShareText = computed(() => {
   return `KOTAETE「${createdSurveyTitle.value}」にご協力ください！KOTAETEであなたの意見をサクッと送信！`;
 });
 
+const validateCreatorName = () => {
+  creatorNameError.value = !survey.value.creatorName.trim();
+  return !creatorNameError.value;
+};
+
 watch(() => survey.value.resultRestricted, (newVal) => {
   if (newVal === false) { // 制限なしに切り替わったら閲覧キーをクリア
     survey.value.viewingKey = '';
@@ -218,7 +225,7 @@ watch(() => survey.value.resultRestricted, (newVal) => {
 
 const isFormValid = computed(() => {
   if (!survey.value.title.trim()) return false;
-  if (!survey.value.creatorName.trim()) return false; // 作成者名を必須にする
+  if (creatorNameError.value) return false; // creatorNameErrorがtrueなら無効
   if (!survey.value.deadline) return false;
   if (survey.value.questions.length === 0) return false;
 
@@ -260,6 +267,18 @@ const removeOption = (question, optionIndex) => {
 };
 
 const createSurvey = async () => {
+  formSubmitted.value = true; // フォームが送信されたことをマーク
+
+  // 作成者名のバリデーションを先に実行
+  if (!validateCreatorName()) {
+    return; // バリデーションエラーがあれば処理を中断
+  }
+
+  if (!isFormValid.value) {
+    alert('入力項目に不備があります。必須項目を確認してください。');
+    return;
+  }
+
   const { v4: uuidv4 } = await import('uuid');
   loading.value = true;
   createdUrl.value = '';
@@ -299,6 +318,7 @@ const createSurvey = async () => {
       displayViewingKey.value = survey.value.viewingKey;
       displayIsRestricted.value = survey.value.resultRestricted;
 
+      // Reset form
       // Reset form
       survey.value = {
         title: '',
