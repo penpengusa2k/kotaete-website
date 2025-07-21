@@ -75,7 +75,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const basePath = process.cwd();
-  const ogpBaseImagePath = path.join(basePath, 'public', 'ogp-base.jpg');
+  const ogpBaseImagePath = path.resolve(__dirname, '..' , '..' , 'public', 'ogp-base.jpg');
   const fontPath = path.join(basePath, 'public', 'fonts', 'NotoSansJP-Bold.ttf'); // フォントファイルのパス
 
   try {
