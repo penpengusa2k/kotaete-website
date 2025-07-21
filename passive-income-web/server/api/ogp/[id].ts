@@ -4,13 +4,17 @@ import path from 'path';
 import fs from 'fs/promises';
 
 export default defineEventHandler(async (event) => {
-  const { id } = event.context.params;
+  const params = event.context.params as Record<string, string> | undefined;
+  const id = params?.id;
   const query = getQuery(event);
 
   // スプレッドシートからタイトルを取得するロジック（既存のgas-proxyを再利用）
   let title = 'KOTAETE'; // デフォルトタイトル
   try {
-    const surveyRes = await $fetch(`/api/gas-proxy?action=get&id=${id}`);
+    const surveyRes = await $fetch(`/api/gas-proxy?action=get&id=${id}`) as {
+      result: string;
+      data?: { title?: string };
+    };
     if (surveyRes.result === 'success' && surveyRes.data && surveyRes.data.title) {
       title = surveyRes.data.title;
     }
