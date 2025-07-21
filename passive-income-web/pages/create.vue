@@ -5,8 +5,8 @@
     <form @submit.prevent="createSurvey">
       <div class="mb-4">
         <label for="title" class="block text-gray-700 font-bold mb-2">KOTAETEタイトル <span class="text-red-500">*</span></label>
-        <input type="text" id="title" v-model="survey.title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required maxlength="500">
-        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.title.length }} / 500</p>
+        <input type="text" id="title" v-model="survey.title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required maxlength="50">
+        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.title.length }} / 50</p>
       </div>
 
       <div class="mb-4">
