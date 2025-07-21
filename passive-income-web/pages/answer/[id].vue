@@ -125,9 +125,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useHead, useRuntimeConfig } from '#app'
 
 const route = useRoute();
 const surveyId = route.params.id;
+const config = useRuntimeConfig(); // ここに移動
 
 const survey = ref(null);
 const responses = ref([]);
@@ -140,6 +142,29 @@ const respondentId = ref('');
 const hasSubmitted = ref(false);
 const username = ref('');
 const isExpired = ref(false);
+
+// OGPメタタグの設定
+useHead(() => {
+  const baseUrl = config.public.baseUrl;
+  const ogpImageUrl = `${baseUrl}/api/ogp/${surveyId}`;
+  const pageUrl = `${baseUrl}${route.fullPath}`;
+
+  return {
+    title: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE',
+    meta: [
+      { property: 'og:title', content: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE' },
+      { property: 'og:description', content: survey.value ? survey.value.description : 'KOTAETEは簡単にアンケートを作成・回答できるサービスです。' },
+      { property: 'og:url', content: pageUrl },
+      { property: 'og:image', content: ogpImageUrl },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:site_name', content: 'KOTAETE' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE' },
+      { name: 'twitter:description', content: survey.value ? survey.value.description : 'KOTAETEは簡単にアンケートを作成・回答できるサービスです。' },
+      { name: 'twitter:image', content: ogpImageUrl },
+    ],
+  };
+});
 
 const getOrCreateRespondentId = async () => {
   const { v4: uuidv4 } = await import('uuid');

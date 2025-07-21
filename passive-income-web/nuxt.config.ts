@@ -10,6 +10,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       gasApiUrl: process.env.NUXT_PUBLIC_GAS_API_URL || '',
+      baseUrl: process.env.NUXT_PUBLIC_BASE_URL || 'https://www.furoshotoku.net' // 本番環境のURLを設定
     }
   },
   app: {
