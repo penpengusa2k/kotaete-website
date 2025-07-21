@@ -145,7 +145,8 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRoute, useHead } from 'vue-router'
+import { useRoute } from 'vue-router'
+import { useHead } from '#app'
 
 const route = useRoute();
 const surveyId = route.params.id;

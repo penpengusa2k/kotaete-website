@@ -164,7 +164,8 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { useRoute, useRouter, useHead } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useHead } from '#app'
 import Tooltip from '~/components/Tooltip.vue'
 
 const route = useRoute();
