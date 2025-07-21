@@ -123,9 +123,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useHead } from '#app'
 
 const route = useRoute();
 const surveyId = route.params.id;
@@ -141,27 +140,6 @@ const respondentId = ref('');
 const hasSubmitted = ref(false);
 const username = ref('');
 const isExpired = ref(false);
-
-// OGPメタタグの設定
-watch(survey, (newSurvey) => {
-  if (newSurvey) {
-    const ogpImageUrl = `${window.location.origin}/api/ogp/${surveyId}`;
-    useHead({
-      title: newSurvey.title,
-      meta: [
-        { property: 'og:title', content: newSurvey.title },
-        { property: 'og:description', content: newSurvey.description || 'KOTAETEは簡単・無料のアンケート作成サービスです。' },
-        { property: 'og:image', content: ogpImageUrl },
-        { property: 'og:url', content: window.location.href },
-        { property: 'og:type', content: 'website' },
-        { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: newSurvey.title },
-        { name: 'twitter:description', content: newSurvey.description || 'KOTAETEは簡単・無料のアンケート作成サービスです。' },
-        { name: 'twitter:image', content: ogpImageUrl },
-      ],
-    });
-  }
-});
 
 const getOrCreateRespondentId = async () => {
   const { v4: uuidv4 } = await import('uuid');

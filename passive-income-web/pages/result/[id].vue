@@ -165,7 +165,6 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useHead } from '#app'
 import Tooltip from '~/components/Tooltip.vue'
 
 const route = useRoute();
@@ -183,27 +182,6 @@ const inputKey = ref(''); // 入力された閲覧キー
 const keyErrorMessage = ref(''); // 閲覧キー入力のエラーメッセージ
 const hasAccess = ref(false); // コンテンツ表示制御
 const submittingKey = ref(false); // キー送信中のローディング状態
-
-// OGPメタタグの設定
-watch(surveyData, (newSurveyData) => {
-  if (newSurveyData) {
-    const ogpImageUrl = `${window.location.origin}/api/ogp/${surveyId}`;
-    useHead({
-      title: `「${newSurveyData.title}」の集計結果`,
-      meta: [
-        { property: 'og:title', content: `「${newSurveyData.title}」の集計結果` },
-        { property: 'og:description', content: newSurveyData.description || 'KOTAETEは簡単・無料のアンケート作成サービスです。' },
-        { property: 'og:image', content: ogpImageUrl },
-        { property: 'og:url', content: window.location.href },
-        { property: 'og:type', content: 'website' },
-        { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: `「${newSurveyData.title}」の集計結果` },
-        { name: 'twitter:description', content: newSurveyData.description || 'KOTAETEは簡単・無料のアンケート作成サービスです。' },
-        { name: 'twitter:image', content: ogpImageUrl },
-      ],
-    });
-  }
-});
 
 const isExpired = computed(() => {
   if (!surveyData.value || !surveyData.value.deadline) return false;
