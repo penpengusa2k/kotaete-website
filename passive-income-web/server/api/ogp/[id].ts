@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const ogpBaseImageUrl = `${config.public.baseUrl}/ogp-base.jpg`;
-  const fontUrl = `${config.public.baseUrl}/fonts/NotoSansJP-Bold.ttf`; // フォントファイルのURL
+  const fontUrl = `${config.public.baseUrl}/fonts/NotoSansJP-Bold.woff2`; // フォントファイルのURL
 
   try {
     // ベース画像をHTTPリクエストで取得
