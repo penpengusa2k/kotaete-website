@@ -8,6 +8,7 @@ interface GenerateSvgForTextOptions {
   height: number;
   fontSize: number;
   yOffset: number;
+  fontBase64: string; // Base64エンコードされたフォントを追加
 }
 
 const generateSvgForText = (
@@ -15,7 +16,8 @@ const generateSvgForText = (
   width: GenerateSvgForTextOptions['width'],
   height: GenerateSvgForTextOptions['height'],
   fontSize: GenerateSvgForTextOptions['fontSize'],
-  yOffset: GenerateSvgForTextOptions['yOffset']
+  yOffset: GenerateSvgForTextOptions['yOffset'],
+  fontBase64: GenerateSvgForTextOptions['fontBase64']
 ): string => {
   // 簡易的なテキスト折り返し（日本語の文字幅は考慮しない）
   const words: string[] = text.split(' ');
@@ -38,15 +40,21 @@ const generateSvgForText = (
   const startY: number = (height - totalTextHeight) / 2 + yOffset;
 
   let svgContent: string = `<svg width="${width}" height="${height}">`;
-  svgContent += `<style>
-    .title {
-      font-family: sans-serif; /* 汎用フォントを使用 */
-      font-size: ${fontSize}px;
-      font-weight: bold;
-      fill: #333;
-      text-anchor: middle;
-    }
-  </style>`;
+  svgContent += `<defs>
+    <style type="text/css">
+      @font-face {
+        font-family: 'NotoSansJP';
+        src: url('data:font/truetype;charset=utf-8;base64,${fontBase64}') format('truetype');
+      }
+      .title {
+        font-family: 'NotoSansJP';
+        font-size: ${fontSize}px;
+        font-weight: bold;
+        fill: #333;
+        text-anchor: middle;
+      }
+    </style>
+  </defs>`;
 
   lines.forEach((l: string, index: number) => {
     svgContent += `<text x="${width / 2}" y="${startY + index * lineHeight}" class="title">${l}</text>`;
@@ -74,15 +82,24 @@ export default defineEventHandler(async (event) => {
   }
 
   const ogpBaseImageUrl = `${config.public.baseUrl}/ogp-base.jpg`;
+  const fontUrl = `${config.public.baseUrl}/fonts/NotoSansJP-Bold.ttf`; // フォントファイルのURL
 
   try {
     // ベース画像をHTTPリクエストで取得
-    const response = await fetch(ogpBaseImageUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch OGP base image: ${response.statusText}`);
+    const imageResponse = await fetch(ogpBaseImageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch OGP base image: ${imageResponse.statusText}`);
     }
-    const imageBuffer = Buffer.from(await response.arrayBuffer());
+    const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
     let image = sharp(imageBuffer);
+
+    // フォントファイルをHTTPリクエストで取得し、Base64エンコード
+    const fontResponse = await fetch(fontUrl);
+    if (!fontResponse.ok) {
+      throw new Error(`Failed to fetch font file: ${fontResponse.statusText}`);
+    }
+    const fontBuffer = Buffer.from(await fontResponse.arrayBuffer());
+    const fontBase64 = fontBuffer.toString('base64');
 
     // OGP推奨サイズにリサイズ
     const targetWidth = 1200;
@@ -92,7 +109,7 @@ export default defineEventHandler(async (event) => {
     const fontSize = 60;
     const textYOffset = -50; // タイトルを少し上に配置
 
-    const svgText = generateSvgForText(title, targetWidth, targetHeight, fontSize, textYOffset);
+    const svgText = generateSvgForText(title, targetWidth, targetHeight, fontSize, textYOffset, fontBase64);
 
     // SVGを画像に合成
     const outputBuffer = await image
@@ -118,4 +135,3 @@ export default defineEventHandler(async (event) => {
     return 'Internal Server Error';
   }
 });
-
