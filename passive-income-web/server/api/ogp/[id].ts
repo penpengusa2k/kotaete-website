@@ -1,9 +1,8 @@
 import { defineEventHandler, getQuery, setHeader } from 'h3';
 import sharp from 'sharp';
-import path from 'path';
-import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, resolve } from 'path';
+import { useRuntimeConfig } from '#app';
 
 // テキストをSVGとして生成するヘルパー関数
 interface GenerateSvgForTextOptions {
@@ -62,6 +61,7 @@ const generateSvgForText = (
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id;
+  const config = useRuntimeConfig();
 
   let title = 'KOTAETE'; // デフォルトタイトル
   let description = 'KOTAETEは簡単・無料のアンケート作成サービスです。'; // デフォルトディスクリプション
@@ -76,16 +76,15 @@ export default defineEventHandler(async (event) => {
     console.error('Error fetching survey title for OGP:', e);
   }
 
-  const basePath = process.cwd();
-  const __filename = fileURLToPath(import.meta.url)
-  const __dirname = dirname(__filename)
-
-  const ogpBaseImagePath = join(__dirname, '../../../public/ogp-base.jpg');
-  const fontPath = path.join(basePath, 'public', 'fonts', 'NotoSansJP-Bold.ttf'); // フォントファイルのパス
+  const ogpBaseImageUrl = `${config.public.baseUrl}/ogp-base.jpg`;
 
   try {
-    // ベース画像を読み込む
-    const imageBuffer = await fs.readFile(ogpBaseImagePath);
+    // ベース画像をHTTPリクエストで取得
+    const response = await fetch(ogpBaseImageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch OGP base image: ${response.statusText}`);
+    }
+    const imageBuffer = Buffer.from(await response.arrayBuffer());
     let image = sharp(imageBuffer);
 
     // OGP推奨サイズにリサイズ
@@ -105,8 +104,6 @@ export default defineEventHandler(async (event) => {
         input: Buffer.from(svgText),
         top: 0,
         left: 0,
-        // フォントを埋め込む場合はここに追加
-        // options: { font: fontPath } // sharpのcompositeオプションでフォント指定
       }])
       .jpeg({ quality: 90 })
       .toBuffer();
@@ -118,17 +115,10 @@ export default defineEventHandler(async (event) => {
 
   } catch (error) {
     console.error('Error generating OGP image:', error);
-    // エラー時はベース画像をそのまま返す
-    try {
-      const fallbackImageBuffer = await fs.readFile(ogpBaseImagePath);
-      setHeader(event, 'Content-Type', 'image/jpeg');
-      setHeader(event, 'Cache-Control', 'public, max-age=604800');
-      setHeader(event, 'Content-Disposition', 'inline');
-      return fallbackImageBuffer;
-    } catch (fallbackError) {
-      console.error('Error serving fallback OGP image:', fallbackError);
-      event.res.statusCode = 500;
-      return 'Internal Server Error';
-    }
+    // エラー時はデフォルトのOGP画像を返すか、エラー画像を生成する
+    // ここでは、エラーが発生した場合は500を返す例
+    event.res.statusCode = 500;
+    return 'Internal Server Error';
   }
 });
+
