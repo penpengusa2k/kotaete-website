@@ -137,40 +137,118 @@
 // });
 
 import { defineEventHandler, setHeader } from 'h3';
-import { createCanvas, registerFont, loadImage } from 'canvas';
-import { join } from 'path';
-import fs from 'fs/promises';
+import sharp from 'sharp';
+
+interface GenerateSvgForTextOptions {
+  text: string;
+  width: number;
+  height: number;
+  fontSize: number;
+  yOffset: number;
+  fontBase64: string;
+}
+
+const generateSvgForText = (
+  text: GenerateSvgForTextOptions['text'],
+  width: GenerateSvgForTextOptions['width'],
+  height: GenerateSvgForTextOptions['height'],
+  fontSize: GenerateSvgForTextOptions['fontSize'],
+  yOffset: GenerateSvgForTextOptions['yOffset'],
+  fontBase64: GenerateSvgForTextOptions['fontBase64']
+): string => {
+  const words: string[] = text.split(' ');
+  let line: string = '';
+  let lines: string[] = [];
+  const maxCharsPerLine: number = Math.floor(width / (fontSize * 0.6));
+
+  for (const word of words) {
+    if ((line + word).length > maxCharsPerLine && line.length > 0) {
+      lines.push(line.trim());
+      line = word + ' ';
+    } else {
+      line += word + ' ';
+    }
+  }
+  lines.push(line.trim());
+
+  const lineHeight: number = fontSize * 1.2;
+  const totalTextHeight: number = lines.length * lineHeight;
+  const startY: number = (height - totalTextHeight) / 2 + yOffset;
+
+  let svgContent: string = `<svg width="${width}" height="${height}">`;
+  svgContent += `<defs>
+    <style type="text/css">
+      @font-face {
+        font-family: 'NotoSansJP';
+        src: url('data:font/truetype;charset=utf-8;base64,${fontBase64}') format('truetype');
+      }
+      .title {
+        font-family: 'NotoSansJP';
+        font-size: ${fontSize}px;
+        font-weight: bold;
+        fill: #333;
+        text-anchor: middle;
+      }
+    </style>
+  </defs>`;
+
+  lines.forEach((l: string, index: number) => {
+    svgContent += `<text x="${width / 2}" y="${startY + index * lineHeight}" class="title">${l}</text>`;
+  });
+  svgContent += `</svg>`;
+
+  return svgContent;
+};
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id;
-  const config = useRuntimeConfig();
 
-  const title = 'KOTAETEの質問タイトル';
-  const width = 1200;
-  const height = 630;
+  let title = 'KOTAETE';
+  let description = 'KOTAETEは簡単・無料のアンケート作成サービスです。';
 
-  // フォントを登録
-  const fontPath = join(process.cwd(), 'public/fonts/NotoSansJP-Bold.ttf');
-  registerFont(fontPath, { family: 'NotoSansJP' });
+  try {
+    const surveyRes = await $fetch(`/api/gas-proxy?action=get&id=${id}`) as {
+      result: string;
+      data?: { title?: string; description?: string };
+    };
+    if (surveyRes.result === 'success' && surveyRes.data) {
+      title = surveyRes.data.title || title;
+      description = surveyRes.data.description || description;
+    }
+  } catch (e) {
+    console.error('Error fetching survey title for OGP:', e);
+  }
 
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
+  try {
+    // Sharp用画像とフォントを assets ストレージから取得
+    const fontBuffer = await useStorage('assets').getItemRaw('fonts/NotoSansJP-Bold.ttf');
+    const imageBuffer = await useStorage('assets').getItemRaw('ogp-base.jpg');
 
-  // 背景画像の読み込み
-  const ogpBasePath = join(process.cwd(), 'public/ogp-base.jpg');
-  const bg = await loadImage(await fs.readFile(ogpBasePath));
+    if (!fontBuffer || !imageBuffer) throw new Error('Missing asset files');
 
-  ctx.drawImage(bg, 0, 0, width, height);
+    const fontBase64 = fontBuffer.toString('base64');
+    const targetWidth = 1200;
+    const targetHeight = 630;
 
-  // テキスト描画
-  ctx.font = 'bold 60px "NotoSansJP"';
-  ctx.fillStyle = '#333';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(title, width / 2, height / 2);
+    const fontSize = 60;
+    const textYOffset = -50;
+    const svgText = generateSvgForText(title, targetWidth, targetHeight, fontSize, textYOffset, fontBase64);
 
-  // 出力
-  const buffer = canvas.toBuffer('image/jpeg');
-  setHeader(event, 'Content-Type', 'image/jpeg');
-  return buffer;
+    const outputBuffer = await sharp(imageBuffer)
+      .resize(targetWidth, targetHeight, { fit: 'cover' })
+      .composite([{ input: Buffer.from(svgText), top: 0, left: 0 }])
+      .jpeg({ quality: 90 })
+      .toBuffer();
+
+    setHeader(event, 'Content-Type', 'image/jpeg');
+    setHeader(event, 'Cache-Control', 'public, max-age=604800');
+    setHeader(event, 'Content-Disposition', 'inline');
+    return outputBuffer;
+
+  } catch (error) {
+    console.error('Error generating OGP image:', error);
+    event.res.statusCode = 500;
+    return 'Internal Server Error';
+  }
 });
+
