@@ -58,7 +58,7 @@ const generateSvgForText = (
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id;
-  const config = event.context.runtimeConfig; // ここを修正
+  const config = useRuntimeConfig();
 
   let title = 'KOTAETE'; // デフォルトタイトル
   let description = 'KOTAETEは簡単・無料のアンケート作成サービスです。'; // デフォルトディスクリプション
