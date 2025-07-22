@@ -1,8 +1,5 @@
-import { defineEventHandler, getQuery, setHeader } from 'h3';
+import { defineEventHandler, setHeader } from 'h3';
 import sharp from 'sharp';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-import { useRuntimeConfig } from '#app';
 
 // テキストをSVGとして生成するヘルパー関数
 interface GenerateSvgForTextOptions {
@@ -61,7 +58,7 @@ const generateSvgForText = (
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id;
-  const config = useRuntimeConfig();
+  const config = event.context.runtimeConfig; // ここを修正
 
   let title = 'KOTAETE'; // デフォルトタイトル
   let description = 'KOTAETEは簡単・無料のアンケート作成サービスです。'; // デフォルトディスクリプション
