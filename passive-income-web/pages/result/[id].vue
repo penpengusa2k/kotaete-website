@@ -15,11 +15,11 @@
       <div v-if="hasAccess">
         <div class="mb-8 p-4 bg-white rounded-lg shadow-md border-l-4" :class="isExpired ? 'border-red-700' : 'border-blue-700'">
           <h1 class="text-3xl font-bold mb-2">「{{ surveyData.title }}」の集計結果</h1>
-        <p class="text-gray-600 mb-2">Created by {{ surveyData.creator_name || '名無し' }}</p>
           <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
             <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
             {{ formatDeadline(surveyData.deadline) }}
           </p>
+          <p class="text-gray-600 mb-2">Created by {{ surveyData.creator_name || '名無し' }}</p>
         </div>
 
         <div v-for="(question, index) in surveyData.questions" :key="index" class="mb-8 p-6 bg-white rounded-lg shadow-md">
@@ -42,9 +42,9 @@
 
           <div v-if="question.type === 'radio' || question.type === 'checkbox'" class="mt-4 space-y-4">
             <div v-for="option in question.options" :key="option.value" class="p-3 bg-gray-50 rounded-md border border-gray-200">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-gray-700">{{ option.value }}</span>
-                    <span class="font-bold text-blue-700">{{ countOccurrences(index, option.value) }}票</span>
+                <div class="flex items-center mb-1">
+                    <span class="text-gray-700 break-all flex-grow min-w-0 overflow-hidden mr-2">{{ option.value }}</span>
+                    <span class="font-bold text-blue-700 flex-shrink-0 whitespace-nowrap">{{ countOccurrences(index, option.value) }}票</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3">
                     <div class="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-out" :style="{ width: getPercentage(countOccurrences(index, option.value)) + '%' }"></div>

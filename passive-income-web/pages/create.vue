@@ -5,21 +5,21 @@
     <form @submit.prevent="createSurvey">
       <div class="mb-4">
         <label for="title" class="block text-gray-700 font-bold mb-2">KOTAETEタイトル <span class="text-red-500">*</span></label>
-        <input type="text" id="title" v-model="survey.title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required maxlength="50">
-        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.title.length }} / 50</p>
+        <input type="text" id="title" v-model="survey.title" ref="titleInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required :maxlength="MAX_TITLE_LENGTH">
+        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.title.length }} / {{ MAX_TITLE_LENGTH }}</p>
       </div>
 
       <div class="mb-4">
         <label for="creatorName" class="block text-gray-700 font-bold mb-2">作成者名 <span class="text-red-500">*</span></label>
-        <input type="text" id="creatorName" v-model="survey.creatorName" :class="[ 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', formSubmitted && creatorNameError ? 'border-red-500' : '' ]" required maxlength="50" @blur="validateCreatorName">
+        <input type="text" id="creatorName" v-model="survey.creatorName" :class="[ 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', formSubmitted && creatorNameError ? 'border-red-500' : '' ]" required :maxlength="MAX_CREATOR_NAME_LENGTH" @blur="validateCreatorName">
         <p v-if="formSubmitted && creatorNameError" class="text-red-500 text-xs italic mt-1">作成者名は必須です。</p>
-        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.creatorName.length }} / 50</p>
+        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.creatorName.length }} / {{ MAX_CREATOR_NAME_LENGTH }}</p>
       </div>
 
       <div class="mb-4">
         <label for="description" class="block text-gray-700 font-bold mb-2">説明文（任意）</label>
-        <textarea id="description" v-model="survey.description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="3" maxlength="500"></textarea>
-        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.description.length }} / 500</p>
+        <textarea id="description" v-model="survey.description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="3" :maxlength="MAX_DESCRIPTION_LENGTH"></textarea>
+        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.description.length }} / {{ MAX_DESCRIPTION_LENGTH }}</p>
       </div>
 
       <hr class="my-6">
@@ -32,8 +32,8 @@
         </div>
         <div class="mb-2">
           <label class="block text-gray-700 font-bold mb-1">質問文 <span class="text-red-500">*</span></label>
-          <input type="text" v-model="question.text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required maxlength="500">
-          <p class="text-right text-sm text-gray-500 mt-1">{{ question.text.length }} / 500</p>
+          <input type="text" v-model="question.text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required :maxlength="MAX_QUESTION_LENGTH">
+          <p class="text-right text-sm text-gray-500 mt-1">{{ question.text.length }} / {{ MAX_QUESTION_LENGTH }}</p>
         </div>
         <div class="mb-2">
           <label class="block text-gray-700 font-bold mb-1">質問タイプ</label>
@@ -45,16 +45,22 @@
         </div>
         <div v-if="question.type === 'radio' || question.type === 'checkbox'">
           <label class="block text-gray-700 font-bold mb-1">選択肢</label>
-          <div v-for="(option, optionIndex) in question.options" :key="optionIndex" class="flex items-center mb-1">
-            <input type="text" v-model="option.value" class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700">
-            <button type="button" @click="removeOption(question, optionIndex)" class="ml-2 text-red-500">×</button>
+          <button type="button" @click="addOption(question)" class="text-blue-500 hover:text-blue-700 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400 mb-2" :disabled="question.options.length >= MAX_OPTIONS_PER_QUESTION">+ 選択肢を追加</button>
+          <span v-if="question.options.length >= MAX_OPTIONS_PER_QUESTION" class="ml-2 text-red-500 text-sm">（最大{{ MAX_OPTIONS_PER_QUESTION }}個まで）</span>
+          <div v-for="(option, optionIndex) in question.options" :key="optionIndex" class="mb-1">
+            <div class="flex items-center">
+              <input type="text" v-model="option.value" class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700" :maxlength="MAX_OPTION_VALUE_LENGTH">
+              <button type="button" @click="removeOption(question, optionIndex)" class="ml-2 text-red-500">×</button>
+            </div>
+            <p class="text-right text-sm text-gray-500 mt-1">{{ option.value.length }} / {{ MAX_OPTION_VALUE_LENGTH }}</p>
           </div>
-          <button type="button" @click="addOption(question)" class="text-blue-500 hover:text-blue-700" :disabled="question.options.length >= 10">+ 選択肢を追加</button>
-          <span v-if="question.options.length >= 10" class="ml-2 text-red-500 text-sm">（最大10個まで）</span>
         </div>
       </div>
 
-      <button type="button" @click="addQuestion" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mb-6">+ 質問を追加</button>
+      <button type="button" @click="addQuestion" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mb-6 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400" :disabled="survey.questions.length >= MAX_QUESTIONS">
+        + 質問を追加
+      </button>
+      <span v-if="survey.questions.length >= MAX_QUESTIONS" class="ml-2 text-red-500 text-sm">（最大{{ MAX_QUESTIONS }}個まで）</span>
 
       <hr class="my-6">
 
@@ -156,13 +162,24 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue' // onMounted をインポート
 
+// --- 定数定義 ---
+const MAX_TITLE_LENGTH = 50;
+const MAX_CREATOR_NAME_LENGTH = 50;
+const MAX_DESCRIPTION_LENGTH = 500;
+const MAX_QUESTION_LENGTH = 500;
+const MAX_QUESTIONS = 50;
+const MAX_OPTIONS_PER_QUESTION = 10;
+const MAX_OPTION_VALUE_LENGTH = 500; // 選択肢の文字数制限を500に更新
+const DEFAULT_DEADLINE_DAYS = 3; // デフォルトの回答期限を3日後に設定
+
+// 回答期限のデフォルト値を設定するヘルパー関数
 const getThreeDaysLater = () => {
   const date = new Date();
-  date.setDate(date.getDate() + 3);
+  date.setDate(date.getDate() + DEFAULT_DEADLINE_DAYS);
   // フォーマットを 'YYYY-MM-DDTHH:mm' に合わせる
-  const year = date.getFullYear();
+  const year = String(date.getFullYear());
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   const hours = String(date.getHours()).padStart(2, '0');
@@ -180,31 +197,31 @@ const survey = ref({
   anonymous: true,
   deadline: getThreeDaysLater(),
   viewingKey: '',
-  creatorName: '名無し', // 新しいプロパティを追加
+  creatorName: '名無し',
 });
 
 const loading = ref(false);
 const createdUrl = ref('');
 const resultUrl = ref('');
-const createdSurveyTitle = ref(''); // 作成されたKOTAETEのタイトルを保持
+const createdSurveyTitle = ref('');
 const formSubmitted = ref(false);
-const creatorNameError = ref(false); // 作成者名のエラー状態
+const creatorNameError = ref(false);
 
-// 作成完了後に表示する閲覧キーと制限設定
 const displayViewingKey = ref('');
 const displayIsRestricted = ref(false);
 
-// SNS投稿文を管理する単一のcomputedプロパティ
+// タイトル入力フィールドへの参照を保持するref
+const titleInput = ref(null);
+
 const postText = computed(() => {
   if (!createdSurveyTitle.value || !createdUrl.value) {
-    return ''; // URLやタイトルがまだない場合は空を返す
+    return '';
   }
   return `KOTAETE「${createdSurveyTitle.value}」が爆誕！ぜひKOTAETEください！
 ${createdUrl.value}
 #KOTAETE #KOTAETEは簡単に作成できるアンケートサービスです`;
 });
 
-// LINE用の投稿文 (XやThreadsとはメッセージが異なるため別途定義)
 const lineShareText = computed(() => {
   if (!createdSurveyTitle.value || !createdUrl.value) {
     return '';
@@ -217,26 +234,47 @@ const validateCreatorName = () => {
   return !creatorNameError.value;
 };
 
+// 結果閲覧制限のwatchは既存のまま
 watch(() => survey.value.resultRestricted, (newVal) => {
-  if (newVal === false) { // 制限なしに切り替わったら閲覧キーをクリア
+  if (newVal === false) {
     survey.value.viewingKey = '';
   }
 });
 
+// 各質問のタイプ変更を監視し、選択肢を自動追加
+watch(
+  () => survey.value.questions,
+  (newQuestions) => {
+    newQuestions.forEach(question => {
+      // 質問タイプがラジオボタンまたはチェックボックスで、かつ選択肢が0個の場合
+      if ((question.type === 'radio' || question.type === 'checkbox') && question.options.length === 0) {
+        addOption(question); // 最初の選択肢を自動追加
+      }
+      // 質問タイプが記述式に変わり、かつ選択肢がある場合はクリア
+      if (question.type === 'text' && question.options.length > 0) {
+        question.options = [];
+      }
+    });
+  },
+  { deep: true } // questions配列内のオブジェクトの変更も監視するためにdeepオプションをtrueにする
+);
+
+
 const isFormValid = computed(() => {
   if (!survey.value.title.trim()) return false;
-  if (creatorNameError.value) return false; // creatorNameErrorがtrueなら無効
+  if (creatorNameError.value) return false;
   if (!survey.value.deadline) return false;
   if (survey.value.questions.length === 0) return false;
 
-  if (survey.value.resultRestricted && !survey.value.viewingKey.trim()) return false; // 結果閲覧制限ありの場合、閲覧キー必須
+  if (survey.value.resultRestricted && !survey.value.viewingKey.trim()) return false;
 
   for (const question of survey.value.questions) {
     if (!question.text.trim()) return false;
+    // 選択肢タイプの質問の場合、選択肢が1つ以上あり、かつその値が空でないことを確認
     if (question.type === 'radio' || question.type === 'checkbox') {
-      if (question.options.length === 0) return false;
+      if (question.options.length === 0) return false; // 選択肢がない場合は無効
       for (const option of question.options) {
-        if (!option.value.trim()) return false;
+        if (!option.value.trim()) return false; // 選択肢の値が空の場合は無効
       }
     }
   }
@@ -247,7 +285,7 @@ const addQuestion = () => {
   survey.value.questions.push({
     text: '',
     type: 'text',
-    options: [],
+    options: [], // 初期はテキストタイプなのでオプションは空
   });
 };
 
@@ -259,7 +297,10 @@ const addOption = (question) => {
   if (!question.options) {
     question.options = [];
   }
-  question.options.push({ value: '' });
+  // 最大選択肢数を超えていない場合のみ追加
+  if (question.options.length < MAX_OPTIONS_PER_QUESTION) {
+    question.options.push({ value: '' });
+  }
 };
 
 const removeOption = (question, optionIndex) => {
@@ -267,11 +308,10 @@ const removeOption = (question, optionIndex) => {
 };
 
 const createSurvey = async () => {
-  formSubmitted.value = true; // フォームが送信されたことをマーク
+  formSubmitted.value = true;
 
-  // 作成者名のバリデーションを先に実行
   if (!validateCreatorName()) {
-    return; // バリデーションエラーがあれば処理を中断
+    return;
   }
 
   if (!isFormValid.value) {
@@ -285,7 +325,6 @@ const createSurvey = async () => {
   resultUrl.value = '';
 
   const config = useRuntimeConfig();
-  // const gasApiUrl = config.public.gasApiUrl; // コメントアウトされていますが、必要な場合は有効にしてください
 
   const body = {
     id: uuidv4(),
@@ -312,26 +351,31 @@ const createSurvey = async () => {
       const baseUrl = window.location.origin;
       createdUrl.value = `${baseUrl}/answer/${response.id}`;
       resultUrl.value = `${baseUrl}/result/${response.id}`;
-      createdSurveyTitle.value = survey.value.title; // タイトルを保持
+      createdSurveyTitle.value = survey.value.title;
 
-      // フォームリセット前に表示用変数に値を保持
       displayViewingKey.value = survey.value.viewingKey;
       displayIsRestricted.value = survey.value.resultRestricted;
 
-      // Reset form
       // Reset form
       survey.value = {
         title: '',
         description: '',
         questions: [
-          { text: '', type: 'text', options: [] } // 最初の質問を初期表示
+          { text: '', type: 'text', options: [] }
         ],
         resultRestricted: false,
         anonymous: true,
-        deadline: getThreeDaysLater(),
+        deadline: getThreeDaysLater(), // 定数を使用
         viewingKey: '',
         creatorName: '名無し',
       };
+      // フォームリセット後もタイトルフィールドにフォーカスを当てる
+      // DOMの更新を待ってからフォーカスを当てる
+      nextTick(() => {
+        if (titleInput.value) {
+          titleInput.value.focus();
+        }
+      });
     } else {
       alert(`エラーが発生しました: ${response.message}`);
     }
@@ -342,4 +386,11 @@ const createSurvey = async () => {
     loading.value = false;
   }
 };
+
+// コンポーネントがマウントされたらタイトル入力フィールドにフォーカス
+onMounted(() => {
+  if (titleInput.value) {
+    titleInput.value.focus();
+  }
+});
 </script>

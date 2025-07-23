@@ -14,8 +14,8 @@
     <div v-else-if="survey">
       <div class="mb-8 p-4 bg-white rounded-lg shadow-md border-l-4 border-blue-700">
         <h1 class="text-3xl font-bold mb-2 break-words">{{ survey.title }}</h1>
-      <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
       <p class="text-gray-600 mb-6">{{ survey.description }}</p>
+      <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
       </div>
 
       <div v-if="isExpired" class="mb-8 p-6 bg-white rounded-lg shadow-md border-l-4 border-red-700">
@@ -78,7 +78,7 @@
                   required
                   :disabled="loading"
                 >
-                <span class="ml-3 text-base">{{ option.value }}</span>
+                <span class="ml-3 text-base break-all">{{ option.value }}</span>
               </label>
             </div>
           </div>
@@ -93,7 +93,7 @@
                       class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors duration-200"
                       :disabled="loading"
                     >
-                    <span class="ml-3 text-base">{{ option.value }}</span>
+                    <span class="ml-3 text-base break-all">{{ option.value }}</span>
                   </label>
               </div>
             </div>
