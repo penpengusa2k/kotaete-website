@@ -83,11 +83,11 @@ export default defineEventHandler(async (event) => {
   try {
     const storage = useStorage('assets:server');
 
-    const imageBuffer = await storage.getItemRaw('assets/ogp-base.jpg');
+    const imageBuffer = await storage.getItemRaw('ogp-base.jpg');
     if (!imageBuffer) throw new Error('OGP base image not found');
     let image = sharp(imageBuffer);
 
-    const fontBuffer = await storage.getItemRaw('assets/NotoSansJP-Bold.ttf');
+    const fontBuffer = await storage.getItemRaw('NotoSansJP-Bold.ttf');
     if (!fontBuffer) throw new Error('Font file not found');
     const fontBase64 = Buffer.from(fontBuffer).toString('base64');
 
