@@ -22,7 +22,7 @@ const generateSvgForText = (
   // 日本語のテキストを文字数に応じて折り返す
   let line = '';
   const lines: string[] = [];
-  // テキストエリアの幅を画像の80%に設定し、1行あたりの最大文字数を計算
+  // テキストエリアの幅を画像の60%に設定し、1行あたりの最大文字数を計算
   const textAreaWidth = width * 0.60;
   const maxCharsPerLine = Math.floor(textAreaWidth / fontSize);
 
@@ -98,15 +98,18 @@ export default defineEventHandler(async (event) => {
 
     // テキストの描画
     const fontSize = 45;
-    const textYOffset = 80; // 折り返しによるずれを考慮して調整
+    const textYOffset = 50; // 折り返しによるずれを考慮して調整
 
     const svgText = generateSvgForText(title, targetWidth, targetHeight, fontSize, textYOffset, fontBase64);
 
-    // SVGを画像に合成
+    // SVGをPNGにラスタライズ
+    const svgPngBuffer = await sharp(Buffer.from(svgText)).png().toBuffer();
+
+    // OGP画像と合成
     const outputBuffer = await image
       .resize(targetWidth, targetHeight, { fit: 'contain' })
       .composite([{
-        input: Buffer.from(svgText),
+        input: svgPngBuffer, // ラスタライズ済みの画像なのでFontconfig不要
         top: 0,
         left: 0,
       }])
