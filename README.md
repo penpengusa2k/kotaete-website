@@ -1,6 +1,7 @@
 # kotaete-website
 
 無料のアンケート作成サイト「kotaete」の開発リポジトリです。
+サイトURLは[https://kotaete.xyz](https://kotaete.xyz)です。
 
 ## 概要
 
