@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
     const targetWidth = 1200;
     const targetHeight = 630;
     const fontSize = 45;
-    const textYOffset = 50;
+    const textYOffset = 20;
     const startX = targetWidth * 0.20;
     const textAreaWidth = targetWidth * 0.60;
 
