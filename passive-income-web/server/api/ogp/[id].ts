@@ -1,75 +1,15 @@
 import { defineEventHandler, setHeader } from 'h3';
 import sharp from 'sharp';
-
-// テキストをSVGとして生成するヘルパー関数
-interface GenerateSvgForTextOptions {
-  text: string;
-  width: number;
-  height: number;
-  fontSize: number;
-  yOffset: number;
-  fontBase64: string; // Base64エンコードされたフォントを追加
-}
-
-const generateSvgForText = (
-  text: GenerateSvgForTextOptions['text'],
-  width: GenerateSvgForTextOptions['width'],
-  height: GenerateSvgForTextOptions['height'],
-  fontSize: GenerateSvgForTextOptions['fontSize'],
-  yOffset: GenerateSvgForTextOptions['yOffset'],
-  fontBase64: GenerateSvgForTextOptions['fontBase64']
-): string => {
-  // 日本語のテキストを文字数に応じて折り返す
-  let line = '';
-  const lines: string[] = [];
-  // テキストエリアの幅を画像の60%に設定し、1行あたりの最大文字数を計算
-  const textAreaWidth = width * 0.60;
-  const maxCharsPerLine = Math.floor(textAreaWidth / fontSize);
-
-  for (const char of text) {
-    if (line.length >= maxCharsPerLine) {
-      lines.push(line);
-      line = '';
-    }
-    line += char;
-  }
-  lines.push(line);
-
-  const lineHeight: number = fontSize * 1.2;
-  const totalTextHeight: number = lines.length * lineHeight;
-  const startY: number = (height - totalTextHeight) / 2 + yOffset;
-  const startX: number = width * 0.20; // 左マージンを20%に設定
-
-  let svgContent: string = `<svg width="${width}" height="${height}">`;
-  svgContent += `<defs>
-    <style type="text/css">
-      @font-face {
-        font-family: 'NotoSansJP';
-        src: url('data:font/truetype;charset=utf-8;base64,${fontBase64}') format('truetype');
-      }
-      .title {
-        font-family: 'NotoSansJP';
-        font-size: ${fontSize}px;
-        font-weight: bold;
-        fill: #333;
-        text-anchor: start; /* 左揃えに変更 */
-      }
-    </style>
-  </defs>`;
-
-  lines.forEach((l: string, index: number) => {
-    svgContent += `<text x="${startX}" y="${startY + index * lineHeight}" class="title">${l}</text>`;
-  });
-  svgContent += `</svg>`;
-
-  return svgContent;
-};
+import TextToSVG from 'text-to-svg';
+import { tmpdir } from 'os';
+import { writeFile, unlink } from 'fs/promises';
+import path from 'path';
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id;
 
-  let title = 'KOTAETE'; // デフォルトタイトル
-  let description = 'KOTAETEは簡単・無料のアンケート作成サービスです。'; // デフォルトディスクリプション
+  let title = 'KOTAETE';
+  let description = 'KOTAETEは簡単・無料のアンケート作成サービスです。';
 
   try {
     const surveyRes = await $fetch(`/api/gas-proxy?action=get&id=${id}`) as { result: string; data?: { title?: string; description?: string } };
@@ -83,36 +23,62 @@ export default defineEventHandler(async (event) => {
 
   try {
     const storage = useStorage();
-
     const imageBuffer = await storage.getItemRaw('assets:server:ogp-base.jpg');
     if (!imageBuffer) throw new Error('OGP base image not found');
     let image = sharp(imageBuffer);
 
     const fontBuffer = await storage.getItemRaw('assets:server:NotoSansJP-Bold.ttf');
     if (!fontBuffer) throw new Error('Font file not found');
-    const fontBase64 = Buffer.from(fontBuffer).toString('base64');
 
-    // OGP推奨サイズにリサイズ
+    // 一時ファイルにフォントを書き出す
+    const tempFontPath = path.join(tmpdir(), `NotoSansJP-${Date.now()}.ttf`);
+    await writeFile(tempFontPath, fontBuffer);
+
+    const textToSVG = TextToSVG.loadSync(tempFontPath); // ここで文字化け回避
+    await unlink(tempFontPath); // 読み込んだら削除（クリーンアップ）
+
     const targetWidth = 1200;
     const targetHeight = 630;
-
-    // テキストの描画
     const fontSize = 45;
-    const textYOffset = 50; // 折り返しによるずれを考慮して調整
+    const textYOffset = 50;
+    const startX = targetWidth * 0.20;
+    const textAreaWidth = targetWidth * 0.60;
 
-    const svgText = generateSvgForText(title, targetWidth, targetHeight, fontSize, textYOffset, fontBase64);
+    const lines: string[] = [];
+    let currentLine = '';
+    const maxCharsPerLine = Math.floor(textAreaWidth / fontSize);
 
-    // SVGをPNGにラスタライズ
-    const svgPngBuffer = await sharp(Buffer.from(svgText)).png().toBuffer();
+    for (const char of title) {
+      if (currentLine.length >= maxCharsPerLine) {
+        lines.push(currentLine);
+        currentLine = '';
+      }
+      currentLine += char;
+    }
+    lines.push(currentLine);
 
-    // OGP画像と合成
+    const lineHeight = fontSize * 1.2;
+    const totalTextHeight = lines.length * lineHeight;
+    const startY = (targetHeight - totalTextHeight) / 2 + textYOffset;
+
+    let svgText = '';
+    lines.forEach((lineText, index) => {
+      const svgPath = textToSVG.getPath(lineText, {
+        x: startX,
+        y: startY + index * lineHeight,
+        fontSize: fontSize,
+        anchor: 'top left',
+        attributes: { fill: '#333' }
+      });
+      svgText += svgPath;
+    });
+
+    const fullSvg = `<svg width="${targetWidth}" height="${targetHeight}">${svgText}</svg>`;
+    const svgPngBuffer = await sharp(Buffer.from(fullSvg)).png().toBuffer();
+
     const outputBuffer = await image
       .resize(targetWidth, targetHeight, { fit: 'contain' })
-      .composite([{
-        input: svgPngBuffer, // ラスタライズ済みの画像なのでFontconfig不要
-        top: 0,
-        left: 0,
-      }])
+      .composite([{ input: svgPngBuffer, top: 0, left: 0 }])
       .jpeg({ quality: 90 })
       .toBuffer();
 
