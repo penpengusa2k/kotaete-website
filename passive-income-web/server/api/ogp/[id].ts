@@ -1,5 +1,6 @@
 import { defineEventHandler, setHeader } from 'h3';
 import sharp from 'sharp';
+import { useStorage } from '#imports';
 
 // テキストをSVGとして生成するヘルパー関数
 interface GenerateSvgForTextOptions {
@@ -19,25 +20,26 @@ const generateSvgForText = (
   yOffset: GenerateSvgForTextOptions['yOffset'],
   fontBase64: GenerateSvgForTextOptions['fontBase64']
 ): string => {
-  // 簡易的なテキスト折り返し（日本語の文字幅は考慮しない）
-  const words: string[] = text.split(' ');
-  let line: string = '';
-  let lines: string[] = [];
-  const maxCharsPerLine: number = Math.floor(width / (fontSize * 0.6)); // 簡易的な文字数計算
+  // 日本語のテキストを文字数に応じて折り返す
+  let line = '';
+  const lines: string[] = [];
+  // テキストエリアの幅を画像の80%に設定し、1行あたりの最大文字数を計算
+  const textAreaWidth = width * 0.8;
+  const maxCharsPerLine = Math.floor(textAreaWidth / fontSize);
 
-  for (const word of words) {
-    if ((line + word).length > maxCharsPerLine && line.length > 0) {
-      lines.push(line.trim());
-      line = word + ' ';
-    } else {
-      line += word + ' ';
+  for (const char of text) {
+    if (line.length >= maxCharsPerLine) {
+      lines.push(line);
+      line = '';
     }
+    line += char;
   }
-  lines.push(line.trim());
+  lines.push(line);
 
   const lineHeight: number = fontSize * 1.2;
   const totalTextHeight: number = lines.length * lineHeight;
   const startY: number = (height - totalTextHeight) / 2 + yOffset;
+  const startX: number = width * 0.1; // 左マージンを10%に設定
 
   let svgContent: string = `<svg width="${width}" height="${height}">`;
   svgContent += `<defs>
@@ -51,13 +53,13 @@ const generateSvgForText = (
         font-size: ${fontSize}px;
         font-weight: bold;
         fill: #333;
-        text-anchor: middle;
+        text-anchor: start; /* 左揃えに変更 */
       }
     </style>
   </defs>`;
 
   lines.forEach((l: string, index: number) => {
-    svgContent += `<text x="${width / 2}" y="${startY + index * lineHeight}" class="title">${l}</text>`;
+    svgContent += `<text x="${startX}" y="${startY + index * lineHeight}" class="title">${l}</text>`;
   });
   svgContent += `</svg>`;
 
@@ -81,13 +83,13 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const storage = useStorage('assets:server');
+    const storage = useStorage();
 
-    const imageBuffer = await storage.getItemRaw('ogp-base.jpg');
+    const imageBuffer = await storage.getItemRaw('assets:server:ogp-base.jpg');
     if (!imageBuffer) throw new Error('OGP base image not found');
     let image = sharp(imageBuffer);
 
-    const fontBuffer = await storage.getItemRaw('NotoSansJP-Bold.ttf');
+    const fontBuffer = await storage.getItemRaw('assets:server:NotoSansJP-Bold.ttf');
     if (!fontBuffer) throw new Error('Font file not found');
     const fontBase64 = Buffer.from(fontBuffer).toString('base64');
 
@@ -97,7 +99,7 @@ export default defineEventHandler(async (event) => {
 
     // テキストの描画
     const fontSize = 60;
-    const textYOffset = -50;
+    const textYOffset = -30; // 少し下に調整
 
     const svgText = generateSvgForText(title, targetWidth, targetHeight, fontSize, textYOffset, fontBase64);
 
