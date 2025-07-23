@@ -25,7 +25,7 @@
 
 1.  **リポジトリをクローン:**
     ```bash
-    git clone https://github.com/your-username/kotaete-website.git
+    git clone https://github.com/penpengusa2k/kotaete-website.git
     cd kotaete-website/kotaete-web
     ```
 
