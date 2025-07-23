@@ -24,7 +24,7 @@ export default defineNuxtConfig({
         { name: 'keywords', content: 'アンケート, KOTAETE, Google Sheets, Nuxt.js, 簡単, 無料, フォーム' },
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/png', href: '/icon.png' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined' }
       ]
     }
