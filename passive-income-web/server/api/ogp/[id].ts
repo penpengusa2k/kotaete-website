@@ -1,5 +1,7 @@
 import { defineEventHandler, setHeader } from 'h3';
 import sharp from 'sharp';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 
 // テキストをSVGとして生成するヘルパー関数
 interface GenerateSvgForTextOptions {
@@ -81,24 +83,17 @@ export default defineEventHandler(async (event) => {
     console.error('Error fetching survey title for OGP:', e);
   }
 
-  const ogpBaseImageUrl = `${config.public.baseUrl}/ogp-base.jpg`;
-  const fontUrl = `${config.public.baseUrl}/fonts/NotoSansJP-Bold.ttf`; // フォントファイルのURL
-
   try {
-    // ベース画像をHTTPリクエストで取得
-    const imageResponse = await fetch(ogpBaseImageUrl);
-    if (!imageResponse.ok) {
-      throw new Error(`Failed to fetch OGP base image: ${imageResponse.statusText}`);
-    }
-    const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+    // Vercelのビルド時にファイルを含めるためのワークアラウンド
+    await fs.readdir(path.join(process.cwd()));
+
+    const imagePath = path.join(process.cwd(), 'ogp-base.jpg');
+    const imageBuffer = await fs.readFile(imagePath);
     let image = sharp(imageBuffer);
 
-    // フォントファイルをHTTPリクエストで取得し、Base64エンコード
-    const fontResponse = await fetch(fontUrl);
-    if (!fontResponse.ok) {
-      throw new Error(`Failed to fetch font file: ${fontResponse.statusText}`);
-    }
-    const fontBuffer = Buffer.from(await fontResponse.arrayBuffer());
+    // フォントファイルをローカルファイルシステムから読み込み、Base64エンコード
+    const fontPath = path.join(process.cwd(), 'NotoSansJP-Bold.ttf');
+    const fontBuffer = await fs.readFile(fontPath);
     const fontBase64 = fontBuffer.toString('base64');
 
     // OGP推奨サイズにリサイズ
