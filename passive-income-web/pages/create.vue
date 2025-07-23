@@ -121,8 +121,8 @@
 
     <div v-if="createdUrl" class="mt-8 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
       <h3 class="font-bold">作成完了！</h3>
-      <p>回答用URL: <a :href="createdUrl" target="_blank" class="underline">{{ createdUrl }}</a></p>
-      <p>結果確認用URL: <a :href="resultUrl" target="_blank" class="underline">{{ resultUrl }}</a></p>
+      <p class="break-all">回答用URL: <a :href="createdUrl" target="_blank" class="underline">{{ createdUrl }}</a></p>
+      <p class="break-all">結果確認用URL: <a :href="resultUrl" target="_blank" class="underline">{{ resultUrl }}</a></p>
 
       <div v-if="displayIsRestricted" class="mt-4 p-2 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
         <p class="font-bold">重要: 結果閲覧キー</p>

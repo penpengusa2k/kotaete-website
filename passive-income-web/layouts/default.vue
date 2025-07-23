@@ -6,7 +6,10 @@
           <img src="/site-title.png" alt="KOTAETE" class="h-8">
         </NuxtLink>
         <div>
-          <NuxtLink to="/create" class="text-gray-700 hover:text-blue-600 transition-colors duration-200">KOTAETE作成</NuxtLink>
+          <NuxtLink to="/create" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-opacity duration-500" :class="{ 'opacity-100 pointer-events-auto': showCreateButton, 'opacity-0 pointer-events-none': !showCreateButton }">
+            <span class="material-icons-outlined mr-2">add_circle_outline</span>
+            NEW
+          </NuxtLink>
         </div>
       </nav>
     </header>
@@ -24,4 +27,12 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+
+const showCreateButton = ref(false);
+
+onMounted(() => {
+  // ページロード後にボタンを表示
+  showCreateButton.value = true;
+});
 </script>
