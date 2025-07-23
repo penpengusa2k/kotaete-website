@@ -1,2 +1,3 @@
-# passive-income-website
-不労所得を目指すウェブサイト開発リポジトリ
+# kotaete-website
+
+無料アンケート作成サイトのkotaete開発リポジトリです
