@@ -1,6 +1,5 @@
 import { defineEventHandler, setHeader } from 'h3';
 import sharp from 'sharp';
-import { useStorage } from '#imports';
 
 // テキストをSVGとして生成するヘルパー関数
 interface GenerateSvgForTextOptions {
@@ -24,7 +23,7 @@ const generateSvgForText = (
   let line = '';
   const lines: string[] = [];
   // テキストエリアの幅を画像の80%に設定し、1行あたりの最大文字数を計算
-  const textAreaWidth = width * 0.8;
+  const textAreaWidth = width * 0.60;
   const maxCharsPerLine = Math.floor(textAreaWidth / fontSize);
 
   for (const char of text) {
@@ -39,7 +38,7 @@ const generateSvgForText = (
   const lineHeight: number = fontSize * 1.2;
   const totalTextHeight: number = lines.length * lineHeight;
   const startY: number = (height - totalTextHeight) / 2 + yOffset;
-  const startX: number = width * 0.1; // 左マージンを10%に設定
+  const startX: number = width * 0.20; // 左マージンを20%に設定
 
   let svgContent: string = `<svg width="${width}" height="${height}">`;
   svgContent += `<defs>
@@ -98,14 +97,14 @@ export default defineEventHandler(async (event) => {
     const targetHeight = 630;
 
     // テキストの描画
-    const fontSize = 60;
-    const textYOffset = -30; // 少し下に調整
+    const fontSize = 45;
+    const textYOffset = 80; // 折り返しによるずれを考慮して調整
 
     const svgText = generateSvgForText(title, targetWidth, targetHeight, fontSize, textYOffset, fontBase64);
 
     // SVGを画像に合成
     const outputBuffer = await image
-      .resize(targetWidth, targetHeight, { fit: 'cover' })
+      .resize(targetWidth, targetHeight, { fit: 'contain' })
       .composite([{
         input: Buffer.from(svgText),
         top: 0,
