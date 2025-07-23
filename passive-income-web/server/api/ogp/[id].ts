@@ -27,22 +27,22 @@ export default defineEventHandler(async (event) => {
     if (!imageBuffer) throw new Error('OGP base image not found');
     let image = sharp(imageBuffer);
 
-    const fontBuffer = await storage.getItemRaw('assets:server:NotoSansJP-Bold.ttf');
+    const fontBuffer = await storage.getItemRaw('assets:server:KiwiMaru-Regular.ttf');
     if (!fontBuffer) throw new Error('Font file not found');
 
     // 一時ファイルにフォントを書き出す
-    const tempFontPath = path.join(tmpdir(), `NotoSansJP-${Date.now()}.ttf`);
+    const tempFontPath = path.join(tmpdir(), `KiwiMaru-Regular-${Date.now()}.ttf`);
     await writeFile(tempFontPath, fontBuffer);
 
     const textToSVG = TextToSVG.loadSync(tempFontPath); // ここで文字化け回避
     await unlink(tempFontPath); // 読み込んだら削除（クリーンアップ）
 
     const targetWidth = 1200;
-    const targetHeight = 630;
-    const fontSize = 45;
-    const textYOffset = 20;
-    const startX = targetWidth * 0.20;
-    const textAreaWidth = targetWidth * 0.60;
+    const targetHeight = 600;
+    const fontSize = 40;
+    const textYOffset = 20; // 折り返しによるずれを考慮して調整
+    const startX = targetWidth * 0.22; // 左マージンを22%に設定 (折り返し計算用)
+    const textAreaWidth = targetWidth * 0.56; // テキストエリア幅56% (折り返し計算用)
 
     const lines: string[] = [];
     let currentLine = '';
@@ -64,11 +64,14 @@ export default defineEventHandler(async (event) => {
     let svgText = '';
     lines.forEach((lineText, index) => {
       const svgPath = textToSVG.getPath(lineText, {
-        x: startX,
+        x: targetWidth / 2, // 中央揃え
         y: startY + index * lineHeight,
         fontSize: fontSize,
-        anchor: 'top left',
-        attributes: { fill: '#333' }
+        anchor: 'top center', // 中央揃え
+        attributes: {
+          fill: '#9575CD',         // ← ここに好きなパープルコード
+          'fill-opacity': '1.0'    // 薄めたいときは 0.8〜0.9 もOK
+        }
       });
       svgText += svgPath;
     });
