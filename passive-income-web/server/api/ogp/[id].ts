@@ -15,6 +15,8 @@ export default defineEventHandler(async (event) => {
     const surveyRes = await $fetch(`/api/gas-proxy?action=get&id=${id}`) as { result: string; data?: { title?: string; description?: string } };
     if (surveyRes.result === 'success' && surveyRes.data) {
       title = surveyRes.data.title || title;
+      // 絵文字を除去
+      title = title.replace(/\p{Emoji_Presentation}/gu, '');
       description = surveyRes.data.description || description;
     }
   } catch (e) {
