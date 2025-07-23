@@ -1,7 +1,5 @@
 import { defineEventHandler, setHeader } from 'h3';
 import sharp from 'sharp';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
 
 // テキストをSVGとして生成するヘルパー関数
 interface GenerateSvgForTextOptions {
@@ -68,7 +66,6 @@ const generateSvgForText = (
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id;
-  const config = useRuntimeConfig();
 
   let title = 'KOTAETE'; // デフォルトタイトル
   let description = 'KOTAETEは簡単・無料のアンケート作成サービスです。'; // デフォルトディスクリプション
@@ -84,31 +81,29 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Vercelのビルド時にファイルを含めるためのワークアラウンド
-    await fs.readdir(path.join(process.cwd()));
+    const storage = useStorage('assets:server');
 
-    const imagePath = path.join(process.cwd(), 'ogp-base.jpg');
-    const imageBuffer = await fs.readFile(imagePath);
+    const imageBuffer = await storage.getItemRaw('assets/ogp-base.jpg');
+    if (!imageBuffer) throw new Error('OGP base image not found');
     let image = sharp(imageBuffer);
 
-    // フォントファイルをローカルファイルシステムから読み込み、Base64エンコード
-    const fontPath = path.join(process.cwd(), 'NotoSansJP-Bold.ttf');
-    const fontBuffer = await fs.readFile(fontPath);
-    const fontBase64 = fontBuffer.toString('base64');
+    const fontBuffer = await storage.getItemRaw('assets/NotoSansJP-Bold.ttf');
+    if (!fontBuffer) throw new Error('Font file not found');
+    const fontBase64 = Buffer.from(fontBuffer).toString('base64');
 
     // OGP推奨サイズにリサイズ
     const targetWidth = 1200;
-    const targetHeight = 630; // Twitter推奨のアスペクト比1.91:1に近い
+    const targetHeight = 630;
 
     // テキストの描画
     const fontSize = 60;
-    const textYOffset = -50; // タイトルを少し上に配置
+    const textYOffset = -50;
 
     const svgText = generateSvgForText(title, targetWidth, targetHeight, fontSize, textYOffset, fontBase64);
 
     // SVGを画像に合成
     const outputBuffer = await image
-      .resize(targetWidth, targetHeight, { fit: 'cover' }) // アスペクト比を維持しつつ、指定サイズに収まるようにリサイズ
+      .resize(targetWidth, targetHeight, { fit: 'cover' })
       .composite([{
         input: Buffer.from(svgText),
         top: 0,
@@ -118,14 +113,12 @@ export default defineEventHandler(async (event) => {
       .toBuffer();
 
     setHeader(event, 'Content-Type', 'image/jpeg');
-    setHeader(event, 'Cache-Control', 'public, max-age=604800'); // 1週間キャッシュ
+    setHeader(event, 'Cache-Control', 'public, max-age=604800');
     setHeader(event, 'Content-Disposition', 'inline');
     return outputBuffer;
 
   } catch (error) {
     console.error('Error generating OGP image:', error);
-    // エラー時はデフォルトのOGP画像を返すか、エラー画像を生成する
-    // ここでは、エラーが発生した場合は500を返す例
     event.res.statusCode = 500;
     return 'Internal Server Error';
   }
