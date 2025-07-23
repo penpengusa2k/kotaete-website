@@ -15,7 +15,7 @@
         </nav>
       </div>
     </header>
-    <main class="max-w-4xl w-full bg-white p-6 sm:p-8 rounded-xl shadow-2xl mt-24">
+    <main class="max-w-4xl w-full bg-white p-6 sm:p-8 rounded-xl shadow-2xl mt-20">
       <slot />
     </main>
     <footer class="w-full max-w-4xl mt-8 text-center">
