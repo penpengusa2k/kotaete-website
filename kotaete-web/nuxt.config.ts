@@ -1,4 +1,10 @@
 export default defineNuxtConfig({
+  modules: [
+    '@nuxtjs/google-adsense'
+  ],
+  googleAdsense: {
+    id: process.env.NUXT_PUBLIC_GOOGLE_ADSENSE_ID
+  },
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
   postcss: {
