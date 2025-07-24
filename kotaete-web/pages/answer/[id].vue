@@ -66,6 +66,16 @@
             <p class="text-right text-sm text-gray-500 mt-1">{{ responses[index]?.length || 0 }} / 500</p>
           </div>
 
+          <div v-if="question.type === 'date'" class="mt-4">
+            <input 
+              type="date" 
+              v-model="responses[index]" 
+              class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+              required
+              :disabled="loading"
+            >
+          </div>
+
           <div v-if="question.type === 'radio'" class="mt-4 space-y-3">
             <div v-for="(option, oIndex) in question.options" :key="oIndex" class="flex items-center">
               <label class="inline-flex items-center cursor-pointer text-gray-700">
@@ -200,6 +210,7 @@ onMounted(async () => {
 
       responses.value = survey.value.questions.map(q => {
         if (q.type === 'checkbox') return [];
+        if (q.type === 'date') return ''; // 日付タイプも空文字列で初期化
         return '';
       });
     } else {

@@ -27,7 +27,7 @@
             <span class="inline-block border-l-4 border-teal-700 pl-3">Q{{ index + 1 }}. {{ question.text }}</span>
           </h2>
 
-          <div v-if="question.type === 'text'" class="mt-4">
+          <div v-if="question.type === 'text' || question.type === 'date'" class="mt-4">
             <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg border border-gray-200">
               <li v-for="(answer, aIndex) in getAnswersForQuestion(index)" :key="aIndex" class="mb-2 text-gray-700 last:mb-0">
                 {{ answer.text }} 
@@ -107,16 +107,23 @@
                     </span>
 
                     <template v-else>
-                      <Tooltip 
-                        v-if="result[hIndex] && String(result[hIndex]).length > 50" 
-                        :content="result[hIndex]">
-                        <span class="inline-block max-w-[150px] truncate cursor-help">
+                      <template v-if="surveyData.questions.find(q => q.text === header && q.type === 'date')">
+                        <span class="inline-block max-w-[150px] truncate">
+                          {{ formatDateOnly(result[hIndex]) }}
+                        </span>
+                      </template>
+                      <template v-else>
+                        <Tooltip 
+                          v-if="result[hIndex] && String(result[hIndex]).length > 50" 
+                          :content="result[hIndex]">
+                          <span class="inline-block max-w-[150px] truncate cursor-help">
+                            {{ truncateText(result[hIndex]) }}
+                          </span>
+                        </Tooltip>
+                        <span v-else class="inline-block max-w-[150px] truncate">
                           {{ truncateText(result[hIndex]) }}
                         </span>
-                      </Tooltip>
-                      <span v-else class="inline-block max-w-[150px] truncate">
-                        {{ truncateText(result[hIndex]) }}
-                      </span>
+                      </template>
                     </template>
                   </td>
                 </tr>
@@ -201,6 +208,28 @@ const formatDeadline = (deadline) => {
   });
 };
 
+const formatDateOnly = (dateInput) => {
+  if (!dateInput) return '';
+  let date;
+  try {
+    if (dateInput instanceof Date) {
+      date = dateInput;
+    } else {
+      date = new Date(dateInput);
+    }
+
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } catch (e) {
+    return ''; // エラー時は空文字列を返す
+  }
+};
+
 const fetchSurveyAndResults = async (key = null) => {
   // Reset only key-related error messages, not general error
   keyErrorMessage.value = '';
@@ -278,7 +307,8 @@ onMounted(async () => {
 });
 
 const getAnswersForQuestion = (questionIndex) => {
-  const questionText = surveyData.value.questions[questionIndex].text;
+  const question = surveyData.value.questions[questionIndex];
+  const questionText = question.text;
   const questionColIndex = resultHeaders.value.indexOf(questionText);
   if (questionColIndex === -1) return [];
 
@@ -286,7 +316,7 @@ const getAnswersForQuestion = (questionIndex) => {
   const usernameCol = resultHeaders.value.indexOf('username');
 
   return results.value.map(res => ({
-    text: res[questionColIndex],
+    text: question.type === 'date' ? formatDateOnly(res[questionColIndex]) : res[questionColIndex],
     respondentIdShort: respondentIdCol !== -1 ? res[respondentIdCol]?.substring(0, 6) || 'N/A' : 'N/A',
     username: usernameCol !== -1 ? res[usernameCol] || 'N/A' : 'N/A'
   })).filter(ans => ans.text);
@@ -333,9 +363,18 @@ const downloadCsv = () => {
   }
 
   const headers = resultHeaders.value.map(header => `"${formatHeader(header).replace(/"/g, '""')}"`).join(',');
-  const rows = results.value.map(row =>
-    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-  );
+  const rows = results.value.map(row => {
+    return row.map((cell, cellIndex) => {
+      const header = resultHeaders.value[cellIndex];
+      // 質問のヘッダーの場合のみ、日付タイプをチェックしてフォーマット
+      const question = surveyData.value.questions.find(q => q.text === header);
+      if (question && question.type === 'date') {
+        return `"${formatDateOnly(cell).replace(/"/g, '""')}"`;
+      } else {
+        return `"${String(cell).replace(/"/g, '""')}"`;
+      }
+    }).join(',');
+  });
 
   const csvContent = [headers, ...rows].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
