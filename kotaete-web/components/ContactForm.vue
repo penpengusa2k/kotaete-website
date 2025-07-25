@@ -5,17 +5,20 @@
     <form @submit.prevent="submitForm" class="space-y-4">
       <div>
         <label for="name" class="block text-gray-700 font-bold mb-2">お名前</label>
-        <input type="text" id="name" v-model="form.name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required :disabled="isLoading">
+        <input type="text" id="name" v-model="form.name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required :disabled="isLoading" :maxlength="MAX_NAME_LENGTH">
+        <p class="text-right text-sm text-gray-500 mt-1">{{ form.name.length }} / {{ MAX_NAME_LENGTH }}</p>
       </div>
 
       <div>
         <label for="email" class="block text-gray-700 font-bold mb-2">メールアドレス</label>
-        <input type="email" id="email" v-model="form.email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required :disabled="isLoading">
+        <input type="email" id="email" v-model="form.email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required :disabled="isLoading" :maxlength="MAX_EMAIL_LENGTH">
+        <p class="text-right text-sm text-gray-500 mt-1">{{ form.email.length }} / {{ MAX_EMAIL_LENGTH }}</p>
       </div>
 
       <div>
         <label for="message" class="block text-gray-700 font-bold mb-2">お問い合わせ内容</label>
-        <textarea id="message" v-model="form.message" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="6" required :disabled="isLoading"></textarea>
+        <textarea id="message" v-model="form.message" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="6" required :disabled="isLoading" :maxlength="MAX_MESSAGE_LENGTH"></textarea>
+        <p class="text-right text-sm text-gray-500 mt-1">{{ form.message.length }} / {{ MAX_MESSAGE_LENGTH }}</p>
       </div>
 
       <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" :disabled="isLoading">
@@ -41,6 +44,10 @@
 
 <script setup>
 import { ref } from 'vue';
+
+const MAX_NAME_LENGTH = 500;
+const MAX_EMAIL_LENGTH = 100;
+const MAX_MESSAGE_LENGTH = 500;
 
 const form = ref({
   name: '',

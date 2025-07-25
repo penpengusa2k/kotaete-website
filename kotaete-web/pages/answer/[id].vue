@@ -13,9 +13,13 @@
     </div>
     <div v-else-if="survey">
       <div class="mb-8 p-4 bg-white rounded-lg shadow-md border-l-4 border-blue-700">
-        <h1 class="text-3xl font-bold mb-2 break-words">{{ survey.title }}</h1>
-      <p class="text-gray-600 mb-6">{{ survey.description }}</p>
-      <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
+        <h1 class="text-3xl font-bold break-words text-left">{{ survey.title }}</h1>
+        <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
+          <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
+          {{ formatDeadline(survey.deadline) }}
+        </p>
+        <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
+        <p class="text-gray-600 mb-6">{{ survey.description }}</p>
       </div>
 
       <div v-if="isExpired" class="mb-8 p-6 bg-white rounded-lg shadow-md border-l-4 border-red-700">
@@ -64,6 +68,16 @@
               :disabled="loading"
             >
             <p class="text-right text-sm text-gray-500 mt-1">{{ responses[index]?.length || 0 }} / 500</p>
+          </div>
+
+          <div v-if="question.type === 'date'" class="mt-4">
+            <input 
+              type="date" 
+              v-model="responses[index]" 
+              class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+              required
+              :disabled="loading"
+            >
           </div>
 
           <div v-if="question.type === 'radio'" class="mt-4 space-y-3">
@@ -123,13 +137,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useHead, useRuntimeConfig } from '#app'
+import { ref, computed } from 'vue';
+import { useRoute, useAsyncData, useHead, useRuntimeConfig, navigateTo } from '#imports';
+import { formatDeadline } from '~/utils/formatters';
 
 const route = useRoute();
 const surveyId = route.params.id;
-const config = useRuntimeConfig(); // ここに移動
+const config = useRuntimeConfig();
 
 const survey = ref(null);
 const responses = ref([]);
@@ -141,28 +155,44 @@ const submitStatus = ref('');
 const respondentId = ref('');
 const hasSubmitted = ref(false);
 const username = ref('');
-const isExpired = ref(false);
 
-// OGPメタタグの設定
+const isExpired = computed(() => {
+  if (!survey.value || !survey.value.deadline) return false;
+  return new Date(survey.value.deadline) < new Date();
+});
+
+const { data: surveyData, pending, error: fetchError } = await useAsyncData('survey', async () => {
+  const res = await $fetch(`/api/gas-proxy?action=get&id=${surveyId}`);
+  if (res.result !== 'success') throw new Error(res.message || 'Fetch failed');
+  res.data.questions = JSON.parse(res.data.questions);
+  return res.data;
+});
+
+survey.value = surveyData.value;
+loading.value = pending.value;
+error.value = fetchError.value?.message || '';
+
 useHead(() => {
   const baseUrl = config.public.baseUrl;
   const ogpImageUrl = `${baseUrl}/api/ogp/${surveyId}`;
   const pageUrl = `${baseUrl}${route.fullPath}`;
+  const title = surveyData.value?.title || 'KOTAETE';
+  const desc = surveyData.value?.description || 'KOTAETEは簡単にアンケートを作成・回答できるサービスです。';
 
   return {
-    title: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE',
+    title: `KOTAETE: ${title}`,
     meta: [
-      { property: 'og:title', content: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE' },
-      { property: 'og:description', content: survey.value ? survey.value.description : 'KOTAETEは簡単にアンケートを作成・回答できるサービスです。' },
+      { property: 'og:title', content: `KOTAETE: ${title}` },
+      { property: 'og:description', content: desc },
       { property: 'og:url', content: pageUrl },
       { property: 'og:image', content: ogpImageUrl },
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: 'KOTAETE' },
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE' },
-      { name: 'twitter:description', content: survey.value ? survey.value.description : 'KOTAETEは簡単にアンケートを作成・回答できるサービスです。' },
+      { name: 'twitter:title', content: `KOTAETE: ${title}` },
+      { name: 'twitter:description', content: desc },
       { name: 'twitter:image', content: ogpImageUrl },
-    ],
+    ]
   };
 });
 
@@ -181,35 +211,9 @@ const getOrCreateRespondentId = async () => {
 };
 
 onMounted(async () => {
-  try {
-    await getOrCreateRespondentId();
-
-    const response = await $fetch(`/api/gas-proxy?action=get&id=${surveyId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (response.result === 'success') {
-      survey.value = response.data;
-      survey.value.questions = JSON.parse(response.data.questions);
-
-      if (survey.value.deadline && new Date(survey.value.deadline) < new Date()) {
-        isExpired.value = true;
-      }
-
-      responses.value = survey.value.questions.map(q => {
-        if (q.type === 'checkbox') return [];
-        return '';
-      });
-    } else {
-      error.value = response.message;
-    }
-  } catch (e) {
-    console.error('Error fetching survey:', e);
-    error.value = 'KOTAETEの読み込みに失敗しました。URLを確認してください。';
-  } finally {
-    loading.value = false;
+  await getOrCreateRespondentId();
+  if (survey.value) {
+    responses.value = survey.value.questions.map(q => (q.type === 'checkbox' ? [] : ''));
   }
 });
 
@@ -226,27 +230,25 @@ const submitResponse = async () => {
 
   const formattedResponses = [...responses.value];
   survey.value.questions.forEach((q, index) => {
-      if (q.type === 'checkbox') {
-          const checkedOptions = q.options.filter((opt, optIndex) => formattedResponses[index] && formattedResponses[index][optIndex]);
-          formattedResponses[index] = checkedOptions.map(opt => opt.value).join(', ');
-      }
+    if (q.type === 'checkbox') {
+      const checkedOptions = q.options.filter((opt, optIndex) => formattedResponses[index]?.[optIndex]);
+      formattedResponses[index] = checkedOptions.map(opt => opt.value).join(', ');
+    }
   });
 
   try {
     const response = await $fetch('/api/gas-proxy', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-      body: JSON.stringify({ 
-        action: 'answer', 
-        data: { 
-          id: surveyId, 
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'answer',
+        data: {
+          id: surveyId,
           respondent_id: respondentId.value,
           username: survey.value.anonymous ? null : username.value,
-          answers: formattedResponses 
-        } 
-      }),
+          answers: formattedResponses
+        }
+      })
     });
 
     if (response.result === 'success') {
@@ -267,7 +269,7 @@ const submitResponse = async () => {
   }
 };
 
-const goToResults = async () => {
+const goToResults = () => {
   navigateTo(`/result/${surveyId}`);
 };
 </script>
