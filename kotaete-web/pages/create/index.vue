@@ -85,7 +85,8 @@
             <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果を閲覧するためのパスワードです。結果の閲覧を制限する場合に必須となります。</span>
           </span>
         </label>
-        <input type="text" id="viewingKey" v-model="survey.viewingKey" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required @keydown.enter.prevent="focusNextInput">
+        <input type="text" id="viewingKey" v-model="survey.viewingKey" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required :maxlength="MAX_VIEWING_KEY_LENGTH" @keydown.enter.prevent="focusNextInput">
+        <p class="text-right text-sm text-gray-500 mt-1">{{ survey.viewingKey.length }} / {{ MAX_VIEWING_KEY_LENGTH }}</p>
       </div>
 
       <div class="mb-4">
@@ -143,6 +144,7 @@ const MAX_QUESTION_LENGTH = 500;
 const MAX_QUESTIONS = 50;
 const MAX_OPTIONS_PER_QUESTION = 10;
 const MAX_OPTION_VALUE_LENGTH = 500;
+const MAX_VIEWING_KEY_LENGTH = 50;
 const DEFAULT_DEADLINE_DAYS = 3;
 
 const getThreeDaysLater = () => {

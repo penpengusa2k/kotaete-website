@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-bold mb-6">KOTAETE作成完了！🎉</h1>
 
     <div class="p-6 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-md mb-8">
-      <h2 class="text-2xl font-bold mb-3">KOTAETE「{{ surveyTitle }}」が作成されました！</h2>
+      <h2 class="text-2xl font-bold mb-3 break-words">KOTAETE「{{ surveyTitle }}」が作成されました！</h2>
       <p class="mb-4">以下のURLを共有して、KOTAETEを開始しましょう！</p>
 
       <!-- Answer URL -->
@@ -78,8 +78,8 @@
     </div>
 
     <div class="mt-8 text-center">
-      <NuxtLink to="/" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-        トップページに戻る
+      <NuxtLink to="/contact" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+        ご意見・ご要望・その他お問合わせはこちら！
       </NuxtLink>
     </div>
 
