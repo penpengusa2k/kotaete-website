@@ -137,14 +137,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useHead, useRuntimeConfig } from '#app'
-import { formatDeadline } from '~/utils/formatters'
+import { ref, computed } from 'vue';
+import { useRoute, useAsyncData, useHead, useRuntimeConfig, navigateTo } from '#imports';
+import { formatDeadline } from '~/utils/formatters';
 
 const route = useRoute();
 const surveyId = route.params.id;
-const config = useRuntimeConfig(); // ここに移動
+const config = useRuntimeConfig();
 
 const survey = ref(null);
 const responses = ref([]);
@@ -156,33 +155,44 @@ const submitStatus = ref('');
 const respondentId = ref('');
 const hasSubmitted = ref(false);
 const username = ref('');
+
 const isExpired = computed(() => {
   if (!survey.value || !survey.value.deadline) return false;
   return new Date(survey.value.deadline) < new Date();
 });
 
+const { data: surveyData, pending, error: fetchError } = await useAsyncData('survey', async () => {
+  const res = await $fetch(`/api/gas-proxy?action=get&id=${surveyId}`);
+  if (res.result !== 'success') throw new Error(res.message || 'Fetch failed');
+  res.data.questions = JSON.parse(res.data.questions);
+  return res.data;
+});
 
+survey.value = surveyData.value;
+loading.value = pending.value;
+error.value = fetchError.value?.message || '';
 
-// OGPメタタグの設定
 useHead(() => {
   const baseUrl = config.public.baseUrl;
   const ogpImageUrl = `${baseUrl}/api/ogp/${surveyId}`;
   const pageUrl = `${baseUrl}${route.fullPath}`;
+  const title = surveyData.value?.title || 'KOTAETE';
+  const desc = surveyData.value?.description || 'KOTAETEは簡単にアンケートを作成・回答できるサービスです。';
 
   return {
-    title: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE',
+    title: `KOTAETE: ${title}`,
     meta: [
-      { property: 'og:title', content: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE' },
-      { property: 'og:description', content: survey.value ? survey.value.description : 'KOTAETEは簡単にアンケートを作成・回答できるサービスです。' },
+      { property: 'og:title', content: `KOTAETE: ${title}` },
+      { property: 'og:description', content: desc },
       { property: 'og:url', content: pageUrl },
       { property: 'og:image', content: ogpImageUrl },
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: 'KOTAETE' },
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: survey.value ? `KOTAETE: ${survey.value.title}` : 'KOTAETE' },
-      { name: 'twitter:description', content: survey.value ? survey.value.description : 'KOTAETEは簡単にアンケートを作成・回答できるサービスです。' },
+      { name: 'twitter:title', content: `KOTAETE: ${title}` },
+      { name: 'twitter:description', content: desc },
       { name: 'twitter:image', content: ogpImageUrl },
-    ],
+    ]
   };
 });
 
@@ -200,37 +210,10 @@ const getOrCreateRespondentId = async () => {
   hasSubmitted.value = localStorage.getItem(`submitted_${surveyId}`) === 'true';
 };
 
-const { data: surveyData, pending, error: fetchError } = await useFetch(`/api/gas-proxy?action=get&id=${surveyId}`, {
-  method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  transform: (response) => {
-    if (response.result === 'success') {
-      response.data.questions = JSON.parse(response.data.questions);
-      return response.data;
-    } else {
-      throw new Error(response.message || 'Failed to fetch survey data');
-    }
-  }
-});
-
-survey.value = surveyData.value;
-loading.value = pending.value;
-error.value = fetchError.value ? fetchError.value.message : '';
-
 onMounted(async () => {
   await getOrCreateRespondentId();
-  // Initialize responses and isExpired after survey data is available
   if (survey.value) {
-    responses.value = survey.value.questions.map(q => {
-      if (q.type === 'checkbox') return [];
-      if (q.type === 'date') return '';
-      return '';
-    });
-    if (survey.value.deadline && new Date(survey.value.deadline) < new Date()) {
-      isExpired.value = true;
-    }
+    responses.value = survey.value.questions.map(q => (q.type === 'checkbox' ? [] : ''));
   }
 });
 
@@ -247,27 +230,25 @@ const submitResponse = async () => {
 
   const formattedResponses = [...responses.value];
   survey.value.questions.forEach((q, index) => {
-      if (q.type === 'checkbox') {
-          const checkedOptions = q.options.filter((opt, optIndex) => formattedResponses[index] && formattedResponses[index][optIndex]);
-          formattedResponses[index] = checkedOptions.map(opt => opt.value).join(', ');
-      }
+    if (q.type === 'checkbox') {
+      const checkedOptions = q.options.filter((opt, optIndex) => formattedResponses[index]?.[optIndex]);
+      formattedResponses[index] = checkedOptions.map(opt => opt.value).join(', ');
+    }
   });
 
   try {
     const response = await $fetch('/api/gas-proxy', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-      body: JSON.stringify({ 
-        action: 'answer', 
-        data: { 
-          id: surveyId, 
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'answer',
+        data: {
+          id: surveyId,
           respondent_id: respondentId.value,
           username: survey.value.anonymous ? null : username.value,
-          answers: formattedResponses 
-        } 
-      }),
+          answers: formattedResponses
+        }
+      })
     });
 
     if (response.result === 'success') {
@@ -288,7 +269,7 @@ const submitResponse = async () => {
   }
 };
 
-const goToResults = async () => {
+const goToResults = () => {
   navigateTo(`/result/${surveyId}`);
 };
 </script>
