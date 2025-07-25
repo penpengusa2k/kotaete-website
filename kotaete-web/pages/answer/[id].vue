@@ -200,37 +200,37 @@ const getOrCreateRespondentId = async () => {
   hasSubmitted.value = localStorage.getItem(`submitted_${surveyId}`) === 'true';
 };
 
-onMounted(async () => {
-  try {
-    await getOrCreateRespondentId();
-
-    const response = await $fetch(`/api/gas-proxy?action=get&id=${surveyId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+const { data: surveyData, pending, error: fetchError } = await useFetch(`/api/gas-proxy?action=get&id=${surveyId}`, {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  transform: (response) => {
     if (response.result === 'success') {
-      survey.value = response.data;
-      survey.value.questions = JSON.parse(response.data.questions);
-
-      if (survey.value.deadline && new Date(survey.value.deadline) < new Date()) {
-        isExpired.value = true;
-      }
-
-      responses.value = survey.value.questions.map(q => {
-        if (q.type === 'checkbox') return [];
-        if (q.type === 'date') return ''; // 日付タイプも空文字列で初期化
-        return '';
-      });
+      response.data.questions = JSON.parse(response.data.questions);
+      return response.data;
     } else {
-      error.value = response.message;
+      throw new Error(response.message || 'Failed to fetch survey data');
     }
-  } catch (e) {
-    console.error('Error fetching survey:', e);
-    error.value = 'KOTAETEの読み込みに失敗しました。URLを確認してください。';
-  } finally {
-    loading.value = false;
+  }
+});
+
+survey.value = surveyData.value;
+loading.value = pending.value;
+error.value = fetchError.value ? fetchError.value.message : '';
+
+onMounted(async () => {
+  await getOrCreateRespondentId();
+  // Initialize responses and isExpired after survey data is available
+  if (survey.value) {
+    responses.value = survey.value.questions.map(q => {
+      if (q.type === 'checkbox') return [];
+      if (q.type === 'date') return '';
+      return '';
+    });
+    if (survey.value.deadline && new Date(survey.value.deadline) < new Date()) {
+      isExpired.value = true;
+    }
   }
 });
 
