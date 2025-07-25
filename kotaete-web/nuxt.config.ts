@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   plugins: [
     '~/plugins/persistedstate.client.ts'
   ],
+  // googleAdsense通過でhereを有効化
   // googleAdsense: {
   //   id: process.env.NUXT_PUBLIC_GOOGLE_ADSENSE_ID
   // },
