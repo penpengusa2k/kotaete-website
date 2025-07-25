@@ -1,6 +1,10 @@
 export default defineNuxtConfig({
   modules: [
-    '@nuxtjs/google-adsense'
+    '@nuxtjs/google-adsense',
+    '@pinia/nuxt'
+  ],
+  plugins: [
+    '~/plugins/persistedstate.client.ts'
   ],
   googleAdsense: {
     id: process.env.NUXT_PUBLIC_GOOGLE_ADSENSE_ID
