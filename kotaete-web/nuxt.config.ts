@@ -1,14 +1,14 @@
 export default defineNuxtConfig({
   modules: [
-    '@nuxtjs/google-adsense',
+    // @nuxtjs/google-adsense は審査通過後に使用でOK（下で補足）
     '@pinia/nuxt'
   ],
   plugins: [
     '~/plugins/persistedstate.client.ts'
   ],
-  googleAdsense: {
-    id: process.env.NUXT_PUBLIC_GOOGLE_ADSENSE_ID
-  },
+  // googleAdsense: {
+  //   id: process.env.NUXT_PUBLIC_GOOGLE_ADSENSE_ID
+  // },
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
   postcss: {
@@ -24,7 +24,6 @@ export default defineNuxtConfig({
     }
   },
   app: {
-
     head: {
       title: 'KOTAETE',
       meta: [
@@ -36,6 +35,13 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/png', href: '/icon.png' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined' }
+      ],
+      script: [
+        {
+          src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8037790037502671',
+          async: true,
+          crossorigin: 'anonymous'
+        }
       ]
     }
   }
