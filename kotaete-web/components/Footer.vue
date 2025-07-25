@@ -15,6 +15,7 @@
         <NuxtLink to="/about" class="hover:text-white transition-colors duration-200">このサイトについて</NuxtLink>
         <NuxtLink to="/how-to-use" class="hover:text-white transition-colors duration-200">使い方</NuxtLink>
         <NuxtLink to="/privacy" class="hover:text-white transition-colors duration-200">プライバシーポリシー</NuxtLink>
+        <NuxtLink to="/terms" class="hover:text-white transition-colors duration-200">利用規約</NuxtLink>
         <NuxtLink to="/faq" class="hover:text-white transition-colors duration-200">よくある質問</NuxtLink>
         <NuxtLink to="/contact" class="hover:text-white transition-colors duration-200">お問い合わせ</NuxtLink>
       </div>

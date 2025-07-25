@@ -17,7 +17,7 @@
           1. アンケートを作成する
         </h2>
         <div class="space-y-4 text-lg">
-          <p class="leading-relaxed">トップページの「NEW」ボタン、または<NuxtLink to="/create" class="text-blue-500 hover:underline font-medium">作成ページ</NuxtLink>からアンケートの作成を開始します。</p>
+          <p class="leading-relaxed">トップページの「さっそくKOTAETEを試してみる」ボタンやヘッダーの「NEW」ボタン、もしくは<NuxtLink to="/create" class="text-blue-500 hover:underline font-medium">こちら</NuxtLink>のボタンからアンケートの作成を開始します。</p>
           
           <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <h3 class="text-xl font-medium mb-2 flex items-center"><span class="material-icons-outlined text-blue-600 mr-2">edit_note</span>基本情報</h3>
@@ -32,7 +32,7 @@
             <h3 class="text-xl font-medium mb-2 flex items-center"><span class="material-icons-outlined text-green-600 mr-2">quiz</span>質問の追加</h3>
             <ul class="list-disc list-inside space-y-2 pl-4">
               <li>「+ 質問を追加」ボタンで、質問をどんどん追加できます。</li>
-              <li>質問タイプ（記述式、ラジオボタン、チェックボックス）を選択し、質問文と選択肢（必要な場合）を入力します。</li>
+              <li>質問タイプ（記述式、ラジオボタン、チェックボックス、日付）を選択し、質問文と選択肢（必要な場合）を入力します。</li>
             </ul>
           </div>
 
