@@ -13,9 +13,13 @@
     </div>
     <div v-else-if="survey">
       <div class="mb-8 p-4 bg-white rounded-lg shadow-md border-l-4 border-blue-700">
-        <h1 class="text-3xl font-bold mb-2 break-words">{{ survey.title }}</h1>
-      <p class="text-gray-600 mb-6">{{ survey.description }}</p>
-      <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
+        <h1 class="text-3xl font-bold break-words text-left">{{ survey.title }}</h1>
+        <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
+          <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
+          {{ formatDeadline(survey.deadline) }}
+        </p>
+        <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
+        <p class="text-gray-600 mb-6">{{ survey.description }}</p>
       </div>
 
       <div v-if="isExpired" class="mb-8 p-6 bg-white rounded-lg shadow-md border-l-4 border-red-700">
@@ -133,9 +137,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead, useRuntimeConfig } from '#app'
+import { formatDeadline } from '~/utils/formatters'
 
 const route = useRoute();
 const surveyId = route.params.id;
@@ -151,7 +156,12 @@ const submitStatus = ref('');
 const respondentId = ref('');
 const hasSubmitted = ref(false);
 const username = ref('');
-const isExpired = ref(false);
+const isExpired = computed(() => {
+  if (!survey.value || !survey.value.deadline) return false;
+  return new Date(survey.value.deadline) < new Date();
+});
+
+
 
 // OGPメタタグの設定
 useHead(() => {

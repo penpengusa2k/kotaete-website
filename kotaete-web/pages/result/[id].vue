@@ -13,8 +13,9 @@
     </div>
     <div v-else-if="surveyData">
       <div v-if="hasAccess">
+        <h1 class="text-3xl font-bold mb-2">KOTAETEの集計結果</h1>
         <div class="mb-8 p-4 bg-white rounded-lg shadow-md border-l-4" :class="isExpired ? 'border-red-700' : 'border-blue-700'">
-          <h1 class="text-3xl font-bold mb-2">「{{ surveyData.title }}」の集計結果</h1>
+          <h1 class="text-3xl font-bold break-words text-left">{{ surveyData.title }}</h1>
           <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
             <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
             {{ formatDeadline(surveyData.deadline) }}
@@ -173,6 +174,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Tooltip from '~/components/Tooltip.vue'
+import { formatDeadline } from '~/utils/formatters'
 
 const route = useRoute();
 const router = useRouter();
@@ -195,18 +197,7 @@ const isExpired = computed(() => {
   return new Date(surveyData.value.deadline) < new Date();
 });
 
-const formatDeadline = (deadline) => {
-  if (!deadline) return '設定なし';
-  const date = new Date(deadline);
-  return date.toLocaleString('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  });
-};
+
 
 const formatDateOnly = (dateInput) => {
   if (!dateInput) return '';

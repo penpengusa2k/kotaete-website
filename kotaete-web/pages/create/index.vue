@@ -291,6 +291,8 @@ const createSurvey = async () => {
       createStore.title = survey.value.title;
       createStore.isRestricted = survey.value.resultRestricted;
       createStore.viewingKey = survey.value.viewingKey;
+      createStore.deadline = survey.value.deadline;
+      createStore.creatorName = survey.value.creatorName;
       router.push({
         path: `/create/success/${response.id}`,
       });

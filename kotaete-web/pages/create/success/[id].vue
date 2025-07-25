@@ -3,8 +3,15 @@
     <h1 class="text-3xl font-bold mb-6">KOTAETE作成完了！🎉</h1>
 
     <div class="p-6 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-md mb-8">
-      <h2 class="text-2xl font-bold mb-3 break-words">KOTAETE「{{ surveyTitle }}」が作成されました！</h2>
-      <p class="mb-4">以下のURLを共有して、KOTAETEを開始しましょう！</p>
+        <div class="p-4 border rounded-lg bg-white shadow-md mb-6">
+          <h1 class="text-3xl text-black font-bold break-words text-left">{{ surveyTitle }}</h1>
+          <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
+            <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
+            {{ formatDeadline(surveyDeadline) }}
+          </p>
+          <p class="text-gray-600 mb-2">Created by {{ surveyCreatorName || '名無し' }}</p>
+        </div>
+        <p class="mb-4">以下のURLを共有して、KOTAETEを開始しましょう！</p>
 
       <!-- Answer URL -->
       <div class="mb-4">
@@ -95,6 +102,7 @@
 import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCreateStore } from '~/stores/create';
+import { formatDeadline } from '~/utils/formatters';
 
 const isHydrated = ref(false)
 const showCopiedMessage = ref(false)
@@ -114,6 +122,15 @@ const surveyId = route.params.id;
 const surveyTitle = computed(() => createStore.title || '新しいKOTAETE')
 const isRestricted = computed(() => createStore.isRestricted === true)
 const viewingKey = computed(() => createStore.viewingKey || '')
+const surveyDeadline = computed(() => createStore.deadline || '')
+const surveyCreatorName = computed(() => createStore.creatorName || '名無し')
+
+const isExpired = computed(() => {
+  if (!surveyDeadline.value) return false;
+  return new Date(surveyDeadline.value) < new Date();
+});
+
+
 
 const baseUrl = useRequestURL().origin;
 const answerUrl = computed(() => `${baseUrl}/answer/${surveyId}`);
