@@ -1,0 +1,61 @@
+name: Deploy GAS to DEV or PROD
+
+# ワークフローが実行されるトリガーを設定
+on:
+  push:
+    branches:
+      - main     # mainブランチへのpush
+      - develop  # developブランチへのpush
+    paths:
+      # リポジトリルートから見たGASコードのパス
+      - 'kotaete-web/gas/**'
+
+jobs:
+  deploy-gas:
+    # 実行環境として最新のUbuntuを使用
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. リポジトリのコードをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Node.js環境をセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # 3. Google clasp CLIをインストール
+      - name: Install clasp
+        run: npm install -g @google/clasp
+
+      # 4. .clasp.jsonファイルを生成
+      #    rootDirにはリポジトリルートからの正しいパスを指定
+      - name: Create .clasp.json
+        run: echo '{"scriptId":"${{ secrets.SCRIPT_ID }}","rootDir":"./kotaete-web/gas"}' > .clasp.json
+
+      # 5. .clasprc.jsonファイルを生成して認証
+      - name: Create .clasprc.json for authentication
+        run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+
+      # 6. コードをGoogle Apps Scriptプロジェクトにプッシュ
+      - name: Push files to Google Apps Script
+        run: clasp push -f
+
+      # 7. developブランチの場合：開発（HEAD）デプロイを更新
+      - name: Announce DEV deployment update
+        if: github.ref == 'refs/heads/develop'
+        run: echo "DEV (HEAD) deployment was updated automatically by the push."
+
+      # 8. mainブランチの場合：本番（PROD）デプロイを更新
+      - name: Create version and deploy to PROD
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Creating a new version for PROD..."
+          VERSION_NAME="v$(date +%Y%m%d-%H%M%S)"
+
+          clasp version "Auto-deployment from main branch: ${VERSION_NAME}"
+
+          echo "Deploying the latest version to PROD deployment..."
+          clasp deploy --version-number @latest --deployment-id ${{ secrets.PROD_DEPLOYMENT_ID }} --description "Release: ${VERSION_NAME}"
