@@ -142,6 +142,33 @@ function handleCreate(data) {  const questions = JSON.parse(data.questions);  co
 }
 
 function handleAnswer(data) {
+  // --- ADDED: Validate deadline ---
+  const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
+  const masterData = masterSheet.getDataRange().getValues();
+  const masterHeader = masterData.shift();
+  const idCol = masterHeader.indexOf('id');
+  const deadlineCol = masterHeader.indexOf('deadline');
+
+  const surveyRow = masterData.find(row => row[idCol] == data.id);
+  if (!surveyRow) throw new Error('アンケートが見つかりません。');
+
+  const deadlineRaw = surveyRow[deadlineCol];
+  const deadline = new Date(deadlineRaw);
+  const now = new Date();
+
+  // --- LOGGING FOR DEBUGGING ---
+  console.log(`[DEADLINE_CHECK] Survey ID: ${data.id}`);
+  console.log(`[DEADLINE_CHECK] Deadline from Sheet (Raw): ${deadlineRaw}`);
+  console.log(`[DEADLINE_CHECK] Parsed Deadline (Date Object): ${deadline.toISOString()}`);
+  console.log(`[DEADLINE_CHECK] Current Time (Date Object): ${now.toISOString()}`);
+  console.log(`[DEADLINE_CHECK] Comparison: deadline < now  ?  ${deadline < now}`);
+  // --- END LOGGING ---
+
+  if (deadline < now) {
+    throw new Error('このKOTAETEは回答期限を過ぎています。');
+  }
+  // --- END: Validate deadline ---
+
   const responseSheetName = `responses_${data.id}`;
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(responseSheetName);
   if (!sheet) throw new Error('Response sheet not found.');

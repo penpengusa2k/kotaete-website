@@ -90,13 +90,20 @@
       </div>
 
       <div class="mb-4">
-        <label for="deadline" class="block text-gray-700 font-bold mb-2">回答受付期限 <span class="text-red-500">*</span>
+        <label for="deadline" class="inline-block text-gray-700 font-bold mb-2">回答受付期限 <span class="text-red-500">*</span>
           <span class="relative group">
             <span class="ml-1 text-gray-500 cursor-pointer material-icons-outlined text-base align-middle">info</span>
             <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">回答の受付を終了する日時です。この日時を過ぎると回答できなくなります。</span>
           </span>
         </label>
-        <input type="datetime-local" id="deadline" v-model="survey.deadline" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required @keydown.enter.prevent="focusNextInput">
+        <div class="relative cursor-pointer" @click="openDeadlinePicker">
+          <input type="datetime-local" id="deadline" ref="deadlineInput" v-model="survey.deadline" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 pr-8" required @keydown.enter.prevent="focusNextInput">
+          <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm10 5H4v8h12V7z" clip-rule="evenodd" />
+            </svg>
+          </span>
+        </div>
       </div>
 
       <div class="mb-4">
@@ -176,6 +183,19 @@ const formSubmitted = ref(false);
 const creatorNameError = ref(false);
 
 const titleInput = ref(null);
+const deadlineInput = ref(null);
+
+const openDeadlinePicker = () => {
+  if (deadlineInput.value) {
+    try {
+      deadlineInput.value.showPicker();
+    } catch (error) {
+      // showPicker() might not be supported in all browsers.
+      // In such cases, the default behavior will be used.
+      console.error("showPicker() is not supported by this browser.", error);
+    }
+  }
+};
 
 const validateCreatorName = () => {
   creatorNameError.value = !survey.value.creatorName.trim();
@@ -371,3 +391,11 @@ onMounted(() => {
 });
 
 </script>
+
+<style scoped>
+/* Hide the default calendar icon for Webkit browsers */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+</style>

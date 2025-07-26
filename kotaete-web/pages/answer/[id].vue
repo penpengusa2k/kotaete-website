@@ -218,6 +218,21 @@ onMounted(async () => {
 });
 
 const submitResponse = async () => {
+  // Re-check deadline at the moment of submission
+  const now = new Date();
+  const deadline = new Date(survey.value.deadline);
+  if (deadline < now) {
+    submitMessage.value = 'このKOTAETEは回答期限を過ぎています。ページを更新します。';
+    submitStatus.value = 'error';
+    isExpired.value = true; // Force UI update
+
+    // Wait 2 seconds for the user to read the message, then reload.
+    setTimeout(() => {
+      location.reload();
+    }, 2000);
+    return;
+  }
+
   if (!survey.value.anonymous && (!username.value || username.value.trim() === '')) {
     submitMessage.value = 'ユーザー名を入力してください。';
     submitStatus.value = 'error';
