@@ -59,7 +59,7 @@ function doPost(e) {
   }
 }
 
-// --- GET HANDLERS --
+// --- GET HANDLERS ---
 function handleGetResponse(id) {
   if (!id) throw new Error('Survey ID is required.');
   
