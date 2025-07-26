@@ -38,16 +38,8 @@ jobs:
           echo "Target: DEV environment"
 
       # --- 認証用 clasprc.json を secrets から復元（Base64） ---
-      - name: Create .clasprc.json for authentication
-        run: echo "${{ secrets.CLASPRC_JSON_BASE64 }}" | base64 -d > ~/.clasprc.json
-
-      # --- デバッグステップ：復元された ~/.clasprc.json を出力（access_token確認用） ---
-      - name: Debug: Print first part of .clasprc.json
-        run: |
-          echo "===== ~/.clasprc.json preview ====="
-          head -c 500 ~/.clasprc.json || echo "(file missing or empty)"
-          echo ""
-          echo "===== End of preview ====="
+      - name: Create .clasprc.json from raw secret
+        run: echo '${{ secrets.CLASPRC_JSON_RAW }}' > ~/.clasprc.json
 
       # --- clasp 実行 ---
       - name: Push files to Google Apps Script
