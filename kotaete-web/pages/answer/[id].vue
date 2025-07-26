@@ -16,11 +16,11 @@
         <span class="text-3xl font-bold mr-2 text-primary">Let's</span>
         <img src="/site-title.png" alt="KOTAETE" class="h-10">
       </div>
-      <div class="mb-6 p-4 border rounded">
-        <h1 class="text-3xl font-bold break-words mb-2">{{ survey.title }}</h1>
+      <div class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
+        <h2 class="text-2xl font-bold break-words mb-2">{{ survey.title }}</h2>
         <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
         <p class="text-gray-600 mb-2 whitespace-pre-wrap">{{ survey.description }}</p>
-        <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
+        <p class="text-base font-medium" :class="isExpired ? 'text-danger' : 'text-secondary'">
           <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
           {{ formatDeadline(survey.deadline) }}
         </p>
@@ -51,7 +51,7 @@
             type="text"
             id="username"
             v-model="username"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
             required
             placeholder="あなたの名前を入力してください"
             :disabled="loading"
@@ -59,7 +59,7 @@
         </div>
 
         <hr v-if="!survey.anonymous" class="my-6">
-        <div v-for="(question, index) in survey.questions" :key="index" class="mb-6 p-4 border rounded">
+        <div v-for="(question, index) in survey.questions" :key="index" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
           <label class="block text-gray-700 font-bold mb-2">
             Q{{ index + 1 }}. {{ question.text }} <span class="text-red-500">*</span>
           </label>
@@ -67,7 +67,7 @@
           <div v-if="question.type === 'text'" class="mt-2">
             <textarea
               v-model="responses[index]"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
               required
               maxlength="500"
               rows="3"
@@ -81,7 +81,7 @@
             <input
               type="date"
               v-model="responses[index]"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
               required
               :disabled="loading"
             >
@@ -95,7 +95,7 @@
                   :name="`question-${index}`"
                   :value="option.value"
                   v-model="responses[index]"
-                  class="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  class="form-radio h-5 w-5 text-primary border-neutral-light focus:ring-primary-dark transition-colors duration-200"
                   required
                   :disabled="loading"
                 >
@@ -111,7 +111,7 @@
                       type="checkbox"
                       :value="option.value"
                       v-model="responses[index]"
-                      class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      class="form-checkbox h-5 w-5 text-primary border-neutral-light rounded focus:ring-primary-dark transition-colors duration-200"
                       :disabled="loading"
                     >
                     <span class="ml-3 break-all">{{ option.value }}</span>
@@ -123,7 +123,7 @@
           <div class="mt-8">
             <button
               type="submit"
-              :class="[ (submitting) ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700', 'text-white font-bold py-3 px-6 rounded-full w-full text-xl flex items-center justify-center' ]"
+              :class="[ (submitting) ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark', 'text-white font-bold py-3 px-6 rounded-lg w-full text-xl flex items-center justify-center shadow-md transition-colors duration-300' ]"
               :disabled="submitting"
             >
               <span v-if="submitting" class="flex items-center">

@@ -13,24 +13,27 @@
     </div>
     <div v-else-if="surveyData">
       <div v-if="hasAccess">
-        <h1 class="text-3xl font-bold mb-2">KOTAETEの集計結果</h1>
-        <div class="mb-6 p-4 border rounded">
+        <div class="flex items-center mb-4">
+          <img src="/site-title.png" alt="KOTAETE" class="h-10 mr-2">
+          <h1 class="text-3xl font-bold text-primary">の集計結果</h1>
+        </div>
+        <div class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
           <h2 class="text-2xl font-bold break-words mb-2">{{ surveyData.title }}</h2>
           <p class="text-gray-600 mb-2">Created by {{ surveyData.creator_name || '名無し' }}</p>
-          <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
+          <p class="text-base font-medium" :class="isExpired ? 'text-danger' : 'text-secondary'">
             <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
             {{ formatDeadline(surveyData.deadline) }}
           </p>
         </div>
 
         <hr class="my-6">
-        <div v-for="(question, index) in surveyData.questions" :key="index" class="mb-6 p-4 border rounded">
+        <div v-for="(question, index) in surveyData.questions" :key="index" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
           <h3 class="text-xl font-bold text-gray-800 mb-3">
             Q{{ index + 1 }}. {{ question.text }}
           </h3>
 
           <div v-if="question.type === 'text' || question.type === 'date'">
-            <ul class="list-disc list-inside bg-gray-50 p-3 rounded">
+            <ul class="list-disc list-inside bg-neutral-lightest p-3 rounded-lg border border-neutral-light">
               <li v-for="(answer, aIndex) in getAnswersForQuestion(index)" :key="aIndex" class="mb-1 text-gray-700">
                 {{ answer.text }}
                 <span v-if="surveyData.anonymous" class="text-xs text-gray-500 ml-1"> (匿名ユーザー {{ answer.respondentIdShort }})
@@ -44,13 +47,13 @@
           </div>
 
           <div v-if="question.type === 'radio' || question.type === 'checkbox'" class="space-y-3">
-            <div v-for="option in question.options" :key="option.value" class="p-2 bg-gray-50 rounded">
+            <div v-for="option in question.options" :key="option.value" class="p-2 bg-neutral-lightest rounded-lg border border-neutral-light">
               <div class="flex items-center justify-between mb-1">
-                <span class="text-gray-700 break-all mr-2">{{ option.value }}</span>
-                <span class="font-bold text-blue-700 whitespace-nowrap">{{ countOccurrences(index, option.value) }}票</span>
+                <span class="text-neutral-darkest break-all mr-2">{{ option.value }}</span>
+                <span class="font-bold text-primary whitespace-nowrap">{{ countOccurrences(index, option.value) }}票</span>
               </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-blue-600 h-2.5 rounded-full" :style="{ width: getPercentage(countOccurrences(index, option.value)) + '%' }"></div>
+              <div class="w-full bg-neutral-light rounded-full h-2.5">
+                <div class="bg-primary h-2.5 rounded-full" :style="{ width: getPercentage(countOccurrences(index, option.value)) + '%' }"></div>
               </div>
             </div>
           </div>
@@ -59,44 +62,44 @@
         <hr class="my-6">
 
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mb-4">
-          <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">全回答データ（総回答数: {{ results.length }}件）</h2>
-          <button @click="downloadCsv" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">全回答データ（総回答数: <span class="text-primary">{{ results.length }}</span>件）</h2>
+          <button @click="downloadCsv" class="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg text-sm shadow-md transition-colors duration-300">
             CSVダウンロード
           </button>
         </div>
 
-        <div class="overflow-x-auto border rounded-lg">
+        <div class="overflow-x-auto border border-neutral-light rounded-lg shadow-md">
           <table class="min-w-full bg-white">
-            <thead class="bg-gray-50">
+            <thead class="bg-neutral-darkest">
               <tr>
-                <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">回答者ID</th>
-                <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">タイムスタンプ</th>
-                <th v-for="(question, qIndex) in surveyData.questions" :key="qIndex" class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="py-2 px-3 text-left text-xs font-medium text-white uppercase tracking-wider">回答者</th>
+                <th class="py-2 px-3 text-left text-xs font-medium text-white uppercase tracking-wider">タイムスタンプ</th>
+                <th v-for="(question, qIndex) in surveyData.questions" :key="qIndex" class="py-2 px-3 text-left text-xs font-medium text-neutral-dark uppercase tracking-wider">
                   <Tooltip :content="formatQuestionHeader(question, qIndex)">
                     <span class="cursor-help">{{ `Q${qIndex + 1}` }}</span>
                   </Tooltip>
                 </th>
-                <th v-if="!surveyData.anonymous && resultHeaders.includes('username')" class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ユーザー名</th>
+                <th v-if="!surveyData.anonymous && resultHeaders.includes('username')" class="py-2 px-3 text-left text-xs font-medium text-white uppercase tracking-wider">ユーザー名</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr v-for="(result, rIndex) in results" :key="rIndex" class="hover:bg-gray-50">
-                <td class="py-2 px-3 text-sm text-gray-800">
+            <tbody class="divide-y divide-neutral-light">
+              <tr v-for="(result, rIndex) in results" :key="rIndex" class="hover:bg-neutral-lightest">
+                <td class="py-2 px-3 text-sm text-neutral-darkest">
                   <span v-if="surveyData.anonymous">匿名ユーザー ({{ result[resultHeaders.indexOf('respondent_id')]?.substring(0, 6) || 'N/A' }})</span>
                   <span v-else>{{ result[resultHeaders.indexOf('respondent_id')] || 'N/A' }}</span>
                 </td>
-                <td class="py-2 px-3 text-sm text-gray-800">{{ new Date(result[resultHeaders.indexOf('timestamp')]).toLocaleString() }}</td>
-                <td v-for="(question, qIndex) in surveyData.questions" :key="qIndex" class="py-2 px-3 text-sm text-gray-800">
+                <td class="py-2 px-3 text-sm text-neutral-darkest">{{ new Date(result[resultHeaders.indexOf('timestamp')]).toLocaleString() }}</td>
+                <td v-for="(question, qIndex) in surveyData.questions" :key="qIndex" class="py-2 px-3 text-sm text-neutral-darkest">
                   <Tooltip v-if="result[qIndex + 2] && String(result[qIndex + 2]).length > 20" :content="result[qIndex + 2]">
                     <span class="inline-block max-w-[120px] truncate cursor-help">{{ truncateText(result[qIndex + 2], 20) }}</span>
                   </Tooltip>
                   <span v-else>{{ truncateText(result[qIndex + 2], 20) }}</span>
                 </td>
-                <td v-if="!surveyData.anonymous && resultHeaders.includes('username')" class="py-2 px-3 text-sm text-gray-800">{{ result[resultHeaders.indexOf('username')] || 'N/A' }}</td>
+                <td v-if="!surveyData.anonymous && resultHeaders.includes('username')" class="py-2 px-3 text-sm text-neutral-darkest">{{ result[resultHeaders.indexOf('username')] || 'N/A' }}</td>
               </tr>
             </tbody>
           </table>
-          <div v-if="results.length === 0" class="text-center py-4 text-gray-500 bg-white">
+          <div v-if="results.length === 0" class="text-center py-4 text-neutral-dark bg-white">
             まだ回答データがありません。
           </div>
         </div>
@@ -278,7 +281,7 @@ const downloadCsv = () => {
     alert('ダウンロードするデータがありません。');
     return;
   }
-  const fixedHeaders = ['回答者ID', 'タイムスタンプ'];
+  const fixedHeaders = ['回答者', 'タイムスタンプ'];
   const questionHeaders = surveyData.value.questions.map((q, index) => formatQuestionHeader(q, index));
   const optionalHeaders = [];
   if (!surveyData.value.anonymous && resultHeaders.value.includes('username')) {
