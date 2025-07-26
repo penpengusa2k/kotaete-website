@@ -5,51 +5,52 @@
     <form @submit.prevent="createSurvey">
       <div class="mb-4">
         <label for="title" class="block text-gray-700 font-bold mb-2">タイトル <span class="text-red-500">*</span></label>
-        <textarea id="title" v-model="survey.title" ref="titleInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required :maxlength="MAX_TITLE_LENGTH" rows="1" @input="adjustTextareaHeight" @keydown.enter.prevent="focusNextInput"></textarea>
+                <textarea id="title" v-model="survey.title" ref="titleInput" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_TITLE_LENGTH" rows="1" @input="adjustTextareaHeight" @keydown.enter.prevent="focusNextInput"></textarea>
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.title.length }} / {{ MAX_TITLE_LENGTH }}</p>
       </div>
 
       <div class="mb-4">
         <label for="creatorName" class="block text-gray-700 font-bold mb-2">作成者名 <span class="text-red-500">*</span></label>
-        <input type="text" id="creatorName" v-model="survey.creatorName" :class="[ 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', formSubmitted && creatorNameError ? 'border-red-500' : '' ]" required :maxlength="MAX_CREATOR_NAME_LENGTH" @blur="validateCreatorName" @keydown.enter.prevent="focusNextInput">
+                <input type="text" id="creatorName" v-model="survey.creatorName" :class="[ 'appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm', formSubmitted && creatorNameError ? 'border-red-500' : '' ]" required :maxlength="MAX_CREATOR_NAME_LENGTH" @blur="validateCreatorName" @keydown.enter.prevent="focusNextInput">
         <p v-if="formSubmitted && creatorNameError" class="text-red-500 text-xs italic mt-1">作成者名は必須です。</p>
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.creatorName.length }} / {{ MAX_CREATOR_NAME_LENGTH }}</p>
       </div>
 
       <div class="mb-4">
         <label for="description" class="block text-gray-700 font-bold mb-2">説明文（任意）</label>
-        <textarea id="description" v-model="survey.description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="3" @input="adjustTextareaHeight"></textarea>
+                <textarea id="description" v-model="survey.description" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" rows="3" @input="adjustTextareaHeight" :maxlength="MAX_DESCRIPTION_LENGTH"></textarea>
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.description.length }} / {{ MAX_DESCRIPTION_LENGTH }}</p>
       </div>
 
       <hr class="my-6">
 
       <h2 class="text-2xl font-bold mb-4">質問</h2>
-      <div v-for="(question, index) in survey.questions" :key="index" class="mb-6 p-4 border rounded">
+      <div v-for="(question, index) in survey.questions" :key="index" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
         <div class="flex justify-between items-center mb-2">
           <span class="text-xl">Q{{ index + 1 }}</span>
           <button type="button" @click="removeQuestion(index)" class="text-red-500 hover:text-red-700 font-bold no-enter-focus">削除</button>
         </div>
         <div class="mb-2">
           <label class="block text-gray-700 font-bold mb-1">質問文 <span class="text-red-500">*</span></label>
-          <textarea v-model="question.text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required :maxlength="MAX_QUESTION_LENGTH" rows="3" @input="adjustTextareaHeight"></textarea>
+                    <textarea v-model="question.text" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_QUESTION_LENGTH" rows="3" @input="adjustTextareaHeight"></textarea>
           <p class="text-right text-sm text-gray-500 mt-1">{{ question.text.length }} / {{ MAX_QUESTION_LENGTH }}</p>
         </div>
         <div class="mb-2">
           <label class="block text-gray-700 font-bold mb-1">質問タイプ</label>
-          <select v-model="question.type" class="shadow border rounded w-full py-2 px-3 text-gray-700" @keydown.enter.prevent="focusNextInput">
+                    <select v-model="question.type" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
             <option value="text">記述式</option>
             <option value="radio">ラジオボタン</option>
             <option value="checkbox">チェックボックス</option>
+            <option value="date">日付</option>
           </select>
         </div>
         <div v-if="question.type === 'radio' || question.type === 'checkbox'">
           <label class="block text-gray-700 font-bold mb-1">選択肢</label>
-          <button type="button" @click="addOption(question)" class="text-blue-500 hover:text-blue-700 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400 mb-2" :disabled="question.options.length >= MAX_OPTIONS_PER_QUESTION" @keydown.enter.prevent="focusNextInput">+ 選択肢を追加</button>
+                    <button type="button" @click="addOption(question)" class="text-primary hover:text-primary-dark disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400 mb-2 font-semibold" :disabled="question.options.length >= MAX_OPTIONS_PER_QUESTION" @keydown.enter.prevent="focusNextInput">+ 選択肢を追加</button>
           <span v-if="question.options.length >= MAX_OPTIONS_PER_QUESTION" class="ml-2 text-red-500 text-sm">（最大{{ MAX_OPTIONS_PER_QUESTION }}個まで）</span>
           <div v-for="(option, optionIndex) in question.options" :key="optionIndex" class="mb-1">
             <div class="flex items-center">
-              <textarea v-model="option.value" class="shadow appearance-none border rounded w-full py-1 px-2 text-gray-700" :maxlength="MAX_OPTION_VALUE_LENGTH" rows="1" @input="adjustTextareaHeight"></textarea>
+                            <textarea v-model="option.value" class="appearance-none border border-neutral-light rounded-lg w-full py-1 px-2 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" :maxlength="MAX_OPTION_VALUE_LENGTH" rows="1" @input="adjustTextareaHeight"></textarea>
               <button type="button" @click="removeOption(question, optionIndex)" class="ml-2 text-red-500 no-enter-focus">×</button>
             </div>
             <p class="text-right text-sm text-gray-500 mt-1">{{ option.value.length }} / {{ MAX_OPTION_VALUE_LENGTH }}</p>
@@ -57,7 +58,7 @@
         </div>
       </div>
 
-      <button type="button" @click="addQuestion" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded mb-6 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400" :disabled="survey.questions.length >= MAX_QUESTIONS" @keydown.enter.prevent="focusNextInput">
+            <button type="button" @click="addQuestion" class="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg mb-6 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400 shadow-md transition-colors duration-300" :disabled="survey.questions.length >= MAX_QUESTIONS" @keydown.enter.prevent="focusNextInput">
         + 質問を追加
       </button>
       <span v-if="survey.questions.length >= MAX_QUESTIONS" class="ml-2 text-red-500 text-sm">（最大{{ MAX_QUESTIONS }}個まで）</span>
@@ -72,7 +73,7 @@
             <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果の閲覧に制限をかけるかを設定します。制限する場合、閲覧キーの入力が必須となります。</span>
           </span>
         </label>
-        <select v-model="survey.resultRestricted" class="shadow border rounded w-full py-2 px-3 text-gray-700" @keydown.enter.prevent="focusNextInput">
+                <select v-model="survey.resultRestricted" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
           <option :value="false">制限しない（公開）</option>
           <option :value="true">制限する（閲覧キー必須）</option>
         </select>
@@ -85,7 +86,7 @@
             <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果を閲覧するためのパスワードです。結果の閲覧を制限する場合に必須となります。</span>
           </span>
         </label>
-        <input type="text" id="viewingKey" v-model="survey.viewingKey" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required :maxlength="MAX_VIEWING_KEY_LENGTH" @keydown.enter.prevent="focusNextInput">
+                <input type="text" id="viewingKey" v-model="survey.viewingKey" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_VIEWING_KEY_LENGTH" @keydown.enter.prevent="focusNextInput">
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.viewingKey.length }} / {{ MAX_VIEWING_KEY_LENGTH }}</p>
       </div>
 
@@ -97,7 +98,7 @@
           </span>
         </label>
         <div class="relative cursor-pointer" @click="openDeadlinePicker">
-          <input type="datetime-local" id="deadline" ref="deadlineInput" v-model="survey.deadline" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 pr-8" required @keydown.enter.prevent="focusNextInput">
+                    <input type="datetime-local" id="deadline" ref="deadlineInput" v-model="survey.deadline" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest pr-8 leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required @keydown.enter.prevent="focusNextInput">
           <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm10 5H4v8h12V7z" clip-rule="evenodd" />
@@ -113,14 +114,14 @@
             <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">回答者が匿名で回答するか、ユーザー名を入力して回答するかを設定します。</span>
           </span>
         </label>
-        <select v-model="survey.anonymous" class="shadow border rounded w-full py-2 px-3 text-gray-700" @keydown.enter.prevent="focusNextInput">
+                <select v-model="survey.anonymous" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
           <option :value="true">匿名</option>
           <option :value="false">非匿名（ユーザー名入力必須）</option>
         </select>
       </div>
 
       <div class="mt-8">
-        <button type="submit" :class="[ (loading || !isFormValid) ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700', 'text-white font-bold py-3 px-6 rounded-full w-full text-xl flex items-center justify-center' ]" :disabled="loading || !isFormValid" @keydown.enter.prevent="focusNextInput">
+        <button type="submit" :class="[ (loading || !isFormValid) ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark', 'text-white font-bold py-3 px-6 rounded-lg w-full text-xl flex items-center justify-center shadow-md transition-colors duration-300' ]" :disabled="loading || !isFormValid" @keydown.enter.prevent="focusNextInput">
           <span v-if="loading" class="flex items-center">
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

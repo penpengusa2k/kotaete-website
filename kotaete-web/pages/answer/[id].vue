@@ -12,124 +12,134 @@
       <p class="text-base">{{ error }}</p>
     </div>
     <div v-else-if="survey">
-      <div class="mb-8 p-4 bg-white rounded-lg shadow-md border-l-4 border-blue-700">
-        <h1 class="text-3xl font-bold break-words text-left">{{ survey.title }}</h1>
-        <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
+      <div class="flex items-center mb-4">
+        <span class="text-3xl font-bold mr-2 text-primary">Let's</span>
+        <img src="/site-title.png" alt="KOTAETE" class="h-10">
+      </div>
+      <div class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
+        <h2 class="text-2xl font-bold break-words mb-2">{{ survey.title }}</h2>
+        <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
+        <p class="text-gray-600 mb-2 whitespace-pre-wrap">{{ survey.description }}</p>
+        <p class="text-base font-medium" :class="isExpired ? 'text-danger' : 'text-secondary'">
           <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
           {{ formatDeadline(survey.deadline) }}
         </p>
-        <p class="text-gray-600 mb-2">Created by {{ survey.creator_name || '名無し' }}</p>
-        <p class="text-gray-600 mb-6">{{ survey.description }}</p>
       </div>
+      <hr class="my-6">
 
-      <div v-if="isExpired" class="mb-8 p-6 bg-white rounded-lg shadow-md border-l-4 border-red-700">
+      <div v-if="isExpired" class="mb-6 p-4 border rounded border-red-500">
         <p class="text-lg text-red-700 font-semibold mb-3">このKOTAETEは回答期限を過ぎています。</p>
-        <button @click="goToResults" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+        <button @click="goToResults" class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
           結果を確認する
         </button>
       </div>
 
-      <div v-else-if="hasSubmitted" class="mb-8 p-6 bg-white rounded-lg shadow-md border-l-4 border-amber-500">
+      <div v-else-if="hasSubmitted" class="mb-6 p-4 border rounded border-amber-500">
         <p class="text-lg text-amber-700 font-semibold mb-3">
           <span v-if="submitStatus === 'success'">ご回答ありがとうございました！</span>
           <span v-else>このKOTAETEには既に回答済みです。ご協力ありがとうございました。</span>
         </p>
-        <button @click="goToResults" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+        <button @click="goToResults" class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
           途中結果を確認する
         </button>
       </div>
 
       <form @submit.prevent="submitResponse" v-else>
-        <div v-if="!survey.anonymous" class="mb-6 p-6 bg-white rounded-lg shadow-md border-l-4 border-gray-400">
-          <label for="username" class="block text-gray-700 font-bold text-lg mb-2">ユーザー名</label>
-          <input 
-            type="text" 
-            id="username" 
-            v-model="username" 
-            class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-            required 
+        <div v-if="!survey.anonymous" class="mb-4">
+          <label for="username" class="block text-gray-700 font-bold mb-2">ユーザー名 <span class="text-red-500">*</span></label>
+          <input
+            type="text"
+            id="username"
+            v-model="username"
+            class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
+            required
             placeholder="あなたの名前を入力してください"
             :disabled="loading"
           >
         </div>
 
-        <div v-for="(question, index) in survey.questions" :key="index" class="mb-8 p-6 bg-white rounded-lg shadow-md">
-          <label class="block text-gray-700 font-bold text-xl mb-4 pb-2 border-b-2 border-gray-200">
-            <span class="inline-block border-l-4 border-teal-700 pl-3">Q{{ index + 1 }}. {{ question.text }}</span>
+        <hr v-if="!survey.anonymous" class="my-6">
+        <div v-for="(question, index) in survey.questions" :key="index" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
+          <label class="block text-gray-700 font-bold mb-2">
+            Q{{ index + 1 }}. {{ question.text }}
           </label>
-          
-          <div v-if="question.type === 'text'" class="mt-4">
-            <input 
-              type="text" 
-              v-model="responses[index]" 
-              class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-              required 
+
+          <div v-if="question.type === 'text'" class="mt-2">
+            <textarea
+              v-model="responses[index]"
+              class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
+              required
               maxlength="500"
+              rows="3"
               :disabled="loading"
-            >
+              @input="adjustTextareaHeight"
+            ></textarea>
             <p class="text-right text-sm text-gray-500 mt-1">{{ responses[index]?.length || 0 }} / 500</p>
           </div>
 
-          <div v-if="question.type === 'date'" class="mt-4">
-            <input 
-              type="date" 
-              v-model="responses[index]" 
-              class="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+          <div v-if="question.type === 'date'" class="mt-2">
+            <input
+              type="date"
+              v-model="responses[index]"
+              class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
               required
               :disabled="loading"
+              @click="openDatePicker($event)"
             >
           </div>
 
-          <div v-if="question.type === 'radio'" class="mt-4 space-y-3">
+          <div v-if="question.type === 'radio'" class="mt-2 space-y-2">
             <div v-for="(option, oIndex) in question.options" :key="oIndex" class="flex items-center">
               <label class="inline-flex items-center cursor-pointer text-gray-700">
-                <input 
-                  type="radio" 
-                  :name="`question-${index}`" 
-                  :value="option.value" 
-                  v-model="responses[index]" 
-                  class="form-radio h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500 transition-colors duration-200" 
+                <input
+                  type="radio"
+                  :name="`question-${index}`"
+                  :value="option.value"
+                  v-model="responses[index]"
+                  class="form-radio h-5 w-5 text-primary border-neutral-light focus:ring-primary-dark transition-colors duration-200"
                   required
                   :disabled="loading"
                 >
-                <span class="ml-3 text-base break-all">{{ option.value }}</span>
+                <span class="ml-3 break-all">{{ option.value }}</span>
               </label>
             </div>
           </div>
 
-          <div v-if="question.type === 'checkbox'" class="mt-4 space-y-3">
+          <div v-if="question.type === 'checkbox'" class="mt-2 space-y-2">
                <div v-for="(option, oIndex) in question.options" :key="oIndex" class="flex items-center">
                   <label class="inline-flex items-center cursor-pointer text-gray-700">
-                    <input 
-                      type="checkbox" 
-                      :value="option.value" 
-                      v-model="responses[index][oIndex]" 
-                      class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors duration-200"
+                    <input
+                      type="checkbox"
+                      :value="option.value"
+                      v-model="responses[index]"
+                      class="form-checkbox h-5 w-5 text-primary border-neutral-light rounded focus:ring-primary-dark transition-colors duration-200"
                       :disabled="loading"
                     >
-                    <span class="ml-3 text-base break-all">{{ option.value }}</span>
+                    <span class="ml-3 break-all">{{ option.value }}</span>
                   </label>
               </div>
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md text-lg w-full transition-colors duration-200 flex items-center justify-center" 
-            :disabled="submitting"
-          >
-            <span v-if="submitting" class="flex items-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            送信中...
-          </span>
-          <span v-else>回答を送信</span>
-        </button>
+          <div class="mt-8">
+            <button
+              type="submit"
+              :class="[ (submitting) ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark', 'text-white font-bold py-3 px-6 rounded-lg w-full text-xl flex items-center justify-center shadow-md transition-colors duration-300' ]"
+              :disabled="submitting"
+            >
+              <span v-if="submitting" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              送信中...
+            </span>
+            <span v-else>回答を送信</span>
+          </button>
+        </div>
       </form>
 
-      <div v-if="submitStatus === 'error'" class="mt-6 p-4 rounded-lg bg-red-100 border border-red-400 text-red-700 shadow-sm">
+      <div v-if="submitStatus === 'error'" class="mt-4 p-4 rounded border bg-red-100 border-red-400 text-red-700">
         <p>{{ submitMessage }}</p>
       </div>
     </div>
@@ -137,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useAsyncData, useHead, useRuntimeConfig, navigateTo } from '#imports';
 import { formatDeadline } from '~/utils/formatters';
 
@@ -169,6 +179,9 @@ const { data: surveyData, pending, error: fetchError } = await useAsyncData('sur
 });
 
 survey.value = surveyData.value;
+if (survey.value) {
+  responses.value = survey.value.questions.map(q => (q.type === 'checkbox' ? [] : ''));
+}
 loading.value = pending.value;
 error.value = fetchError.value?.message || '';
 
@@ -217,16 +230,29 @@ onMounted(async () => {
   }
 });
 
+const adjustTextareaHeight = (event) => {
+  const textarea = event.target;
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+};
+
+const openDatePicker = (event) => {
+  if (event.target) {
+    try {
+      event.target.showPicker();
+    } catch (error) {
+      console.error("showPicker() is not supported by this browser.", error);
+    }
+  }
+};
+
 const submitResponse = async () => {
-  // Re-check deadline at the moment of submission
   const now = new Date();
   const deadline = new Date(survey.value.deadline);
   if (deadline < now) {
     submitMessage.value = 'このKOTAETEは回答期限を過ぎています。ページを更新します。';
     submitStatus.value = 'error';
-    isExpired.value = true; // Force UI update
-
-    // Wait 2 seconds for the user to read the message, then reload.
+    isExpired.value = true;
     setTimeout(() => {
       location.reload();
     }, 2000);
@@ -239,6 +265,16 @@ const submitResponse = async () => {
     return;
   }
 
+  // Checkbox validation
+  for (let i = 0; i < survey.value.questions.length; i++) {
+    const question = survey.value.questions[i];
+    if (question.type === 'checkbox' && responses.value[i].length === 0) {
+        alert(`質問${i + 1}に回答してください。`);
+        return;
+    }
+  }
+
+
   submitting.value = true;
   submitMessage.value = '';
   submitStatus.value = '';
@@ -246,8 +282,7 @@ const submitResponse = async () => {
   const formattedResponses = [...responses.value];
   survey.value.questions.forEach((q, index) => {
     if (q.type === 'checkbox') {
-      const checkedOptions = q.options.filter((opt, optIndex) => formattedResponses[index]?.[optIndex]);
-      formattedResponses[index] = checkedOptions.map(opt => opt.value).join(', ');
+      formattedResponses[index] = responses.value[index].join(', ');
     }
   });
 
