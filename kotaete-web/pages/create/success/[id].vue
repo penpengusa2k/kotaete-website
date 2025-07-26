@@ -1,6 +1,11 @@
 <template>
   <div v-if="isHydrated" class="container mx-auto p-4 relative">
-    <h1 class="text-3xl font-bold mb-6">KOTAETE作成完了！🎉</h1>
+    <canvas id="confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-50"></canvas>
+    <div class="relative z-10">
+      <div class="flex items-center mb-6">
+      <img src="/site-title.png" alt="KOTAETE" class="h-10 mr-2">
+      <h1 class="text-3xl font-bold text-primary">作成完了！🎉</h1>
+    </div>
 
     <div class="p-6 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-md mb-8">
         <div class="p-4 border rounded-lg bg-white shadow-md mb-6">
@@ -95,6 +100,7 @@
         クリップボードにコピーしました！
       </div>
     </transition>
+    </div>
   </div>
 </template>
 
@@ -103,16 +109,41 @@ import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCreateStore } from '~/stores/create';
 import { formatDeadline } from '~/utils/formatters';
+import ConfettiGenerator from "confetti-js";
 
 const isHydrated = ref(false)
 const showCopiedMessage = ref(false)
 
 onMounted(() => {
   isHydrated.value = true
-  if (postTextarea.value) {
-    postTextarea.value.style.height = 'auto';
-    postTextarea.value.style.height = postTextarea.value.scrollHeight + 'px';
-  }
+  nextTick(() => {
+    if (postTextarea.value) {
+      postTextarea.value.style.height = 'auto';
+      postTextarea.value.style.height = postTextarea.value.scrollHeight + 'px';
+    }
+
+    const confettiSettings = {
+      target: 'confetti-canvas',
+      max: 80,
+      size: 1,
+      animate: true,
+      props: ['circle', 'square', 'triangle', 'line'],
+      colors: [[165,104,246],[230,61,135],[0,199,228],[253,214,126]],
+      clock: 25,
+      rotate: true,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      start_from_edge: true,
+      respawn: true
+    };
+    const confetti = new ConfettiGenerator(confettiSettings);
+    confetti.render();
+
+    // Stop confetti after 5 seconds
+    // setTimeout(() => {
+    //   confetti.clear();
+    // }, 5000);
+  });
 });
 
 const route = useRoute();
