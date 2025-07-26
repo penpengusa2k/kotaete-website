@@ -172,7 +172,7 @@ function handleAnswer(data) {
   const respondentCol = respondentColIndex + 1; // 1-indexed for getRange
 
   const lastRow = sheet.getLastRow();
-  if (lastRow > 1) { // ヘッダー行以外にデータがある場合のみチェック
+  if (lastRow > 1) {
     const existingIds = sheet.getRange(2, respondentCol, lastRow - 1, 1).getValues().flat();
     if (existingIds.includes(data.respondent_id)) {
       throw new Error('You have already submitted a response for this survey from this browser.');
