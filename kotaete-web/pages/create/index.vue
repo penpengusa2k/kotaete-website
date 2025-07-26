@@ -39,9 +39,9 @@
           <label class="block text-gray-700 font-bold mb-1">質問タイプ</label>
                     <select v-model="question.type" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
             <option value="text">記述式</option>
-            <option value="date">日付</option>
             <option value="radio">ラジオボタン</option>
             <option value="checkbox">チェックボックス</option>
+            <option value="date">日付</option>
           </select>
         </div>
         <div v-if="question.type === 'radio' || question.type === 'checkbox'">

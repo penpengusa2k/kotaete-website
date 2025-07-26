@@ -61,7 +61,7 @@
         <hr v-if="!survey.anonymous" class="my-6">
         <div v-for="(question, index) in survey.questions" :key="index" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
           <label class="block text-gray-700 font-bold mb-2">
-            Q{{ index + 1 }}. {{ question.text }} <span class="text-red-500">*</span>
+            Q{{ index + 1 }}. {{ question.text }}
           </label>
 
           <div v-if="question.type === 'text'" class="mt-2">
@@ -84,6 +84,7 @@
               class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
               required
               :disabled="loading"
+              @click="openDatePicker($event)"
             >
           </div>
 
@@ -233,6 +234,16 @@ const adjustTextareaHeight = (event) => {
   const textarea = event.target;
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
+};
+
+const openDatePicker = (event) => {
+  if (event.target) {
+    try {
+      event.target.showPicker();
+    } catch (error) {
+      console.error("showPicker() is not supported by this browser.", error);
+    }
+  }
 };
 
 const submitResponse = async () => {
