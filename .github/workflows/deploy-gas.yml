@@ -39,18 +39,8 @@ jobs:
 
       # --- 認証とデプロイ（ここは共通） ---
       - name: Create .clasprc.json for authentication
-        run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+        run: echo "${{ secrets.CLASPRC_JSON_BASE64 }}" | base64 -d > ~/.clasprc.json
 
-      # Debug: Check clasprc.json content
-      # このステップはデバッグ目的です。本番運用時には削除を検討してください。
-      - name: Debug Check clasprc.json content
-        run: |
-          echo "--- Debugging .clasprc.json ---"
-          echo "File details:"
-          ls -l ~/.clasprc.json
-          echo "File content (first 50 characters):"
-          head -c 50 ~/.clasprc.json
-          echo "--- End of Debug ---"
 
       - name: Push files to Google Apps Script
         run: clasp push -f

@@ -120,7 +120,6 @@ function handleListResponse() {
 }
 
 // --- POST HANDLERS ---
-
 function handleCreate(data) {  const questions = JSON.parse(data.questions);  const MAX_OPTIONS = 10;  for (const question of questions) {    if (question.type === 'radio' || question.type === 'checkbox') {      if (question.options && question.options.length > MAX_OPTIONS) {        throw new Error(`Question '${question.text}' has too many options. Maximum allowed is ${MAX_OPTIONS}.`);      }    }  }  const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const newRow = [data.id, data.title, data.description, data.result_restricted, data.deadline, new Date(), data.viewing_key, data.anonymous, data.questions, data.creator_name];
   masterSheet.appendRow(newRow);
