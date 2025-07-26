@@ -1,5 +1,6 @@
 name: Deploy GAS to DEV or PROD by Branch
 
+# ワークフローが実行されるトリガーを設定
 on:
   push:
     branches:
@@ -37,9 +38,20 @@ jobs:
           echo "{\"scriptId\":\"${{ secrets.DEV_SCRIPT_ID }}\",\"rootDir\":\"./kotaete-web/gas\"}" > .clasp.json
           echo "Target: DEV environment"
 
-      # --- 認証用 clasprc.json を secrets から復元（Base64） ---
-      - name: Create .clasprc.json from raw secret
-        run: echo '${{ secrets.CLASPRC_JSON_RAW }}' > ~/.clasprc.json
+      # --- 認証用 clasprc.json を secrets から復元 (Base64デコード) ---
+      # 重要: CLASPRC_JSON_RAW には、clasp login で取得した認証情報JSONを Base64 エンコードした文字列を設定してください。
+      # ローカルで `cat ~/.clasprc.json | base64` を実行して得られる文字列です。
+      - name: Create .clasprc.json from Base64 secret
+        run: |
+          echo '${{ secrets.CLASPRC_JSON_RAW }}' | base64 --decode > ~/.clasprc.json
+          echo ".clasprc.json was created from secret." # ファイル作成の確認メッセージ
+          # !!! 注意 !!!
+          # 以下のコマンドは、機密情報である .clasprc.json の内容の一部をログに出力します。
+          # デバッグ目的以外では使用せず、デバッグ完了後は必ず削除してください。
+          echo "--- .clasprc.json content (first 50 chars) for debug ---"
+          head -c 50 ~/.clasprc.json
+          echo "--- End of .clasprc.json debug ---"
+
 
       # --- clasp 実行 ---
       - name: Push files to Google Apps Script
