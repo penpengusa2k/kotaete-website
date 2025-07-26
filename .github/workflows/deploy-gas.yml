@@ -41,6 +41,15 @@ jobs:
       - name: Create .clasprc.json for authentication
         run: echo "${{ secrets.CLASPRC_JSON_BASE64 }}" | base64 -d > ~/.clasprc.json
 
+      # --- デバッグステップ：復元された ~/.clasprc.json を出力（access_token確認用） ---
+      - name: Debug: Print first part of .clasprc.json
+        run: |
+          echo "===== ~/.clasprc.json preview ====="
+          head -c 500 ~/.clasprc.json || echo "(file missing or empty)"
+          echo ""
+          echo "===== End of preview ====="
+
+      # --- clasp 実行 ---
       - name: Push files to Google Apps Script
         run: clasp push -f
 
