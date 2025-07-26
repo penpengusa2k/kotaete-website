@@ -232,7 +232,7 @@ ${data.message}
   return { result: 'success', message: 'お問い合わせを受け付けました。' };
 }
 
-// --- UTILITY FUNCTIONS ---
+// --- UTILITY FUNCTIONS ----
 function validateViewingKey(surveyId, key) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const data = sheet.getDataRange().getValues();
