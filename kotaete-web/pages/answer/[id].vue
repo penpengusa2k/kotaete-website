@@ -14,7 +14,7 @@
     <div v-else-if="survey">
       <div class="flex items-center mb-4">
         <span class="text-3xl font-bold mr-2 text-primary">Let's</span>
-        <img src="/site-title.png" alt="KOTAETE" class="h-10">
+        <img src="/site-title.png" alt="KOTAETE" class="h-10 mt-1">
       </div>
       <div class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
         <h2 class="text-2xl font-bold break-words mb-2">{{ survey.title }}</h2>
