@@ -233,7 +233,6 @@ ${data.message}
 }
 
 // --- UTILITY FUNCTIONS ---
-
 function validateViewingKey(surveyId, key) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const data = sheet.getDataRange().getValues();

@@ -60,8 +60,10 @@ jobs:
 
 
       # --- clasp 実行 ---
+      # --auth-file オプションで認証ファイルのパスを明示的に指定
       - name: Push files to Google Apps Script
-        run: clasp push -f
+        run: clasp push -f --auth-file ~/.clasprc.json
 
+      # --auth-file オプションで認証ファイルのパスを明示的に指定
       - name: Deploy to the target environment
-        run: clasp deploy --description "Auto-deployment from branch ${{ github.ref_name }}"
+        run: clasp deploy --description "Auto-deployment from branch ${{ github.ref_name }}" --auth-file ~/.clasprc.json
