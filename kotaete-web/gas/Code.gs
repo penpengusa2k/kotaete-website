@@ -123,7 +123,6 @@ function handleCreate(data) {  const questions = JSON.parse(data.questions);  co
   const newRow = [data.id, data.title, data.description, data.result_restricted, data.deadline, new Date(), data.viewing_key, data.anonymous, data.questions, data.creator_name];
   masterSheet.appendRow(newRow);
 
-
   // Create a new sheet for responses
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   const responseSheetName = `responses_${data.id}`;
