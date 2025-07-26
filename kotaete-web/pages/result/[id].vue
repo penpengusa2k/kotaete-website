@@ -14,8 +14,8 @@
     <div v-else-if="surveyData">
       <div v-if="hasAccess">
         <div class="flex items-center mb-4">
-          <img src="/site-title.png" alt="KOTAETE" class="h-10 mr-2">
-          <h1 class="text-3xl font-bold text-primary">の集計結果</h1>
+          <span class="text-3xl font-bold mr-2 text-primary">みんなの</span>
+          <img src="/kotae.png" alt="KOTAETE" class="h-10 mt-1">
         </div>
         <div class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
           <h2 class="text-2xl font-bold break-words mb-2">{{ surveyData.title }}</h2>
@@ -62,7 +62,7 @@
         <hr class="my-6">
 
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mb-4">
-          <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">全回答データ（総回答数: <span class="text-primary">{{ results.length }}</span>件）</h2>
+          <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">全回答データ<span class="text-sm">（総回答数: </span><span class="text-primary">{{ results.length }}</span><span class="text-sm">件）</span></h2>
           <button @click="downloadCsv" class="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg text-sm shadow-md transition-colors duration-300">
             CSVダウンロード
           </button>

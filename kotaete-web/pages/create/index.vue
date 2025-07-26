@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">新規KOTAETE</h1>
+    <div class="flex items-center mb-4">
+      <span class="text-3xl font-bold mr-2 text-primary">New</span>
+      <img src="/site-title.png" alt="KOTAETE" class="h-10 mt-1">
+    </div>
 
     <form @submit.prevent="createSurvey">
       <div class="mb-4">

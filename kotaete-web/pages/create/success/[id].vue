@@ -1,10 +1,9 @@
 <template>
-  <div v-if="isHydrated" class="container mx-auto p-4 relative">
+  <div v-if="isHydrated" class="relative">
     <canvas id="confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-50"></canvas>
     <div class="relative z-10">
-      <div class="flex items-center mb-6">
-      <img src="/site-title.png" alt="KOTAETE" class="h-10 mr-2">
-      <h1 class="text-3xl font-bold text-primary">作成完了！🎉</h1>
+      <div class="flex items-center mb-2">
+      <h1 class="text-3xl font-bold text-black">作成完了🎉</h1>
     </div>
 
     <div class="p-6 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-md mb-8">
