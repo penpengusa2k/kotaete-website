@@ -2,8 +2,8 @@
 const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('GOOGLE_SHEET_ID');
 const MASTER_SHEET_NAME = 'master';
 const CONTACT_SHEET_NAME = 'contact_messages';
-const CONTACT_SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('CONTACT_SPREADSHEET_ID'); // 新しく追加
-const NOTIFICATION_EMAIL = PropertiesService.getScriptProperties().getProperty('NOTIFICATION_EMAIL'); // 新しく追加
+const CONTACT_SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('CONTACT_SPREADSHEET_ID');
+const NOTIFICATION_EMAIL = PropertiesService.getScriptProperties().getProperty('NOTIFICATION_EMAIL');
 
 // Main entry point for GET requests
 function doGet(e) {
@@ -60,7 +60,6 @@ function doPost(e) {
 }
 
 // --- GET HANDLERS ---
-
 function handleGetResponse(id) {
   if (!id) throw new Error('Survey ID is required.');
   
@@ -120,11 +119,9 @@ function handleListResponse() {
 }
 
 // --- POST HANDLERS ---
-
 function handleCreate(data) {  const questions = JSON.parse(data.questions);  const MAX_OPTIONS = 10;  for (const question of questions) {    if (question.type === 'radio' || question.type === 'checkbox') {      if (question.options && question.options.length > MAX_OPTIONS) {        throw new Error(`Question '${question.text}' has too many options. Maximum allowed is ${MAX_OPTIONS}.`);      }    }  }  const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const newRow = [data.id, data.title, data.description, data.result_restricted, data.deadline, new Date(), data.viewing_key, data.anonymous, data.questions, data.creator_name];
   masterSheet.appendRow(newRow);
-
 
   // Create a new sheet for responses
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -142,6 +139,24 @@ function handleCreate(data) {  const questions = JSON.parse(data.questions);  co
 }
 
 function handleAnswer(data) {
+  // --- ADDED: Validate deadline ---
+  const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
+  const masterData = masterSheet.getDataRange().getValues();
+  const masterHeader = masterData.shift();
+  const idCol = masterHeader.indexOf('id');
+  const deadlineCol = masterHeader.indexOf('deadline');
+
+  const surveyRow = masterData.find(row => row[idCol] == data.id);
+  if (!surveyRow) throw new Error('アンケートが見つかりません。');
+
+  const deadlineRaw = surveyRow[deadlineCol];
+  const deadline = new Date(deadlineRaw);
+  const now = new Date();
+
+  if (deadline < now) {
+    throw new Error('このKOTAETEは回答期限を過ぎています。');
+  }
+
   const responseSheetName = `responses_${data.id}`;
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(responseSheetName);
   if (!sheet) throw new Error('Response sheet not found.');
@@ -155,7 +170,7 @@ function handleAnswer(data) {
   const respondentCol = respondentColIndex + 1; // 1-indexed for getRange
 
   const lastRow = sheet.getLastRow();
-  if (lastRow > 1) { // ヘッダー行以外にデータがある場合のみチェック
+  if (lastRow > 1) {
     const existingIds = sheet.getRange(2, respondentCol, lastRow - 1, 1).getValues().flat();
     if (existingIds.includes(data.respondent_id)) {
       throw new Error('You have already submitted a response for this survey from this browser.');
@@ -217,7 +232,6 @@ ${data.message}
 }
 
 // --- UTILITY FUNCTIONS ---
-
 function validateViewingKey(surveyId, key) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const data = sheet.getDataRange().getValues();

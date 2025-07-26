@@ -1,12 +1,8 @@
 <template>
   <div>
-    <h1 class="text-4xl font-extrabold text-center text-green-700 mb-8">KOTAETEの使い方</h1>
-
-    <!-- 使い方ページの導入画像やイラストを配置する場所を提案 -->
+    <h1 class="text-4xl font-extrabold text-center mb-8"><img src="/site-title.png" alt="KOTAETE" class="inline-block h-16 align-middle"><span class="text-blue-500 align-middle">の使い方</span></h1>
     <div class="mb-10 text-center">
-      <!-- ここに使い方ページの導入画像やイラストを配置 -->
-      <!-- 例: <img src="/path/to/how-to-use-hero.png" alt="How to Use KOTAETE" class="mx-auto max-w-full h-auto rounded-lg shadow-lg"> -->
-      <p class="text-gray-600 mt-4">（ここに使い方ページの導入画像やイラストを配置できます）</p>
+      <img src="/how-to-use.png" alt="KOTAETEの使い方" class="mx-auto max-w-full h-auto rounded-lg shadow-lg">
     </div>
 
     <div class="space-y-10 text-gray-800">

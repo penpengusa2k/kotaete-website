@@ -1,12 +1,8 @@
 <template>
   <div>
-    <h1 class="text-4xl font-extrabold text-center text-blue-700 mb-8">KOTAETEについて</h1>
-    
-    <!-- サイトの紹介画像やイラストを配置する場所を提案 -->
+    <h1 class="text-4xl font-extrabold text-center mb-8"><img src="/site-title.png" alt="KOTAETE" class="inline-block h-16 align-middle"><span class="text-blue-500 align-middle">について</span></h1>
     <div class="mb-10 text-center">
-      <!-- ここにサイトのコンセプトを表す画像やイラストを配置 -->
-      <!-- 例: <img src="/path/to/about-hero.png" alt="KOTAETE Concept" class="mx-auto max-w-full h-auto rounded-lg shadow-lg"> -->
-      <p class="text-gray-600 mt-4">（ここにサイトのコンセプトを表す画像やイラストを配置できます）</p>
+      <img src="/about-us.png" alt="KOTAETE Concept" class="mx-auto max-w-full h-auto rounded-lg shadow-lg">
     </div>
 
     <div class="space-y-8 text-gray-800">
