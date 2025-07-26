@@ -13,7 +13,7 @@
     </div>
     <div v-else-if="surveyData">
       <div v-if="hasAccess">
-        <h1 class="text-3xl font-bold mb-2">KOTAETEの集計結果</h1>
+                <h1 class="text-3xl font-bold mb-2">KOTAETEの集計結果</h1>
         <div class="mb-8 p-4 bg-white rounded-lg shadow-md border-l-4" :class="isExpired ? 'border-red-700' : 'border-blue-700'">
           <h1 class="text-3xl font-bold break-words text-left">{{ surveyData.title }}</h1>
           <p class="text-base font-medium" :class="isExpired ? 'text-red-700' : 'text-green-700'">
@@ -53,7 +53,7 @@
             </div>
           </div>
         </div>
-
+      
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-baseline mt-10 mb-6 p-4 bg-white rounded-lg shadow-md">
           <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">全回答データ（総回答数: <span class="text-blue-600">{{ results.length }}</span>件）</h2>
           <div class="flex items-center">
@@ -66,20 +66,28 @@
           <div class="overflow-x-auto relative z-0 border border-gray-200 rounded-lg shadow-md">
             <table class="min-w-full bg-white table-fixed">
               <thead>
-                <tr class="bg-gray-800"> <th
-                    v-for="(header, hIndex) in resultHeaders"
-                    :key="hIndex"
-                    class="py-3 px-4 border-b border-gray-700 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap overflow-visible sm:text-sm" >
-                    <template v-if="formatHeader(header) && formatHeader(header).length > 20">
-                      <Tooltip :content="formatHeader(header)">
+                <tr class="bg-gray-800">
+                  <th class="py-3 px-4 border-b border-gray-700 text-left text-xs font-semibold text-white tracking-wider whitespace-nowrap overflow-visible sm:text-sm">回答者ID</th>
+                  <th class="py-3 px-4 border-b border-gray-700 text-left text-xs font-semibold text-white tracking-wider whitespace-nowrap overflow-visible sm:text-sm">タイムスタンプ</th>
+                  <th
+                    v-for="(question, qIndex) in surveyData.questions"
+                    :key="qIndex"
+                    class="py-3 px-4 border-b border-gray-700 text-left text-xs font-semibold text-white tracking-wider whitespace-nowrap overflow-visible sm:text-sm"
+                  >
+                    <template v-if="formatQuestionHeader(question, qIndex).length > 20">
+                      <Tooltip :content="formatQuestionHeader(question, qIndex)">
                         <span class="inline-block max-w-[120px] truncate cursor-help">
-                          {{ truncateText(formatHeader(header), 20) }}
+                          {{ truncateText(formatQuestionHeader(question, qIndex), 20) }}
                         </span>
                       </Tooltip>
                     </template>
                     <span v-else class="inline-block max-w-[120px] truncate">
-                      {{ truncateText(formatHeader(header), 20) }}
+                      {{ truncateText(formatQuestionHeader(question, qIndex), 20) }}
                     </span>
+                  </th>
+                  <th v-if="!surveyData.anonymous && resultHeaders.includes('username')"
+                    class="py-3 px-4 border-b border-gray-700 text-left text-xs font-semibold text-white tracking-wider whitespace-nowrap overflow-visible sm:text-sm">
+                    ユーザー名
                   </th>
                 </tr>
               </thead>
@@ -89,43 +97,43 @@
                   :key="rIndex"
                   class="hover:bg-gray-50 transition-colors duration-150 ease-in-out"
                 >
+                  <td class="py-3 px-4 border-b border-gray-200 text-sm text-gray-800 whitespace-nowrap overflow-visible">
+                    <span v-if="surveyData.anonymous">
+                      匿名ユーザー ({{ result[resultHeaders.indexOf('respondent_id')]?.substring(0, 6) || 'N/A' }})
+                    </span>
+                    <span v-else>
+                      {{ result[resultHeaders.indexOf('respondent_id')] || 'N/A' }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 border-b border-gray-200 text-sm text-gray-800 whitespace-nowrap overflow-visible">
+                    {{ new Date(result[resultHeaders.indexOf('timestamp')]).toLocaleString() }}
+                  </td>
                   <td
-                    v-for="(header, hIndex) in resultHeaders"
-                    :key="hIndex"
+                    v-for="(question, qIndex) in surveyData.questions"
+                    :key="qIndex"
                     class="py-3 px-4 border-b border-gray-200 text-sm text-gray-800 whitespace-nowrap overflow-visible"
                   >
-                    <span v-if="header === 'respondent_id'">
-                      <span v-if="surveyData.anonymous">
-                        匿名ユーザー ({{ result[hIndex]?.substring(0, 6) || 'N/A' }})
+                    <template v-if="question.type === 'date'">
+                      <span class="inline-block max-w-[150px] truncate">
+                        {{ formatDateOnly(result[qIndex + 2]) }}
                       </span>
-                      <span v-else>
-                        {{ result[hIndex] || 'N/A' }}
-                      </span>
-                    </span>
-
-                    <span v-else-if="header === 'timestamp'">
-                      {{ new Date(result[hIndex]).toLocaleString() }}
-                    </span>
-
-                    <template v-else>
-                      <template v-if="surveyData.questions.find(q => q.text === header && q.type === 'date')">
-                        <span class="inline-block max-w-[150px] truncate">
-                          {{ formatDateOnly(result[hIndex]) }}
-                        </span>
-                      </template>
-                      <template v-else>
-                        <Tooltip 
-                          v-if="result[hIndex] && String(result[hIndex]).length > 50" 
-                          :content="result[hIndex]">
-                          <span class="inline-block max-w-[150px] truncate cursor-help">
-                            {{ truncateText(result[hIndex]) }}
-                          </span>
-                        </Tooltip>
-                        <span v-else class="inline-block max-w-[150px] truncate">
-                          {{ truncateText(result[hIndex]) }}
-                        </span>
-                      </template>
                     </template>
+                    <template v-else>
+                      <Tooltip 
+                        v-if="result[qIndex + 2] && String(result[qIndex + 2]).length > 50" 
+                        :content="result[qIndex + 2]">
+                        <span class="inline-block max-w-[150px] truncate cursor-help">
+                          {{ truncateText(result[qIndex + 2]) }}
+                        </span>
+                      </Tooltip>
+                      <span v-else class="inline-block max-w-[150px] truncate">
+                        {{ truncateText(result[qIndex + 2]) }}
+                      </span>
+                    </template>
+                  </td>
+                  <td v-if="!surveyData.anonymous && resultHeaders.includes('username')"
+                    class="py-3 px-4 border-b border-gray-200 text-sm text-gray-800 whitespace-nowrap overflow-visible">
+                    {{ result[resultHeaders.indexOf('username')] || 'N/A' }}
                   </td>
                 </tr>
               </tbody>
@@ -136,7 +144,7 @@
           </div>
       </div>
 
-      <div v-else-if="showKeyInput" class="p-6 bg-white rounded-lg shadow-md">
+            <div v-else-if="showKeyInput" class="p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-2xl font-bold mb-4">閲覧キーの入力</h2>
         <p class="text-gray-700 mb-4">このKOTAETEの結果を確認するには閲覧キーを入力してください。</p>
         <div class="mb-4">
@@ -166,7 +174,7 @@
           <span v-else>キーを送信</span>
         </button>
       </div>
-    </div>
+      </div>
   </div>
 </template>
 
@@ -183,14 +191,14 @@ let viewingKey = route.query.key;
 
 const surveyData = ref(null);
 const results = ref([]);
-const resultHeaders = ref([]);
+const resultHeaders = ref([]); // このヘッダーはバックエンドから来た生データの列順を把握するために引き続き使用
 const loading = ref(true);
 const error = ref('');
-const showKeyInput = ref(false); // 閲覧キー入力フォームの表示制御
-const inputKey = ref(''); // 入力された閲覧キー
-const keyErrorMessage = ref(''); // 閲覧キー入力のエラーメッセージ
-const hasAccess = ref(false); // コンテンツ表示制御
-const submittingKey = ref(false); // キー送信中のローディング状態
+const showKeyInput = ref(false); 
+const inputKey = ref(''); 
+const keyErrorMessage = ref(''); 
+const hasAccess = ref(false); 
+const submittingKey = ref(false); 
 
 const isExpired = computed(() => {
   if (!surveyData.value || !surveyData.value.deadline) return false;
@@ -222,10 +230,8 @@ const formatDateOnly = (dateInput) => {
 };
 
 const fetchSurveyAndResults = async (key = null) => {
-  // Reset only key-related error messages, not general error
   keyErrorMessage.value = '';
 
-  // Initial loading state for the whole page
   if (!surveyData.value && !showKeyInput.value) {
     loading.value = true;
   }
@@ -237,11 +243,10 @@ const fetchSurveyAndResults = async (key = null) => {
       surveyData.value = surveyRes.data;
       surveyData.value.questions = JSON.parse(surveyRes.data.questions);
 
-      // If restricted and no key provided yet (initial load or direct access without key)
       if (surveyData.value.result_restricted && !key) {
         showKeyInput.value = true;
         hasAccess.value = false;
-        loading.value = false; // Stop main loading, show key input
+        loading.value = false; 
         return;
       }
 
@@ -252,27 +257,24 @@ const fetchSurveyAndResults = async (key = null) => {
         resultHeaders.value = resultsRes.data.shift();
         results.value = resultsRes.data;
         hasAccess.value = true;
-        showKeyInput.value = false; // Hide key input on success
-        error.value = ''; // Clear any previous general error
+        showKeyInput.value = false; 
+        error.value = ''; 
       } else if (resultsRes.result !== 'success') {
-        // This is specifically for incorrect key or no data with key
         results.value = [];
         resultHeaders.value = [];
-        // DO NOT set error.value here. Use keyErrorMessage.value instead.
         keyErrorMessage.value = '結果の取得に失敗しました。閲覧キーが正しくない可能性があります。';
         hasAccess.value = false;
-        showKeyInput.value = true; // Keep key input form visible
-        inputKey.value = ''; // Clear input for re-entry
+        showKeyInput.value = true; 
+        inputKey.value = ''; 
       }
     } else {
-      // This is a general error fetching survey data itself
       throw new Error(surveyRes.message || 'KOTAETE情報の取得に失敗しました。');
     }
   } catch (e) {
     console.error('Error fetching results:', e);
-    error.value = e.message; // Set general error for unrecoverable issues
+    error.value = e.message; 
     hasAccess.value = false;
-    showKeyInput.value = false; // Hide key input if general error occurs
+    showKeyInput.value = false; 
   } finally {
     loading.value = false;
   }
@@ -285,11 +287,11 @@ const submitKey = async () => {
     return;
   }
 
-  submittingKey.value = true; // ローディング開始
+  submittingKey.value = true; 
   try {
     await fetchSurveyAndResults(inputKey.value);
   } finally {
-    submittingKey.value = false; // ローディング終了
+    submittingKey.value = false; 
   }
 };
 
@@ -298,11 +300,12 @@ onMounted(async () => {
 });
 
 const getAnswersForQuestion = (questionIndex) => {
-  const question = surveyData.value.questions[questionIndex];
-  const questionText = question.text;
-  const questionColIndex = resultHeaders.value.indexOf(questionText);
-  if (questionColIndex === -1) return [];
+  const questionColIndex = questionIndex + 2; 
 
+  if (questionColIndex >= resultHeaders.value.length) return []; 
+
+  const question = surveyData.value.questions[questionIndex];
+  
   const respondentIdCol = resultHeaders.value.indexOf('respondent_id');
   const usernameCol = resultHeaders.value.indexOf('username');
 
@@ -314,15 +317,15 @@ const getAnswersForQuestion = (questionIndex) => {
 };
 
 const countOccurrences = (questionIndex, optionValue) => {
-    const questionText = surveyData.value.questions[questionIndex].text;
-    const questionColIndex = resultHeaders.value.indexOf(questionText);
-    if (questionColIndex === -1) return 0;
+  const questionColIndex = questionIndex + 2; 
 
-    const answers = results.value.map(res => res[questionColIndex]).filter(Boolean);
-    return answers.reduce((count, answer) => {
-        const individualAnswers = String(answer).split(', ');
-        return count + (individualAnswers.includes(optionValue) ? 1 : 0);
-    }, 0);
+  if (questionColIndex >= resultHeaders.value.length) return 0; 
+
+  const answers = results.value.map(res => res[questionColIndex]).filter(Boolean);
+  return answers.reduce((count, answer) => {
+      const individualAnswers = String(answer).split(', ');
+      return count + (individualAnswers.includes(optionValue) ? 1 : 0);
+  }, 0);
 };
 
 const totalResponses = computed(() => results.value.length);
@@ -338,7 +341,15 @@ const truncateText = (text, maxLength = 50) => {
   return text.substring(0, maxLength) + '...';
 };
 
+// ヘッダーのテキストを整形する関数
+const formatQuestionHeader = (question, index) => {
+  // Q番号と質問文を結合して表示
+  return `Q${index + 1}. ${question.text}`;
+};
+
+
 const formatHeader = (header) => {
+  // この関数はもう、固定ヘッダー（respondent_id, timestamp, username）のみに限定して使用
   const headerMap = {
     respondent_id: '回答者ID',
     timestamp: 'タイムスタンプ',
@@ -353,21 +364,43 @@ const downloadCsv = () => {
     return;
   }
 
-  const headers = resultHeaders.value.map(header => `"${formatHeader(header).replace(/"/g, '""')}"`).join(',');
+  // CSVのヘッダーを生成する際に、formatQuestionHeaderを使用
+  const fixedHeaders = ['回答者ID', 'タイムスタンプ'];
+  const questionHeaders = surveyData.value.questions.map((q, index) => formatQuestionHeader(q, index));
+  const optionalHeaders = [];
+  if (!surveyData.value.anonymous && resultHeaders.value.includes('username')) {
+      optionalHeaders.push('ユーザー名');
+  }
+
+  const allHeaders = [...fixedHeaders, ...questionHeaders, ...optionalHeaders].map(header => `"${header.replace(/"/g, '""')}"`).join(',');
+
   const rows = results.value.map(row => {
-    return row.map((cell, cellIndex) => {
-      const header = resultHeaders.value[cellIndex];
-      // 質問のヘッダーの場合のみ、日付タイプをチェックしてフォーマット
-      const question = surveyData.value.questions.find(q => q.text === header);
-      if (question && question.type === 'date') {
-        return `"${formatDateOnly(cell).replace(/"/g, '""')}"`;
-      } else {
-        return `"${String(cell).replace(/"/g, '""')}"`;
+    // データ列を正しい順序でCSV用に整形
+    const rowData = [];
+
+    // 固定ヘッダーのデータ
+    rowData.push(`"${String(row[resultHeaders.value.indexOf('respondent_id')] || '').replace(/"/g, '""')}"`);
+    rowData.push(`"${new Date(row[resultHeaders.value.indexOf('timestamp')] || '').toLocaleString().replace(/"/g, '""')}"`);
+
+    // 質問の回答データ
+    surveyData.value.questions.forEach((question, qIndex) => {
+      const cellData = row[qIndex + 2]; // qIndex + 2 で正しい列を指す
+      let formattedCell = cellData;
+      if (question.type === 'date') {
+        formattedCell = formatDateOnly(cellData);
       }
-    }).join(',');
+      rowData.push(`"${String(formattedCell || '').replace(/"/g, '""')}"`);
+    });
+
+    // ユーザー名データ（存在する場合）
+    if (!surveyData.value.anonymous && resultHeaders.value.includes('username')) {
+        rowData.push(`"${String(row[resultHeaders.value.indexOf('username')] || '').replace(/"/g, '""')}"`);
+    }
+
+    return rowData.join(',');
   });
 
-  const csvContent = [headers, ...rows].join('\n');
+  const csvContent = [allHeaders, ...rows].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);

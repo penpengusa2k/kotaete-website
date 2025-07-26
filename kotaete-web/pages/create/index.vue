@@ -39,6 +39,7 @@
           <label class="block text-gray-700 font-bold mb-1">質問タイプ</label>
           <select v-model="question.type" class="shadow border rounded w-full py-2 px-3 text-gray-700" @keydown.enter.prevent="focusNextInput">
             <option value="text">記述式</option>
+            <option value="date">日付</option>
             <option value="radio">ラジオボタン</option>
             <option value="checkbox">チェックボックス</option>
           </select>

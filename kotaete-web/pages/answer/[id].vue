@@ -103,7 +103,7 @@
                     <input 
                       type="checkbox" 
                       :value="option.value" 
-                      v-model="responses[index][oIndex]" 
+                      v-model="responses[index]" 
                       class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors duration-200"
                       :disabled="loading"
                     >
@@ -169,6 +169,10 @@ const { data: surveyData, pending, error: fetchError } = await useAsyncData('sur
 });
 
 survey.value = surveyData.value;
+// Initialize responses based on question types
+if (survey.value) {
+  responses.value = survey.value.questions.map(q => (q.type === 'checkbox' ? [] : ''));
+}
 loading.value = pending.value;
 error.value = fetchError.value?.message || '';
 
