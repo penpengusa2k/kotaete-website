@@ -2,8 +2,8 @@
 const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('GOOGLE_SHEET_ID');
 const MASTER_SHEET_NAME = 'master';
 const CONTACT_SHEET_NAME = 'contact_messages';
-const CONTACT_SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('CONTACT_SPREADSHEET_ID'); // 新しく追加
-const NOTIFICATION_EMAIL = PropertiesService.getScriptProperties().getProperty('NOTIFICATION_EMAIL'); // 新しく追加
+const CONTACT_SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('CONTACT_SPREADSHEET_ID');
+const NOTIFICATION_EMAIL = PropertiesService.getScriptProperties().getProperty('NOTIFICATION_EMAIL');
 
 // Main entry point for GET requests
 function doGet(e) {
