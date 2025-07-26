@@ -41,6 +41,17 @@ jobs:
       - name: Create .clasprc.json for authentication
         run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
 
+      - name: Debug: Check clasprc.json content
+        run: |
+          echo "--- Debugging .clasprc.json ---"
+          echo "File details:"
+          ls -l ~/.clasprc.json
+          echo "File content (first 50 characters):"
+          head -c 50 ~/.clasprc.json
+          echo ""
+          echo "--- End of Debug ---"
+
+
       - name: Push files to Google Apps Script
         run: clasp push -f
 
