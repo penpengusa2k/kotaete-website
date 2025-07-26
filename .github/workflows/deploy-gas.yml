@@ -1,6 +1,5 @@
 name: Deploy GAS to DEV or PROD by Branch
 
-# ワークフローが実行されるトリガーを設定
 on:
   push:
     branches:
@@ -38,32 +37,18 @@ jobs:
           echo "{\"scriptId\":\"${{ secrets.DEV_SCRIPT_ID }}\",\"rootDir\":\"./kotaete-web/gas\"}" > .clasp.json
           echo "Target: DEV environment"
 
-      # --- 認証用 clasprc.json を secrets から復元 (Base64デコード) ---
-      # 重要: CLASPRC_JSON_RAW には、clasp login で取得した認証情報JSONを Base64 エンコードした文字列を設定してください。
-      # ローカルで `cat ~/.clasprc.json | base64` を実行して得られる文字列です。
-      - name: Create .clasprc.json from Base64 secret
+      # --- Secrets（改行なしJSON）から .clasprc.json を復元 ---
+      - name: Create .clasprc.json from raw secret
         run: |
-          # Base64デコードした内容を変数に格納
-          DECODED_CREDS=$(echo '${{ secrets.CLASPRC_JSON_RAW }}' | base64 --decode)
-          # ファイルに書き込み
-          echo "$DECODED_CREDS" > ~/.clasprc.json
-          echo ".clasprc.json was created from secret." # ファイル作成の確認メッセージ
+          echo '${{ secrets.CLASPRC_JSON_RAW }}' > ~/.clasprc.json
+          echo "--- ~/.clasprc.json Preview (first 300 chars) ---"
+          head -c 300 ~/.clasprc.json || echo "(file missing or empty)"
+          echo "--- End Preview ---"
 
-          # !!! 非常に重要: 以下のコマンドは機密情報全体をログに出力します。
-          # !!! デバッグ目的以外では絶対に使用せず、問題解決後すぐに削除してください。
-          echo "--- .clasprc.json Full Content for DEBUG (!!! SENSITIVE !!!) ---"
-          echo "$DECODED_CREDS"
-          echo "--- End of .clasprc.json Full Content Debug ---"
-
-          # ファイルのパーミッションを厳しく設定 (念のため)
-          chmod 600 ~/.clasprc.json
-
-
-      # --- clasp 実行 ---
-      # --auth-file オプションで認証ファイルのパスを明示的に指定
+      # --- Push to Google Apps Script ---
       - name: Push files to Google Apps Script
-        run: clasp push -f ~/.clasprc.json
+        run: clasp push -f
 
-      # --auth-file オプションで認証ファイルのパスを明示的に指定
+      # --- Deploy to the target environment ---
       - name: Deploy to the target environment
-        run: clasp deploy --description "Auto-deployment from branch ${{ github.ref_name }}" --auth-file ~/.clasprc.json
+        run: clasp deploy --description "Auto-deployment from branch ${{ github.ref_name }}"
