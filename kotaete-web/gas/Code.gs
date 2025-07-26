@@ -155,18 +155,9 @@ function handleAnswer(data) {
   const deadline = new Date(deadlineRaw);
   const now = new Date();
 
-  // --- LOGGING FOR DEBUGGING ---
-  console.log(`[DEADLINE_CHECK] Survey ID: ${data.id}`);
-  console.log(`[DEADLINE_CHECK] Deadline from Sheet (Raw): ${deadlineRaw}`);
-  console.log(`[DEADLINE_CHECK] Parsed Deadline (Date Object): ${deadline.toISOString()}`);
-  console.log(`[DEADLINE_CHECK] Current Time (Date Object): ${now.toISOString()}`);
-  console.log(`[DEADLINE_CHECK] Comparison: deadline < now  ?  ${deadline < now}`);
-  // --- END LOGGING ---
-
   if (deadline < now) {
     throw new Error('このKOTAETEは回答期限を過ぎています。');
   }
-  // --- END: Validate deadline ---
 
   const responseSheetName = `responses_${data.id}`;
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(responseSheetName);

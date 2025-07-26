@@ -1,6 +1,5 @@
 name: Deploy GAS to DEV or PROD by Branch
 
-# ワークフローが実行されるトリガーを設定
 on:
   push:
     branches:
@@ -12,6 +11,7 @@ on:
 jobs:
   deploy-gas:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,23 +24,22 @@ jobs:
       - name: Install clasp
         run: npm install -g @google/clasp
 
-      # --- ここが重要：ブランチに応じて .clasp.json を動的に生成 ---
+      # --- ブランチに応じて .clasp.json を動的に生成 ---
       - name: Create .clasp.json for PROD
         if: github.ref == 'refs/heads/main'
         run: |
-          echo '{"scriptId":"${{ secrets.PROD_SCRIPT_ID }}","rootDir":"./kotaete-web/gas"}' > .clasp.json
+          echo "{\"scriptId\":\"${{ secrets.PROD_SCRIPT_ID }}\",\"rootDir\":\"./kotaete-web/gas\"}" > .clasp.json
           echo "Target: PROD environment"
 
       - name: Create .clasp.json for DEV
         if: github.ref == 'refs/heads/develop'
         run: |
-          echo '{"scriptId":"${{ secrets.DEV_SCRIPT_ID }}","rootDir":"./kotaete-web/gas"}' > .clasp.json
+          echo "{\"scriptId\":\"${{ secrets.DEV_SCRIPT_ID }}\",\"rootDir\":\"./kotaete-web/gas\"}" > .clasp.json
           echo "Target: DEV environment"
 
-      # --- 認証とデプロイ（ここは共通） ---
+      # --- 認証用 clasprc.json を secrets から復元（Base64） ---
       - name: Create .clasprc.json for authentication
         run: echo "${{ secrets.CLASPRC_JSON_BASE64 }}" | base64 -d > ~/.clasprc.json
-
 
       - name: Push files to Google Apps Script
         run: clasp push -f
