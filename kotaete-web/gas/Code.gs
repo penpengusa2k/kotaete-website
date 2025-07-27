@@ -4,6 +4,7 @@ const MASTER_SHEET_NAME = 'master';
 const CONTACT_SHEET_NAME = 'contact_messages';
 const CONTACT_SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('CONTACT_SPREADSHEET_ID');
 const NOTIFICATION_EMAIL = PropertiesService.getScriptProperties().getProperty('NOTIFICATION_EMAIL');
+const BACKUP_FOLDER_ID = PropertiesService.getScriptProperties().getProperty('BACKUP_FOLDER_ID');
 
 // Main entry point for GET requests
 function doGet(e) {
@@ -119,7 +120,17 @@ function handleListResponse() {
 }
 
 // --- POST HANDLERS ---
-function handleCreate(data) {  const questions = JSON.parse(data.questions);  const MAX_OPTIONS = 10;  for (const question of questions) {    if (question.type === 'radio' || question.type === 'checkbox') {      if (question.options && question.options.length > MAX_OPTIONS) {        throw new Error(`Question '${question.text}' has too many options. Maximum allowed is ${MAX_OPTIONS}.`);      }    }  }  const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
+function handleCreate(data) {
+  const questions = JSON.parse(data.questions);
+  const MAX_OPTIONS = 10;
+  for (const question of questions) {
+    if (question.type === 'radio' || question.type === 'checkbox') {
+      if (question.options && question.options.length > MAX_OPTIONS) {
+        throw new Error(`Question '${question.text}' has too many options. Maximum allowed is ${MAX_OPTIONS}.`);
+      }
+    }
+  }
+  const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const newRow = [data.id, data.title, data.description, data.result_restricted, data.deadline, new Date(), data.viewing_key, data.anonymous, data.questions, data.creator_name];
   masterSheet.appendRow(newRow);
 
@@ -230,6 +241,105 @@ ${data.message}
 
   return { result: 'success', message: 'お問い合わせを受け付けました。' };
 }
+
+/**
+ * Cleans up old surveys and their corresponding response sheets.
+ * Surveys with a deadline more than 10 days in the past will be deleted.
+ */
+function cleanUpOldSurveys() {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const masterSheet = spreadsheet.getSheetByName(MASTER_SHEET_NAME);
+  if (!masterSheet) {
+    Logger.log('Master sheet not found. Exiting cleanup.');
+    return;
+  }
+
+  let backupSuccessful = false;
+  // --- Backup the spreadsheet before cleanup ---
+  try {
+    const backupFolder = DriveApp.getFolderById(BACKUP_FOLDER_ID);
+    const spreadsheetFile = DriveApp.getFileById(SPREADSHEET_ID);
+    const formattedDate = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd_HHmmss');
+    const backupFileName = `${formattedDate}_${spreadsheetFile.getName()}_backup`;
+    spreadsheetFile.makeCopy(backupFileName, backupFolder);
+    Logger.log(`Spreadsheet backed up to folder ${backupFolder.getName()} as ${backupFileName}`);
+    backupSuccessful = true;
+  } catch (e) {
+    Logger.log(`Error during backup: ${e.message}`);
+    if (NOTIFICATION_EMAIL) {
+      const subject = 'KOTAETE: スプレッドシートのバックアップに失敗しました';
+      const body = `
+スプレッドシートの自動バックアップ中にエラーが発生しました。
+
+エラーメッセージ: ${e.message}
+
+バックアップが失敗したため、古いアンケートの削除処理はスキップされました。
+手動でバックアップとクリーンアップを確認してください。
+`;
+      MailApp.sendEmail(NOTIFICATION_EMAIL, subject, body);
+    }
+    // If backup fails, do NOT proceed with deletion
+    return;
+  }
+  // --- End Backup ---
+
+  const dataRange = masterSheet.getDataRange();
+  const values = dataRange.getValues();
+  const header = values[0];
+  const surveys = values.slice(1); // Exclude header row
+
+  const idColIndex = header.indexOf('id');
+  const deadlineColIndex = header.indexOf('deadline');
+
+  if (idColIndex === -1 || deadlineColIndex === -1) {
+    Logger.log('Required columns (id or deadline) not found in master sheet. Exiting cleanup.');
+    return;
+  }
+
+  const now = new Date();
+  const tenDaysAgo = new Date(now.setDate(now.getDate() - 10));
+
+  const surveysToDelete = [];
+  const rowsToDelete = []; // Store row indices to delete from master sheet
+
+  // Iterate from bottom to top to avoid issues with row deletion
+  for (let i = surveys.length - 1; i >= 0; i--) {
+    const survey = surveys[i];
+    const surveyId = survey[idColIndex];
+    const deadline = new Date(survey[deadlineColIndex]);
+
+    if (deadline < tenDaysAgo) {
+      surveysToDelete.push(surveyId);
+      rowsToDelete.push(i + 2); // +2 because of header row and 0-indexed array
+    }
+  }
+
+  // Only proceed with deletion if backup was successful
+  if (backupSuccessful) {
+    // Delete rows from master sheet
+    rowsToDelete.forEach(rowIndex => {
+      masterSheet.deleteRow(rowIndex);
+      Logger.log(`Deleted row ${rowIndex} from master sheet.`);
+    });
+
+    // Delete corresponding response sheets
+    surveysToDelete.forEach(surveyId => {
+      const responseSheetName = `responses_${surveyId}`;
+      const responseSheet = spreadsheet.getSheetByName(responseSheetName);
+      if (responseSheet) {
+        spreadsheet.deleteSheet(responseSheet);
+        Logger.log(`Deleted response sheet: ${responseSheetName}`);
+      } else {
+        Logger.log(`Response sheet not found for survey ID: ${surveyId}. Skipping deletion.`);
+      }
+    });
+
+    Logger.log(`Cleanup complete. Deleted ${surveysToDelete.length} old surveys.`);
+  } else {
+    Logger.log('Backup failed, skipping cleanup process.');
+  }
+}
+
 
 // --- UTILITY FUNCTIONS ---
 function validateViewingKey(surveyId, key) {
