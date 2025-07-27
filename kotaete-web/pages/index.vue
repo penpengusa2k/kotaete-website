@@ -89,12 +89,14 @@ useHead({
     { property: 'og:description', content: 'KOTAETEは、登録不要で簡単に使える無料のアンケート作成サービスです。あなたの「知りたい」を、みんなの答えで解決しましょう。' },
     { property: 'og:image', content: `${baseUrl}/default-ogp.png` },
     { property: 'og:url', content: baseUrl },
-    { property: 'twitter:card', content: 'summary_large_image' },
+    { property: 'twitter:card', content: 'summary' },
   ],
 })
 
+const siteUrl = baseUrl;
+
 const shareText = computed(() => {
-  return `あなたの「知りたい」に、みんなの答えを.\n簡単・無料のアンケート作成サービス「KOTAETE」を試してみよう！\n${baseUrl}`;
+  return `正直どう思ってる？🥺\n匿名で答えてもらえるアンケート作ったよ！\n推し・恋・性格なんでも聞ける！\n👇あなたも作ってみて「KOTAETE」\n${siteUrl}`;
 });
 
 const fetchTotalCreatedCount = async () => {
