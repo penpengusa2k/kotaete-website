@@ -329,7 +329,7 @@ function cleanUpOldSurveys() {
   }
 
   const now = new Date();
-  const tenDaysAgo = new Date(now.setDate(now.getDate() - 10));
+  const sixtyDaysAgo = new Date(now.setDate(now.getDate() - 60));
 
   const surveysToDelete = [];
   const rowsToDelete = []; // Store row indices to delete from master sheet
@@ -340,7 +340,7 @@ function cleanUpOldSurveys() {
     const surveyId = survey[idColIndex];
     const deadline = new Date(survey[deadlineColIndex]);
 
-    if (deadline < tenDaysAgo) {
+    if (deadline < sixtyDaysAgo) {
       surveysToDelete.push(surveyId);
       rowsToDelete.push(i + 2); // +2 because of header row and 0-indexed array
     }
