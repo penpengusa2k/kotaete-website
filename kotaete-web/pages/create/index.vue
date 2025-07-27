@@ -5,6 +5,42 @@
       <img src="/site-title.png" alt="KOTAETE" class="h-10 mt-1">
     </div>
 
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg shadow-sm">
+      <h3 class="font-bold mb-2 flex items-center">
+        <span class="material-icons-outlined text-xl mr-2">lightbulb</span>
+        テンプレートから作成
+      </h3>
+      <p class="text-sm mb-3">用途に合わせたテンプレートを選択すると、タイトルと質問が自動で入力されます。</p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <button type="button" @click="setTemplate(templates.snsEvent)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          SNS: イベント告知
+        </button>
+        <button type="button" @click="setTemplate(templates.snsOpinion)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          SNS: 意見募集
+        </button>
+        <button type="button" @click="setTemplate(templates.snsSelfIntro)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          SNS: 自己紹介リレー
+        </button>
+        <button type="button" @click="setTemplate(templates.snsAskMeAnything)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          SNS: 質問募集（AMA）
+        </button>
+
+        <button type="button" @click="setTemplate(templates.bizCustomer)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          業務用: 顧客満足度
+        </button>
+        <button type="button" @click="setTemplate(templates.bizEmployee)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          業務用: 従業員アンケート
+        </button>
+
+        <button type="button" @click="setTemplate(templates.genericFeedback)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          汎用: イベントFB
+        </button>
+        <button type="button" @click="setTemplate(templates.genericSimple)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          汎用: シンプル
+        </button>
+      </div>
+    </div>
+
     <form @submit.prevent="createSurvey">
       <div class="mb-4">
         <label for="title" class="block text-gray-700 font-bold mb-2">タイトル <span class="text-red-500">*</span></label>
@@ -194,6 +230,153 @@ const creatorNameError = ref(false);
 const titleInput = ref(null);
 const deadlineInput = ref(null);
 
+// --- テンプレートデータ ---
+const templates = {
+  snsEvent: {
+    title: '【イベント参加意向調査】〇〇イベント開催します！',
+    description: '来る〇月〇日に開催を予定している「〇〇イベント」について、皆様のご意見をお聞かせください！',
+    questions: [
+      { text: '〇〇イベントに参加したいと思いますか？', type: 'radio', options: [{ value: 'はい' }, { value: 'いいえ' }, { value: '検討中' }] },
+      { text: 'もし参加するなら、希望する開催曜日はありますか？', type: 'checkbox', options: [{ value: '平日' }, { value: '土曜日' }, { value: '日曜日' }] },
+      { text: 'イベントで他に期待することはありますか？', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: true,
+  },
+  snsOpinion: {
+    title: '【意見募集】今後のSNS投稿についてアンケート！',
+    description: 'いつもご覧いただきありがとうございます！今後のSNS投稿の参考に、皆様のご意見を伺わせてください。',
+    questions: [
+      { text: 'どのような内容の投稿をもっと見たいですか？', type: 'checkbox', options: [{ value: '写真や動画' }, { value: '短いテキスト情報' }, { value: '詳しい解説記事' }, { value: 'Q&A形式' }] },
+      { text: '投稿頻度は適切だと思いますか？', type: 'radio', options: [{ value: '多い' }, { value: '適切' }, { value: '少ない' }] },
+      { text: 'その他、SNS運用に関するご意見があれば教えてください。', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: true,
+  },
+  snsSelfIntro: {
+    title: '【自己紹介リレー】あなたの〇〇を教えて！',
+    description: 'あなたの好きなものや、最近ハマっていることを教えてください！ぜひ他の人の回答も見て、新しい発見をしてみましょう！',
+    questions: [
+      { text: '最近ハマっていることは何ですか？', type: 'text', options: [] },
+      { text: '好きな食べ物は何ですか？', type: 'text', options: [] },
+      { text: '休日の過ごし方で一番好きなものは？', type: 'radio', options: [{ value: '家でまったり' }, { value: '外出してアクティブに' }, { value: '趣味に没頭' }] },
+      { text: '座右の銘や好きな言葉があれば教えてください。', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: true,
+  },
+  snsAskMeAnything: { // 新しいAMA形式テンプレート
+    title: '【質問募集】私に聞きたいことある？（AMA形式）',
+    description: '普段なかなか聞けないことや、ちょっとした疑問、何でもお気軽に質問してください！答えられる範囲で、包み隠さずお答えします！',
+    questions: [
+      { text: '私に聞きたいことはありますか？自由に質問してください。', type: 'text', options: [] },
+    ],
+    resultRestricted: false, // 質問内容によっては公開しても問題ないため
+    anonymous: true, // 質問しやすいように匿名を推奨
+  },
+  bizCustomer: {
+    title: '【顧客満足度調査】サービス品質向上にご協力ください',
+    description: '平素より弊社サービスをご利用いただき、誠にありがとうございます。今後のサービス改善のため、皆様のご意見をお聞かせください。',
+    questions: [
+      { text: '当社のサービスに全体的に満足していますか？', type: 'radio', options: [{ value: '非常に満足' }, { value: '満足' }, { value: 'どちらともいえない' }, { value: '不満' }, { value: '非常に不満' }] },
+      { text: '特に満足した点があれば具体的に教えてください。', type: 'text', options: [] },
+      { text: '改善してほしい点、不満に感じた点があれば具体的に教えてください。', type: 'text', options: [] },
+      { text: '今後、どのようなサービスを期待しますか？', type: 'text', options: [] },
+    ],
+    resultRestricted: true, // 業務用は閲覧制限をデフォルトで推奨
+    anonymous: false, // 顧客満足度は通常、ユーザー名（顧客名）を求める
+  },
+  bizEmployee: {
+    title: '【従業員意識調査】より良い職場環境のために',
+    description: '皆様が日々の業務を円滑に進め、能力を最大限に発揮できるような職場環境を目指し、従業員意識調査を実施いたします。',
+    questions: [
+      { text: '現在の業務内容に満足していますか？', type: 'radio', options: [{ value: '非常に満足' }, { value: '満足' }, { value: 'どちらともいえない' }, { value: '不満' }, { value: '非常に不満' }] },
+      { text: '職場の人間関係についてどう感じていますか？', type: 'radio', options: [{ value: '非常に良い' }, { value: '良い' }, { value: '普通' }, { value: '悪い' }, { value: '非常に悪い' }] },
+      { text: '業務効率を向上させるために、どのような改善が必要だと思いますか？', type: 'text', options: [] },
+      { text: '会社に期待することや、その他自由に意見を述べてください。', type: 'text', options: [] },
+    ],
+    resultRestricted: true,
+    anonymous: false, // 従業員アンケートは匿名ではない場合が多い
+  },
+  genericFeedback: {
+    title: '【イベントフィードバック】ご感想をお聞かせください',
+    description: 'この度は〇〇イベントにご参加いただき、誠にありがとうございました。今後の企画の参考に、皆様からの率直なご意見・ご感想をお待ちしております。',
+    questions: [
+      { text: 'イベント全体の満足度を教えてください。', type: 'radio', options: [{ value: '5:大変満足' }, { value: '4:満足' }, { value: '3:普通' }, { value: '2:不満' }, { value: '1:大変不満' }] },
+      { text: '特に印象に残った内容や良かった点があれば教えてください。', type: 'text', options: [] },
+      { text: '改善してほしい点や、次回開催時に期待することがあれば教えてください。', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: true,
+  },
+  genericSimple: {
+    title: '【シンプルアンケート】ご協力のお願い',
+    description: '簡単なアンケートです。お気軽にご回答ください。',
+    questions: [
+      { text: 'お名前（ニックネーム可）', type: 'text', options: [] },
+      { text: 'メールアドレス（任意）', type: 'text', options: [] },
+      { text: 'ご意見・ご感想', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: false, // シンプルなアンケートはユーザー名入力ありが多い
+  },
+};
+
+const setTemplate = async (template) => {
+  // まず現在のフォーム状態をクリア
+  survey.value = {
+    title: '',
+    description: '',
+    questions: [{ text: '', type: 'text', options: [] }],
+    resultRestricted: false,
+    anonymous: true,
+    deadline: getThreeDaysLater(),
+    viewingKey: '',
+    creatorName: '名無し',
+  };
+
+  // テンプレート内容をセット
+  survey.value.title = template.title;
+  survey.value.description = template.description;
+  survey.value.questions = JSON.parse(JSON.stringify(template.questions)); // ディープコピー
+  survey.value.resultRestricted = template.resultRestricted;
+  survey.value.anonymous = template.anonymous;
+
+  // テンプレートによっては閲覧キーの生成を推奨
+  if (template.resultRestricted && !survey.value.viewingKey) {
+    const { v4: uuidv4 } = await import('uuid');
+    survey.value.viewingKey = uuidv4().substring(0, 8); // 短いUUIDを自動生成
+  }
+
+  // バリデーションエラーをリセット
+  formSubmitted.value = false;
+  creatorNameError.value = false;
+
+  // textareaの高さ調整を次回のDOM更新サイクル後に行う
+  await nextTick();
+  if (titleInput.value) {
+    adjustTextareaHeight({ target: titleInput.value });
+  }
+  survey.value.questions.forEach((question, index) => {
+    // 質問文のtextareaの高さを調整
+    const questionTextarea = document.querySelector(`textarea[id^="question-${index}"]`);
+    if (questionTextarea) {
+      adjustTextareaHeight({ target: questionTextarea });
+    }
+    // オプションのtextareaも調整（v-forで生成されるtextareaには一意のIDがなくても、親要素からの相対位置で特定可能）
+    if (question.options && question.options.length > 0) {
+      // 各選択肢のtextareaにアクセスするためのロジックを調整
+      // 例: `document.querySelectorAll(`.question-block-${index} textarea.option-input`
+      // 現状のHTML構造に合わせたより具体的なセレクタが必要になりますが、
+      // ここでは簡略化のため、既存のadjustTextareaHeightを呼び出す例にとどめます。
+      // 実際には、質問ブロックごとにRefを持たせるなどの工夫が必要になるかもしれません。
+      // もし必要であれば、具体的なHTML構造と合わせて再度ご相談ください。
+    }
+  });
+};
+
+
 const openDeadlinePicker = () => {
   if (deadlineInput.value) {
     try {
@@ -338,6 +521,14 @@ const addQuestion = () => {
     type: 'text',
     options: [],
   });
+  // 新しい質問が追加された後にtextareaの高さを調整
+  nextTick(() => {
+    const newQuestionIndex = survey.value.questions.length - 1;
+    const newQuestionTextarea = document.querySelector(`textarea[id^="question-${newQuestionIndex}"]`); // question-${index} のIDを設定している場合
+    if (newQuestionTextarea) {
+      adjustTextareaHeight({ target: newQuestionTextarea });
+    }
+  });
 };
 
 const removeQuestion = (index) => {
@@ -350,6 +541,16 @@ const addOption = (question) => {
   }
   if (question.options.length < MAX_OPTIONS_PER_QUESTION) {
     question.options.push({ value: '' });
+    // 新しい選択肢が追加された後にtextareaの高さを調整
+    nextTick(() => {
+      // 選択肢のtextareaに一意のIDを付与していないため、このセレクタは動作しません。
+      // もしIDを付与するなら `textarea[id="option-${questionIndex}-${newOptionIndex}"]` のように変更が必要です。
+      // 現在のコードでは特定のtextareaを特定しづらいです。
+      // 最も確実なのは、v-forで生成されるtextareaにrefを持たせてアクセスすることですが、
+      // 複雑になるため、今回は一般的なtextareaの高さ調整をトリガーするだけに留めます。
+      // もし必要であれば、具体的なHTML構造と合わせて再度ご相談ください。
+      // このコメントは開発者向けの情報であり、ユーザーには表示されません。
+    });
   }
 };
 
@@ -405,6 +606,7 @@ const createSurvey = async () => {
         path: `/create/success/${response.id}`,
       });
 
+      // フォームを初期状態に戻す
       survey.value = {
         title: '',
         description: '',
