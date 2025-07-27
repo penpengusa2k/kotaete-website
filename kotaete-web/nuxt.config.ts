@@ -30,8 +30,8 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { hid: 'description', name: 'description', content: 'Nuxt 3とGoogle Sheetsで作るアンケートアプリ' },
-        { name: 'keywords', content: 'アンケート, KOTAETE, Google Sheets, Nuxt.js, 簡単, 無料, フォーム' },
+        { hid: 'description', name: 'description', content: 'KOTAETEは、誰でも簡単にアンケートを作成し、手軽に回答を集められる無料のアンケート作成ツールです。シンプルな操作で、イベントの出欠確認から顧客満足度調査まで幅広く活用できます。' },
+        { name: 'keywords', content: 'アンケート, 無料, フォーム, 作成, 回答, KOTAETE, 簡単, シンプル, 投票, 意見収集, ウェブフォーム' },
       ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/icon.png' },
