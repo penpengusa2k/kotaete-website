@@ -43,6 +43,11 @@
           途中結果を確認する
         </button>
       </div>
+      <div v-if="hasSubmitted" class="mt-4 text-center">
+        <NuxtLink to="/contact" class="inline-block bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded-lg">
+          ご意見・ご要望・その他お問合わせはこちら！
+        </NuxtLink>
+      </div>
 
       <form @submit.prevent="submitResponse" v-else>
         <div v-if="!survey.anonymous" class="mb-4">

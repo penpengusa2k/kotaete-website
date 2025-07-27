@@ -17,6 +17,11 @@
         </div>
         <p class="mb-4">以下のURLを共有して、KOTAETEを開始しましょう！</p>
 
+        <div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-4">
+          <p class="font-bold mb-1">重要なお知らせ:</p>
+          <p class="text-sm">このKOTAETEは、回答期限から10日経過すると、その結果を含め自動的にシステムから削除されます。削除されたアンケートは復元できませんので、必要な情報は早めにダウンロードしてください。</p>
+        </div>
+
       <!-- Answer URL -->
       <div class="mb-4">
         <p class="font-bold text-lg mb-1 shrink-0">回答用URL:</p>

@@ -73,6 +73,15 @@
             <div>
               <h3 class="font-bold text-xl flex items-center mb-2">
                 <span class="material-icons-outlined text-blue-500 mr-2">question_answer</span>
+                Q. 作成したアンケートはいつまで保存されますか？
+              </h3>
+              <p class="ml-8">A. 回答期限を過ぎてから10日経過したアンケートは、その結果を含め自動的にシステムから削除されます。削除されたアンケートは復元できませんのでご注意ください。</p>
+            </div>
+
+            <!-- Q&A Item 8 -->
+            <div>
+              <h3 class="font-bold text-xl flex items-center mb-2">
+                <span class="material-icons-outlined text-blue-500 mr-2">question_answer</span>
                 Q. アンケートの質問数や文字数に制限はありますか？
               </h3>
               <p class="ml-8">A. はい、現在の無料版では、アンケートタイトル、質問数、文字数などに一部制限があります。詳細は<NuxtLink to="/how-to-use" class="text-blue-500 hover:underline font-medium">使い方ページ</NuxtLink>の「制約事項」をご確認ください。</p>
