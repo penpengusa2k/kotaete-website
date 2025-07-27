@@ -5,43 +5,43 @@
       <img src="/site-title.png" alt="KOTAETE" class="h-10 mt-1">
     </div>
 
-    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg shadow-sm">
-      <h3 class="font-bold mb-2 flex items-center">
-        <span class="material-icons-outlined text-xl mr-2">lightbulb</span>
-        テンプレートから作成
-      </h3>
-      <p class="text-sm mb-3">用途に合わせたテンプレートを選択すると、タイトルと質問が自動で入力されます。</p>
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        <button type="button" @click="setTemplate(templates.snsEvent)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
-          SNS: イベント告知
-        </button>
-        <button type="button" @click="setTemplate(templates.snsOpinion)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
-          SNS: 意見募集
-        </button>
-        <button type="button" @click="setTemplate(templates.snsSelfIntro)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
-          SNS: 自己紹介リレー
-        </button>
-        <button type="button" @click="setTemplate(templates.snsAskMeAnything)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
-          SNS: 質問募集（AMA）
-        </button>
+    <form @submit.prevent="createSurvey">
+      <div class="mb-6 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg shadow-sm">
+        <h3 class="font-bold mb-2 flex items-center">
+          <span class="material-icons-outlined text-xl mr-2">lightbulb</span>
+          テンプレートから作成（任意）
+        </h3>
+        <p class="text-sm mb-3">用途に合わせたテンプレートを選択すると、タイトルと質問が自動で入力されます。</p>
+        <select @change="handleTemplateSelect" class="appearance-none border border-blue-light rounded-lg w-full py-2 px-3 text-blue-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-blue-dark focus:border-transparent transition-all duration-200 shadow-sm">
+          <option value="">テンプレートを選ぶ</option>
+          <optgroup label="SNS向けテンプレート">
+            <option :value="JSON.stringify(templates.snsAskMeAnything)">SNS: 質問募集（AMA）</option>
+            <option :value="JSON.stringify(templates.snsSelfIntro)">SNS: 自己紹介リレー</option>
+            <option :value="JSON.stringify(templates.snsEvent)">SNS: イベント告知</option>
+            <option :value="JSON.stringify(templates.snsOpinion)">SNS: 意見募集</option>
+          </optgroup>
+          <optgroup label="業務用テンプレート">
+            <option :value="JSON.stringify(templates.bizCustomer)">業務用: 顧客満足度</option>
+            <option :value="JSON.stringify(templates.bizEmployee)">業務用: 従業員アンケート</option>
+          </optgroup>
+          <optgroup label="汎用テンプレート">
+            <option :value="JSON.stringify(templates.genericFeedback)">汎用: イベントFB</option>
+            <option :value="JSON.stringify(templates.genericSimple)">汎用: シンプル</option>
+          </optgroup>
+        </select>
+      </div>
 
-        <button type="button" @click="setTemplate(templates.bizCustomer)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
-          業務用: 顧客満足度
-        </button>
-        <button type="button" @click="setTemplate(templates.bizEmployee)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
-          業務用: 従業員アンケート
-        </button>
-
-        <button type="button" @click="setTemplate(templates.genericFeedback)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
-          汎用: イベントFB
-        </button>
-        <button type="button" @click="setTemplate(templates.genericSimple)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
-          汎用: シンプル
+      <div class="mb-6 p-4 bg-gray-50 border border-gray-200 text-gray-800 rounded-lg shadow-sm">
+        <h3 class="font-bold mb-2 flex items-center">
+          <span class="material-icons-outlined text-xl mr-2">refresh</span>
+          フォームをリセット
+        </h3>
+        <p class="text-sm mb-3">入力内容やテンプレートをすべてクリアして、初期状態に戻します。</p>
+        <button type="button" @click="resetToDefault" class="bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200 w-full sm:w-auto">
+          すべてクリアしてデフォルトに戻す
         </button>
       </div>
-    </div>
 
-    <form @submit.prevent="createSurvey">
       <div class="mb-4">
         <label for="title" class="block text-gray-700 font-bold mb-2">タイトル <span class="text-red-500">*</span></label>
         <textarea id="title" v-model="survey.title" ref="titleInput" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_TITLE_LENGTH" rows="1" @input="adjustTextareaHeight" @keydown.enter.prevent="focusNextInput"></textarea>
@@ -210,7 +210,7 @@ const getThreeDaysLater = () => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-const survey = ref({
+const getDefaultSurvey = () => ({
   title: '',
   description: '',
   questions: [
@@ -222,6 +222,8 @@ const survey = ref({
   viewingKey: '',
   creatorName: '名無し',
 });
+
+const survey = ref(getDefaultSurvey());
 
 const loading = ref(false);
 const formSubmitted = ref(false);
@@ -266,14 +268,14 @@ const templates = {
     resultRestricted: false,
     anonymous: true,
   },
-  snsAskMeAnything: { // 新しいAMA形式テンプレート
+  snsAskMeAnything: {
     title: '【質問募集】私に聞きたいことある？（AMA形式）',
     description: '普段なかなか聞けないことや、ちょっとした疑問、何でもお気軽に質問してください！答えられる範囲で、包み隠さずお答えします！',
     questions: [
       { text: '私に聞きたいことはありますか？自由に質問してください。', type: 'text', options: [] },
     ],
-    resultRestricted: false, // 質問内容によっては公開しても問題ないため
-    anonymous: true, // 質問しやすいように匿名を推奨
+    resultRestricted: false,
+    anonymous: true,
   },
   bizCustomer: {
     title: '【顧客満足度調査】サービス品質向上にご協力ください',
@@ -284,8 +286,8 @@ const templates = {
       { text: '改善してほしい点、不満に感じた点があれば具体的に教えてください。', type: 'text', options: [] },
       { text: '今後、どのようなサービスを期待しますか？', type: 'text', options: [] },
     ],
-    resultRestricted: true, // 業務用は閲覧制限をデフォルトで推奨
-    anonymous: false, // 顧客満足度は通常、ユーザー名（顧客名）を求める
+    resultRestricted: true,
+    anonymous: false,
   },
   bizEmployee: {
     title: '【従業員意識調査】より良い職場環境のために',
@@ -297,7 +299,7 @@ const templates = {
       { text: '会社に期待することや、その他自由に意見を述べてください。', type: 'text', options: [] },
     ],
     resultRestricted: true,
-    anonymous: false, // 従業員アンケートは匿名ではない場合が多い
+    anonymous: false,
   },
   genericFeedback: {
     title: '【イベントフィードバック】ご感想をお聞かせください',
@@ -319,61 +321,63 @@ const templates = {
       { text: 'ご意見・ご感想', type: 'text', options: [] },
     ],
     resultRestricted: false,
-    anonymous: false, // シンプルなアンケートはユーザー名入力ありが多い
+    anonymous: false,
   },
 };
 
-const setTemplate = async (template) => {
-  // まず現在のフォーム状態をクリア
-  survey.value = {
-    title: '',
-    description: '',
-    questions: [{ text: '', type: 'text', options: [] }],
-    resultRestricted: false,
-    anonymous: true,
-    deadline: getThreeDaysLater(),
-    viewingKey: '',
-    creatorName: '名無し',
-  };
+const handleTemplateSelect = async (event) => {
+  const selectedValue = event.target.value;
+  if (!selectedValue) {
+    // 「テンプレートを選択してください」が選ばれた場合は何もしない
+    return;
+  }
+  const template = JSON.parse(selectedValue);
+  await setTemplate(template);
+  // 選択肢を初期値に戻す
+  event.target.value = "";
+};
 
-  // テンプレート内容をセット
+const setTemplate = async (template) => {
+  survey.value = getDefaultSurvey(); // まずデフォルトに戻してからテンプレートを適用
+
   survey.value.title = template.title;
   survey.value.description = template.description;
-  survey.value.questions = JSON.parse(JSON.stringify(template.questions)); // ディープコピー
+  survey.value.questions = JSON.parse(JSON.stringify(template.questions));
   survey.value.resultRestricted = template.resultRestricted;
   survey.value.anonymous = template.anonymous;
 
-  // テンプレートによっては閲覧キーの生成を推奨
   if (template.resultRestricted && !survey.value.viewingKey) {
     const { v4: uuidv4 } = await import('uuid');
-    survey.value.viewingKey = uuidv4().substring(0, 8); // 短いUUIDを自動生成
+    survey.value.viewingKey = uuidv4().substring(0, 8);
   }
 
-  // バリデーションエラーをリセット
   formSubmitted.value = false;
   creatorNameError.value = false;
 
-  // textareaの高さ調整を次回のDOM更新サイクル後に行う
   await nextTick();
   if (titleInput.value) {
     adjustTextareaHeight({ target: titleInput.value });
   }
   survey.value.questions.forEach((question, index) => {
-    // 質問文のtextareaの高さを調整
     const questionTextarea = document.querySelector(`textarea[id^="question-${index}"]`);
     if (questionTextarea) {
       adjustTextareaHeight({ target: questionTextarea });
     }
-    // オプションのtextareaも調整（v-forで生成されるtextareaには一意のIDがなくても、親要素からの相対位置で特定可能）
-    if (question.options && question.options.length > 0) {
-      // 各選択肢のtextareaにアクセスするためのロジックを調整
-      // 例: `document.querySelectorAll(`.question-block-${index} textarea.option-input`
-      // 現状のHTML構造に合わせたより具体的なセレクタが必要になりますが、
-      // ここでは簡略化のため、既存のadjustTextareaHeightを呼び出す例にとどめます。
-      // 実際には、質問ブロックごとにRefを持たせるなどの工夫が必要になるかもしれません。
-      // もし必要であれば、具体的なHTML構造と合わせて再度ご相談ください。
-    }
   });
+};
+
+const resetToDefault = async () => {
+  if (confirm('入力内容をすべてクリアして、デフォルトの状態に戻しますか？')) {
+    survey.value = getDefaultSurvey();
+    formSubmitted.value = false;
+    creatorNameError.value = false;
+
+    await nextTick();
+    if (titleInput.value) {
+      titleInput.value.focus();
+      adjustTextareaHeight({ target: titleInput.value });
+    }
+  }
 };
 
 
@@ -392,26 +396,21 @@ const validateCreatorName = () => {
   return !creatorNameError.value;
 };
 
-// 特定の質問文が重複しているかをチェックする関数
 const isQuestionDuplicate = (currentIndex) => {
   const currentQuestionText = survey.value.questions[currentIndex].text.trim();
-  if (!currentQuestionText) return false; // 空の質問文は重複と見なさない
+  if (!currentQuestionText) return false;
 
   return survey.value.questions.some((question, index) => {
     return index !== currentIndex && question.text.trim() === currentQuestionText;
   });
 };
 
-// いずれかの質問文に重複があるかをチェックするComputedプロパティ
-// このプロパティはフォーム全体のバリデーションに引き続き使用します
 const hasDuplicateQuestions = computed(() => {
   const texts = survey.value.questions.map(q => q.text.trim()).filter(Boolean);
   const uniqueTexts = new Set(texts);
   return texts.length !== uniqueTexts.size;
 });
 
-
-// 特定の質問の選択肢に重複があるかをチェックする関数
 const hasDuplicateOptions = (question) => {
   if (question.type === 'text' || question.type === 'date') return false;
   const optionValues = question.options.map(o => o.value.trim()).filter(Boolean);
@@ -419,11 +418,10 @@ const hasDuplicateOptions = (question) => {
   return optionValues.length !== uniqueOptionValues.size;
 };
 
-// 特定の選択肢が重複しているかをチェックする関数
 const isOptionDuplicate = (question, optionIndex) => {
   if (question.type === 'text' || question.type === 'date') return false;
   const currentOptionValue = question.options[optionIndex].value.trim();
-  if (!currentOptionValue) return false; // 空の選択肢は重複と見なさない
+  if (!currentOptionValue) return false;
 
   const otherOptionValues = question.options
     .filter((_, idx) => idx !== optionIndex)
@@ -432,8 +430,6 @@ const isOptionDuplicate = (question, optionIndex) => {
   return otherOptionValues.includes(currentOptionValue);
 };
 
-
-// いずれかの質問の選択肢に重複があるかをチェックするComputedプロパティ
 const hasAnyDuplicateOptions = computed(() => {
   return survey.value.questions.some(question => hasDuplicateOptions(question));
 });
@@ -444,7 +440,6 @@ watch(() => survey.value.resultRestricted, (newVal) => {
   }
 });
 
-// 質問タイプが変更されたときの処理
 const handleQuestionTypeChange = (question) => {
   if (question.type === 'radio') {
     question.options = question.options.filter(o => o.value.trim() !== '');
@@ -461,12 +456,10 @@ const handleQuestionTypeChange = (question) => {
   }
 };
 
-
 watch(
   () => survey.value.questions,
   (newQuestions) => {
     newQuestions.forEach((question) => {
-      // 質問タイプがradioまたはcheckboxで、選択肢が不足している場合に自動で追加
       if (question.type === 'radio') {
         while (question.options.length < 2) {
           question.options.push({ value: '' });
@@ -476,7 +469,6 @@ watch(
           question.options.push({ value: '' });
         }
       }
-      // 質問タイプがtextまたはdateで、選択肢が存在する場合はクリア
       if ((question.type === 'text' || question.type === 'date') && question.options.length > 0) {
         question.options = [];
       }
@@ -485,27 +477,24 @@ watch(
   { deep: true }
 );
 
-
 const isFormValid = computed(() => {
   if (!survey.value.title.trim()) return false;
   if (creatorNameError.value && formSubmitted.value) return false;
   if (!survey.value.deadline) return false;
   if (survey.value.questions.length === 0) return false;
-  if (hasDuplicateQuestions.value) return false; // 質問全体の重複チェック
-  if (hasAnyDuplicateOptions.value) return false; // 選択肢全体の重複チェック
+  if (hasDuplicateQuestions.value) return false;
+  if (hasAnyDuplicateOptions.value) return false;
 
   if (survey.value.resultRestricted && !survey.value.viewingKey.trim()) return false;
 
   for (const question of survey.value.questions) {
     if (!question.text.trim()) return false;
     if (question.type === 'radio') {
-      // ラジオボタンは最低2つの選択肢と、そのすべてが入力されていることを確認
       if (question.options.length < 2) return false;
       for (const option of question.options) {
         if (!option.value.trim()) return false;
       }
     } else if (question.type === 'checkbox') {
-      // チェックボックスは最低1つの選択肢と、そのすべてが入力されていることを確認
       if (question.options.length < 1) return false;
       for (const option of question.options) {
         if (!option.value.trim()) return false;
@@ -521,10 +510,9 @@ const addQuestion = () => {
     type: 'text',
     options: [],
   });
-  // 新しい質問が追加された後にtextareaの高さを調整
   nextTick(() => {
     const newQuestionIndex = survey.value.questions.length - 1;
-    const newQuestionTextarea = document.querySelector(`textarea[id^="question-${newQuestionIndex}"]`); // question-${index} のIDを設定している場合
+    const newQuestionTextarea = document.querySelector(`textarea[id^="question-${newQuestionIndex}"]`);
     if (newQuestionTextarea) {
       adjustTextareaHeight({ target: newQuestionTextarea });
     }
@@ -541,15 +529,9 @@ const addOption = (question) => {
   }
   if (question.options.length < MAX_OPTIONS_PER_QUESTION) {
     question.options.push({ value: '' });
-    // 新しい選択肢が追加された後にtextareaの高さを調整
     nextTick(() => {
-      // 選択肢のtextareaに一意のIDを付与していないため、このセレクタは動作しません。
-      // もしIDを付与するなら `textarea[id="option-${questionIndex}-${newOptionIndex}"]` のように変更が必要です。
-      // 現在のコードでは特定のtextareaを特定しづらいです。
-      // 最も確実なのは、v-forで生成されるtextareaにrefを持たせてアクセスすることですが、
-      // 複雑になるため、今回は一般的なtextareaの高さ調整をトリガーするだけに留めます。
-      // もし必要であれば、具体的なHTML構造と合わせて再度ご相談ください。
-      // このコメントは開発者向けの情報であり、ユーザーには表示されません。
+      // 特定のtextareaを正確に特定するための改善が必要な場合があります。
+      // 現在のコードでは、新しく追加されたオプションのtextareaを直接参照していません。
     });
   }
 };
@@ -606,19 +588,7 @@ const createSurvey = async () => {
         path: `/create/success/${response.id}`,
       });
 
-      // フォームを初期状態に戻す
-      survey.value = {
-        title: '',
-        description: '',
-        questions: [
-          { text: '', type: 'text', options: [] }
-        ],
-        resultRestricted: false,
-        anonymous: true,
-        deadline: getThreeDaysLater(),
-        viewingKey: '',
-        creatorName: '名無し',
-      };
+      survey.value = getDefaultSurvey();
       nextTick(() => {
         if (titleInput.value) {
           titleInput.value.focus();
@@ -668,8 +638,10 @@ const focusNextInput = (event) => {
 
 const adjustTextareaHeight = (event) => {
   const textarea = event.target;
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
+  if (textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
 };
 
 onMounted(() => {
