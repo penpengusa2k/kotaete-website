@@ -6,6 +6,26 @@
         あなたの「知りたい」に、みんなの応えを。<br/>
         KOTAETEは簡単・無料のアンケート作成サービスです。
       </p>
+
+      <div class="mt-4 text-center animate-fade-in-up-text delay-count">
+        <div v-if="loadingCount" class="flex flex-col items-center justify-center">
+          <svg class="animate-spin h-8 w-8 text-gray-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="text-sm text-gray-600">集計結果を読み込み中...</p>
+        </div>
+        <div v-else-if="totalCreatedCount !== null" class="text-gray-500">
+          <p class="text-sm sm:text-base">
+            これまでに作成されたKOTAETEの数: <strong class="text-primary text-xl sm:text-2xl">{{ totalCreatedCount }}</strong> 件
+          </p>
+        </div>
+        <div v-else class="text-gray-500">
+          <p class="text-sm sm:text-base">
+            これまでに作成されたKOTAETEの数: <strong class="text-gray-400 text-xl sm:text-2xl">---</strong> 件
+          </p>
+        </div>
+      </div>
       <div class="mt-10 sm:mt-12 text-center">
         <NuxtLink to="/create" class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 animate-subtle-bounce custom-button-width">
           <span class="material-icons-outlined mr-2">add_circle_outline</span>
@@ -38,7 +58,32 @@
 </template>
 
 <script setup>
-// 必要であればここにスクリプトを追加
+import { ref, onMounted } from 'vue';
+
+const totalCreatedCount = ref(null);
+const loadingCount = ref(true); // ローディング状態を管理する新しいref
+
+const fetchTotalCreatedCount = async () => {
+  loadingCount.value = true; // 読み込み開始時にtrueに設定
+  try {
+    const response = await $fetch('/api/gas-proxy?action=getStats');
+    if (response.result === 'success') {
+      totalCreatedCount.value = response.totalCreatedCount;
+    } else {
+      console.error('Failed to fetch total created count:', response.message);
+      totalCreatedCount.value = null; // エラー時はnullに戻すか、'---'などを表示
+    }
+  } catch (error) {
+    console.error('Error fetching total created count:', error);
+    totalCreatedCount.value = null; // エラー時はnullに戻す
+  } finally {
+    loadingCount.value = false; // 読み込み完了時にfalseに設定
+  }
+};
+
+onMounted(() => {
+  fetchTotalCreatedCount();
+});
 </script>
 
 <style scoped>
@@ -60,6 +105,11 @@
 .animate-fade-in-up-text {
   opacity: 0; /* 初期状態を非表示に設定 */
   animation: fadeInUpText 1s ease-out forwards 0.2s; /* 1.2s -> 1s, 0.3s -> 0.2s */
+}
+
+/* カウント表示の遅延アニメーション */
+.animate-fade-in-up-text.delay-count {
+  animation-delay: 0.5s; /* 説明文より少し遅れて表示 */
 }
 
 /* ボタンの控えめなバウンス */

@@ -5,6 +5,7 @@ const CONTACT_SHEET_NAME = 'contact_messages';
 const CONTACT_SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('CONTACT_SPREADSHEET_ID');
 const NOTIFICATION_EMAIL = PropertiesService.getScriptProperties().getProperty('NOTIFICATION_EMAIL');
 const BACKUP_FOLDER_ID = PropertiesService.getScriptProperties().getProperty('BACKUP_FOLDER_ID');
+const STATS_SHEET_NAME = 'stats'; // 追加: 統計シート名
 
 // Main entry point for GET requests
 function doGet(e) {
@@ -19,6 +20,8 @@ function doGet(e) {
         return createJsonResponse(handleResultsResponse(id, e.parameter.viewing_key));
       case 'list':
         throw new Error('List action is no longer supported.');
+      case 'getStats': // 追加: 統計取得アクション
+        return createJsonResponse(handleGetStats());
       default:
         throw new Error('Invalid action specified.');
     }
@@ -63,12 +66,12 @@ function doPost(e) {
 // --- GET HANDLERS ---
 function handleGetResponse(id) {
   if (!id) throw new Error('Survey ID is required.');
-  
+
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const data = sheet.getDataRange().getValues();
   const header = data.shift();
   const idCol = header.indexOf('id');
-  
+
   const surveyRow = data.find(row => row[idCol] == id);
   if (!surveyRow) throw new Error('Survey not found.');
 
@@ -79,12 +82,12 @@ function handleGetResponse(id) {
 
 function handleResultsResponse(id, viewingKey) {
   if (!id) throw new Error('Survey ID is required.');
-  
+
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const data = sheet.getDataRange().getValues();
   const header = data.shift();
   const idCol = header.indexOf('id');
-  
+
   const surveyRow = data.find(row => row[idCol] == id);
   if (!surveyRow) throw new Error('Survey not found.');
 
@@ -92,21 +95,21 @@ function handleResultsResponse(id, viewingKey) {
 
   // If result_restricted, require viewing_key
   if (surveyData.result_restricted) {
-      if (!viewingKey) {
-          throw new Error('閲覧キーが提供されていません。このKOTAETEの結果は非公開です。');
-      }
-      if (!validateViewingKey(id, viewingKey)) {
-          throw new Error('無効な閲覧キーです。');
-      }
+    if (!viewingKey) {
+      throw new Error('閲覧キーが提供されていません。このKOTAETEの結果は非公開です。');
+    }
+    if (!validateViewingKey(id, viewingKey)) {
+      throw new Error('無効な閲覧キーです。');
+    }
   }
 
   const responseSheetName = `responses_${id}`;
   const responseSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(responseSheetName);
-  
+
   if (!responseSheet) {
     return { result: 'success', data: [] };
   }
-  
+
   const resultsData = responseSheet.getDataRange().getValues();
   return { result: 'success', data: resultsData };
 }
@@ -117,6 +120,22 @@ function handleListResponse() {
   const header = data.shift();
   const surveys = data.map(row => rowToObject(row, header));
   return { result: 'success', data: surveys };
+}
+
+// 追加: 統計情報を取得するハンドラ
+function handleGetStats() {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let statsSheet = spreadsheet.getSheetByName(STATS_SHEET_NAME);
+
+  if (!statsSheet) {
+    // statsシートが存在しない場合、作成し、A1セルに0を設定
+    statsSheet = spreadsheet.insertSheet(STATS_SHEET_NAME);
+    statsSheet.getRange('A1').setValue(0);
+    Logger.log(`Created new stats sheet: ${STATS_SHEET_NAME} and initialized A1 to 0.`);
+  }
+
+  const totalCount = statsSheet.getRange('A1').getValue();
+  return { result: 'success', totalCreatedCount: totalCount };
 }
 
 // --- POST HANDLERS ---
@@ -145,6 +164,19 @@ function handleCreate(data) {
     headers = ['username', 'respondent_id', 'timestamp', ...questions.map(q => q.text)];
   }
   spreadsheet.insertSheet(responseSheetName).getRange(1, 1, 1, headers.length).setValues([headers]);
+
+  // 追加: KOTAETEが作成されるたびにstatsシートのカウントを増やす
+  const statsSheet = spreadsheet.getSheetByName(STATS_SHEET_NAME);
+  if (statsSheet) {
+    const currentCount = statsSheet.getRange('A1').getValue();
+    statsSheet.getRange('A1').setValue(currentCount + 1);
+    Logger.log(`Incremented total created count to ${currentCount + 1}.`);
+  } else {
+    // statsシートがない場合は作成して初期化
+    const newStatsSheet = spreadsheet.insertSheet(STATS_SHEET_NAME);
+    newStatsSheet.getRange('A1').setValue(1); // 最初のKOTAETE
+    Logger.log(`Created new stats sheet and set initial count to 1.`);
+  }
 
   return { result: 'success', id: data.id };
 }
@@ -205,7 +237,7 @@ function handleAnswer(data) {
     newRow = [data.respondent_id, new Date(), ...data.answers];
   }
   sheet.appendRow(newRow);
-  
+
   return { result: 'success' };
 }
 
