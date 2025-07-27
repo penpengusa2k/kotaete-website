@@ -138,7 +138,7 @@
         <label for="deadline" class="inline-block text-gray-700 font-bold mb-2">回答受付期限 <span class="text-red-500">*</span>
           <span class="relative group">
             <span class="ml-1 text-gray-500 cursor-pointer material-icons-outlined text-base align-middle">info</span>
-            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">回答の受付を終了する日時です。この日時を過ぎると回答できなくなります。回答期限から10日経過したアンケートは、その結果を含め自動的に削除されます。</span>
+            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">回答の受付を終了する日時です。この日時を過ぎると回答できなくなります。回答期限から60日経過したアンケートは、その結果を含め自動的に削除されます。</span>
           </span>
         </label>
         <div class="relative cursor-pointer" @click="openDeadlinePicker">
