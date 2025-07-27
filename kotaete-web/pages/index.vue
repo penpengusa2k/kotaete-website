@@ -79,6 +79,7 @@ import { ref, onMounted, computed } from 'vue';
 
 const totalCreatedCount = ref(null);
 const loadingCount = ref(true); // ローディング状態を管理
+const baseUrl = useRuntimeConfig().public.baseUrl;
 
 useHead({
   title: 'KOTAETE - 簡単・無料のアンケート作成サービス',
@@ -86,15 +87,14 @@ useHead({
     { name: 'description', content: 'KOTAETEは、登録不要で簡単に使える無料のアンケート作成サービスです。あなたの「知りたい」を、みんなの答えで解決しましょう。' },
     { property: 'og:title', content: 'KOTAETE - 簡単・無料のアンケート作成サービス' },
     { property: 'og:description', content: 'KOTAETEは、登録不要で簡単に使える無料のアンケート作成サービスです。あなたの「知りたい」を、みんなの答えで解決しましょう。' },
-    { property: 'og:image', content: 'https://kotaete.net/default-ogp.png' },
-    { property: 'og:url', content: 'https://kotaete.net' },
+    { property: 'og:image', content: `${baseUrl}/default-ogp.png` },
+    { property: 'og:url', content: baseUrl },
     { property: 'twitter:card', content: 'summary_large_image' },
   ],
 })
 
-const siteUrl = 'https://kotaete.net';
 const shareText = computed(() => {
-  return `あなたの「知りたい」に、みんなの答えを。\n簡単・無料のアンケート作成サービス「KOTAETE」を試してみよう！\n${siteUrl}`;
+  return `あなたの「知りたい」に、みんなの答えを.\n簡単・無料のアンケート作成サービス「KOTAETE」を試してみよう！\n${baseUrl}`;
 });
 
 const fetchTotalCreatedCount = async () => {

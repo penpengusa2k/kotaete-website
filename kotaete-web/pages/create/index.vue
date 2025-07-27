@@ -587,13 +587,6 @@ const createSurvey = async () => {
       router.push({
         path: `/create/success/${response.id}`,
       });
-
-      survey.value = getDefaultSurvey();
-      nextTick(() => {
-        if (titleInput.value) {
-          titleInput.value.focus();
-        }
-      });
     } else {
       alert(`エラーが発生しました: ${response.message}`);
     }
@@ -645,10 +638,17 @@ const adjustTextareaHeight = (event) => {
 };
 
 onMounted(() => {
-  if (titleInput.value) {
-    titleInput.value.focus();
-    adjustTextareaHeight({ target: titleInput.value });
-  }
+  // ページが表示されるたびにフォームを初期状態にリセット
+  survey.value = getDefaultSurvey();
+  formSubmitted.value = false;
+  creatorNameError.value = false;
+
+  nextTick(() => {
+    if (titleInput.value) {
+      titleInput.value.focus();
+      adjustTextareaHeight({ target: titleInput.value });
+    }
+  });
 });
 </script>
 

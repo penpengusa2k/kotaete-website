@@ -165,9 +165,7 @@ const isExpired = computed(() => {
   return new Date(surveyDeadline.value) < new Date();
 });
 
-
-
-const baseUrl = useRequestURL().origin;
+const baseUrl = useRuntimeConfig().public.baseUrl;
 const answerUrl = computed(() => `${baseUrl}/answer/${surveyId}`);
 const resultUrl = computed(() => `${baseUrl}/result/${surveyId}`);
 
