@@ -11,22 +11,32 @@
           <span class="material-icons-outlined text-xl mr-2">lightbulb</span>
           テンプレートから作成（任意）
         </h3>
-        <p class="text-sm mb-3">用途に合わせたテンプレートを選択すると、タイトルと質問が自動で入力されます。</p>
+        <p class="text-sm mb-3">バズ狙い？実用性重視？目的別テンプレートでサクッと作成！</p>
         <select @change="handleTemplateSelect" class="appearance-none border border-blue-light rounded-lg w-full py-2 px-3 text-blue-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-blue-dark focus:border-transparent transition-all duration-200 shadow-sm">
           <option value="">テンプレートを選ぶ</option>
           <optgroup label="SNS向けテンプレート">
-            <option :value="JSON.stringify(templates.snsAskMeAnything)">SNS: 質問募集（AMA）</option>
+            <option :value="JSON.stringify(templates.snsFunnyPersonality)">SNS: 性格バレアンケート</option>
+            <option :value="JSON.stringify(templates.snsCrushCheck)">SNS: 気になる人に聞いてみた</option>
+            <option :value="JSON.stringify(templates.snsRatingMe)">SNS: 私って何点？</option>
             <option :value="JSON.stringify(templates.snsSelfIntro)">SNS: 自己紹介リレー</option>
-            <option :value="JSON.stringify(templates.snsEvent)">SNS: イベント告知</option>
-            <option :value="JSON.stringify(templates.snsOpinion)">SNS: 意見募集</option>
+            <option :value="JSON.stringify(templates.snsWhoAmI)">SNS: 私ってどんな人診断</option>
+            <option :value="JSON.stringify(templates.snsFriendshipTest)">SNS: 友情度チェック</option>
+            <option :value="JSON.stringify(templates.snsComplimentBox)">SNS: 褒めてボックス</option>
+            <option :value="JSON.stringify(templates.snsDareMe)">SNS: やってほしいこと募集</option>
           </optgroup>
           <optgroup label="業務用テンプレート">
             <option :value="JSON.stringify(templates.bizCustomer)">業務用: 顧客満足度</option>
             <option :value="JSON.stringify(templates.bizEmployee)">業務用: 従業員アンケート</option>
+            <option :value="JSON.stringify(templates.bizEventFeedback)">業務用: イベント満足度</option>
+            <option :value="JSON.stringify(templates.bizServiceImprovement)">業務用: 改善提案募集</option>
+            <option :value="JSON.stringify(templates.bizInternalComms)">業務用: 社内コミュニケーション調査</option>
           </optgroup>
-          <optgroup label="汎用テンプレート">
-            <option :value="JSON.stringify(templates.genericFeedback)">汎用: イベントFB</option>
-            <option :value="JSON.stringify(templates.genericSimple)">汎用: シンプル</option>
+          <optgroup label="日常・趣味系テンプレート">
+            <option :value="JSON.stringify(templates.funAnimeRanking)">日常: 好きなアニメランキング</option>
+            <option :value="JSON.stringify(templates.funLunchVote)">日常: 今日のランチ決め</option>
+            <option :value="JSON.stringify(templates.funTravelSurvey)">日常: 旅行の好みアンケート</option>
+            <option :value="JSON.stringify(templates.funPetSurvey)">日常: ペットについて教えて</option>
+            <option :value="JSON.stringify(templates.funGamePrefs)">日常: ゲームの好み診断</option>
           </optgroup>
         </select>
       </div>
@@ -234,95 +244,336 @@ const deadlineInput = ref(null);
 
 // --- テンプレートデータ ---
 const templates = {
-  snsEvent: {
-    title: '【イベント参加意向調査】〇〇イベント開催します！',
-    description: '来る〇月〇日に開催を予定している「〇〇イベント」について、皆様のご意見をお聞かせください！',
+  snsFunnyPersonality: {
+    title: '【ぶっちゃけ教えて】私ってどんな人？',
+    description: 'あなたが思う私の印象やキャラを匿名で教えてください！',
     questions: [
-      { text: '〇〇イベントに参加したいと思いますか？', type: 'radio', options: [{ value: 'はい' }, { value: 'いいえ' }, { value: '検討中' }] },
-      { text: 'もし参加するなら、希望する開催曜日はありますか？', type: 'checkbox', options: [{ value: '平日' }, { value: '土曜日' }, { value: '日曜日' }] },
-      { text: 'イベントで他に期待することはありますか？', type: 'text', options: [] },
+      { text: '私の第一印象は？', type: 'text', options: [] },
+      { text: '正直、私の性格を一言でいうと？', type: 'text', options: [] },
+      { text: '私を動物に例えると？', type: 'text', options: [] },
+      { text: '一番似合うと思う職業は？', type: 'text', options: [] },
+      { text: '私の口癖、何か思い出せる？', type: 'text', options: [] },
+      { text: '私って友達に紹介したいタイプ？', type: 'radio', options: [
+        { value: 'ぜひ紹介したい' }, { value: '場合によるかも' }, { value: 'ちょっと無理かも' }
+      ] }
     ],
     resultRestricted: false,
-    anonymous: true,
+    anonymous: true
   },
-  snsOpinion: {
-    title: '【意見募集】今後のSNS投稿についてアンケート！',
-    description: 'いつもご覧いただきありがとうございます！今後のSNS投稿の参考に、皆様のご意見を伺わせてください。',
+
+  snsCrushCheck: {
+    title: '【匿名で回答】気になる人に聞いてみた！',
+    description: 'ちょっとドキドキ…気になるあの人のホンネ、聞いてみませんか？',
     questions: [
-      { text: 'どのような内容の投稿をもっと見たいですか？', type: 'checkbox', options: [{ value: '写真や動画' }, { value: '短いテキスト情報' }, { value: '詳しい解説記事' }, { value: 'Q&A形式' }] },
-      { text: '投稿頻度は適切だと思いますか？', type: 'radio', options: [{ value: '多い' }, { value: '適切' }, { value: '少ない' }] },
-      { text: 'その他、SNS運用に関するご意見があれば教えてください。', type: 'text', options: [] },
+      { text: '私って恋愛対象になりますか？', type: 'radio', options: [
+        { value: 'なる' }, { value: 'ならない' }, { value: '迷う' }
+      ] },
+      { text: '付き合ったら楽しそう？', type: 'radio', options: [
+        { value: 'めっちゃ楽しそう' }, { value: '普通かな' }, { value: '不安かも' }
+      ] },
+      { text: '第一印象のスコア（100点満点中）', type: 'radio', options: [
+        { value: '90〜100' }, { value: '70〜89' }, { value: '50〜69' }, { value: 'それ以下' }
+      ] },
+      { text: '正直、今の印象は？', type: 'text', options: [] },
+      { text: 'どんなところが魅力的？', type: 'text', options: [] },
+      { text: '逆にちょっと気になるところは？', type: 'text', options: [] }
+    ],
+    resultRestricted: true,
+    anonymous: true
+  },
+
+  snsRatingMe: {
+    title: '【匿名評価】私って何点？',
+    description: '見た目？性格？人間力？あなたからの点数をこっそり知りたい！',
+    questions: [
+      { text: '私の総合点は？', type: 'radio', options: [
+        { value: '100点満点' }, { value: '80点くらい' }, { value: '50点以下' }
+      ] },
+      { text: '見た目の評価（10点満点）', type: 'radio', options: [
+        { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
+      ] },
+      { text: '性格の評価（10点満点）', type: 'radio', options: [
+        { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
+      ] },
+      { text: '良いと思う点は？', type: 'text', options: [] },
+      { text: '直した方がいい点があれば教えてください', type: 'text', options: [] },
+      { text: '総合コメントお願いします！', type: 'text', options: [] }
     ],
     resultRestricted: false,
-    anonymous: true,
+    anonymous: true
   },
+
   snsSelfIntro: {
     title: '【自己紹介リレー】あなたの〇〇を教えて！',
-    description: 'あなたの好きなものや、最近ハマっていることを教えてください！ぜひ他の人の回答も見て、新しい発見をしてみましょう！',
+    description: 'あなたの好きなものや、最近ハマっていることを教えてください！',
     questions: [
-      { text: '最近ハマっていることは何ですか？', type: 'text', options: [] },
-      { text: '好きな食べ物は何ですか？', type: 'text', options: [] },
-      { text: '休日の過ごし方で一番好きなものは？', type: 'radio', options: [{ value: '家でまったり' }, { value: '外出してアクティブに' }, { value: '趣味に没頭' }] },
-      { text: '座右の銘や好きな言葉があれば教えてください。', type: 'text', options: [] },
+      { text: '好きな食べ物は？', type: 'text', options: [] },
+      { text: '最近ハマってることは？', type: 'text', options: [] },
+      { text: '休日の過ごし方は？', type: 'text', options: [] },
+      { text: '自分を一言で表すと？', type: 'text', options: [] },
+      { text: '好きな音楽・アーティストは？', type: 'text', options: [] },
+      { text: '今年の目標を教えてください！', type: 'text', options: [] }
     ],
     resultRestricted: false,
-    anonymous: true,
+    anonymous: true
   },
-  snsAskMeAnything: {
-    title: '【質問募集】私に聞きたいことある？（AMA形式）',
-    description: '普段なかなか聞けないことや、ちょっとした疑問、何でもお気軽に質問してください！答えられる範囲で、包み隠さずお答えします！',
+
+  snsWhoAmI: {
+    title: '【私ってどんな人？】本音で答えて！',
+    description: '匿名だからこそ聞けるホンネ！私の印象教えて！',
     questions: [
-      { text: '私に聞きたいことはありますか？自由に質問してください。', type: 'text', options: [] },
+      { text: '私を色で表すと？', type: 'text', options: [] },
+      { text: '私に足りないものは？', type: 'text', options: [] },
+      { text: '逆に、良いところも！', type: 'text', options: [] },
+      { text: '私の特徴を一言で表すと？', type: 'text', options: [] },
+      { text: '私ってどんな場面で輝いてると思う？', type: 'text', options: [] }
     ],
     resultRestricted: false,
-    anonymous: true,
+    anonymous: true
   },
+
+  snsFriendshipTest: {
+    title: '【友情度チェック】私たちどれくらい仲良し？',
+    description: '友達って言える？あなたの本音を教えてください！',
+    questions: [
+      { text: '初対面の印象は？', type: 'text', options: [] },
+      { text: '一緒にいて楽しいと感じる？', type: 'radio', options: [
+        { value: 'とても楽しい' }, { value: 'まあまあ' }, { value: '微妙かも' }
+      ] },
+      { text: '連絡頻度はどのくらい？', type: 'radio', options: [
+        { value: '毎日' }, { value: '週に1回' }, { value: '月1回以下' }
+      ] },
+      { text: '喧嘩したら仲直りできそう？', type: 'radio', options: [
+        { value: 'すぐできそう' }, { value: '時間かかりそう' }, { value: '無理かも' }
+      ] },
+      { text: 'もっと仲良くなるには何が必要？', type: 'text', options: [] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
+  snsComplimentBox: {
+    title: '【褒めてボックス】あなたの良いところ教えて！',
+    description: '匿名で褒め合おう！ちょっと嬉しい気分になれるかも？',
+    questions: [
+      { text: 'あなたが思う私の長所は？', type: 'text', options: [] },
+      { text: '一緒にいて安心できるポイントは？', type: 'text', options: [] },
+      { text: '「ありがとう」と言いたいことは？', type: 'text', options: [] },
+      { text: '私の努力を感じた瞬間があれば教えて！', type: 'text', options: [] },
+      { text: '最後に一言メッセージがあればどうぞ！', type: 'text', options: [] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
+  snsDareMe: {
+    title: '【やってみた募集】なにしてほしい？',
+    description: '挑戦してみたいから、アイデア募集します！',
+    questions: [
+      { text: '私にやってほしいことは？', type: 'text', options: [] },
+      { text: 'その理由や背景も教えて！', type: 'text', options: [] },
+      { text: '誰と一緒にやったら面白そう？', type: 'text', options: [] },
+      { text: 'SNSでバズりそうな要素ある？', type: 'text', options: [] },
+      { text: '難易度レベルは？', type: 'radio', options: [
+        { value: '超簡単' }, { value: 'まあまあ' }, { value: 'ガチでキツい' }
+      ] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
   bizCustomer: {
     title: '【顧客満足度調査】サービス品質向上にご協力ください',
-    description: '平素より弊社サービスをご利用いただき、誠にありがとうございます。今後のサービス改善のため、皆様のご意見をお聞かせください。',
+    description: '日頃のご利用ありがとうございます。今後の改善の参考にさせていただきます。',
     questions: [
-      { text: '当社のサービスに全体的に満足していますか？', type: 'radio', options: [{ value: '非常に満足' }, { value: '満足' }, { value: 'どちらともいえない' }, { value: '不満' }, { value: '非常に不満' }] },
-      { text: '特に満足した点があれば具体的に教えてください。', type: 'text', options: [] },
-      { text: '改善してほしい点、不満に感じた点があれば具体的に教えてください。', type: 'text', options: [] },
-      { text: '今後、どのようなサービスを期待しますか？', type: 'text', options: [] },
+      { text: '当社のサービスに満足していますか？', type: 'radio', options: [
+        { value: '非常に満足' }, { value: '満足' }, { value: '普通' }, { value: '不満' }, { value: '非常に不満' }
+      ] },
+      { text: 'どの点に満足していますか？', type: 'text', options: [] },
+      { text: '改善してほしい点はありますか？', type: 'text', options: [] },
+      { text: 'スタッフの対応についてどう感じましたか？', type: 'radio', options: [
+        { value: 'とても良い' }, { value: '良い' }, { value: '普通' }, { value: '悪い' }
+      ] },
+      { text: '今後どんなサービスを望みますか？', type: 'text', options: [] },
+      { text: 'このサービスを他人に勧めたいですか？', type: 'radio', options: [
+        { value: '強く勧めたい' }, { value: 'まあ勧めたい' }, { value: '勧めない' }
+      ] }
     ],
     resultRestricted: true,
-    anonymous: false,
+    anonymous: false
   },
+
   bizEmployee: {
     title: '【従業員意識調査】より良い職場環境のために',
-    description: '皆様が日々の業務を円滑に進め、能力を最大限に発揮できるような職場環境を目指し、従業員意識調査を実施いたします。',
+    description: '従業員の声をもとに、職場改善を目指しています。',
     questions: [
-      { text: '現在の業務内容に満足していますか？', type: 'radio', options: [{ value: '非常に満足' }, { value: '満足' }, { value: 'どちらともいえない' }, { value: '不満' }, { value: '非常に不満' }] },
-      { text: '職場の人間関係についてどう感じていますか？', type: 'radio', options: [{ value: '非常に良い' }, { value: '良い' }, { value: '普通' }, { value: '悪い' }, { value: '非常に悪い' }] },
-      { text: '業務効率を向上させるために、どのような改善が必要だと思いますか？', type: 'text', options: [] },
-      { text: '会社に期待することや、その他自由に意見を述べてください。', type: 'text', options: [] },
+      { text: '現在の仕事内容に満足していますか？', type: 'radio', options: [
+        { value: '非常に満足' }, { value: '満足' }, { value: '普通' }, { value: '不満' }
+      ] },
+      { text: '上司・同僚との関係性はいかがですか？', type: 'radio', options: [
+        { value: '良好' }, { value: '普通' }, { value: '悪い' }
+      ] },
+      { text: '働きやすさを10点満点で評価すると？', type: 'radio', options: [
+        { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
+      ] },
+      { text: '福利厚生に対するご意見があればお聞かせください。', type: 'text', options: [] },
+      { text: '改善してほしい点は？', type: 'text', options: [] },
+      { text: '自由にご意見・ご提案をお願いします。', type: 'text', options: [] }
     ],
     resultRestricted: true,
-    anonymous: false,
+    anonymous: false
   },
-  genericFeedback: {
-    title: '【イベントフィードバック】ご感想をお聞かせください',
-    description: 'この度は〇〇イベントにご参加いただき、誠にありがとうございました。今後の企画の参考に、皆様からの率直なご意見・ご感想をお待ちしております。',
+
+  bizEventFeedback: {
+    title: '【イベント参加者アンケート】ご意見ください',
+    description: '本イベントにご参加いただきありがとうございました。今後の運営の参考とさせていただきます。',
     questions: [
-      { text: 'イベント全体の満足度を教えてください。', type: 'radio', options: [{ value: '5:大変満足' }, { value: '4:満足' }, { value: '3:普通' }, { value: '2:不満' }, { value: '1:大変不満' }] },
-      { text: '特に印象に残った内容や良かった点があれば教えてください。', type: 'text', options: [] },
-      { text: '改善してほしい点や、次回開催時に期待することがあれば教えてください。', type: 'text', options: [] },
+      { text: 'イベントの満足度を教えてください。', type: 'radio', options: [
+        { value: '大変満足' }, { value: '満足' }, { value: '普通' }, { value: 'やや不満' }, { value: '不満' }
+      ] },
+      { text: '最も印象に残ったプログラムは何ですか？', type: 'text', options: [] },
+      { text: 'スタッフの対応はいかがでしたか？', type: 'radio', options: [
+        { value: 'とても良かった' }, { value: '普通' }, { value: '悪かった' }
+      ] },
+      { text: '会場やオンライン配信の環境について感想を教えてください。', type: 'text', options: [] },
+      { text: '今後どのようなテーマで開催してほしいですか？', type: 'text', options: [] },
+      { text: 'その他、自由なご意見があればご記入ください。', type: 'text', options: [] }
     ],
     resultRestricted: false,
-    anonymous: true,
+    anonymous: true
   },
-  genericSimple: {
-    title: '【シンプルアンケート】ご協力のお願い',
-    description: '簡単なアンケートです。お気軽にご回答ください。',
+
+  bizServiceImprovement: {
+    title: '【改善提案募集】もっと良くするには？',
+    description: 'サービスや社内制度をより良くするためのご意見を募集しています。',
     questions: [
-      { text: 'お名前（ニックネーム可）', type: 'text', options: [] },
-      { text: 'メールアドレス（任意）', type: 'text', options: [] },
-      { text: 'ご意見・ご感想', type: 'text', options: [] },
+      { text: '現在困っていることがあれば教えてください。', type: 'text', options: [] },
+      { text: 'サービスや業務フローの改善案を自由にご記入ください。', type: 'text', options: [] },
+      { text: '提案する改善案の効果やメリットは何ですか？', type: 'text', options: [] },
+      { text: 'すぐに実行できそうな工夫があれば教えてください。', type: 'text', options: [] },
+      { text: '改善にあたり障害となることがあればご記入ください。', type: 'text', options: [] }
     ],
     resultRestricted: false,
-    anonymous: false,
+    anonymous: true
   },
+
+  bizInternalComms: {
+    title: '【社内コミュニケーション調査】風通しはどう？',
+    description: 'チームワークや人間関係に関する実態を把握し、改善につなげるための調査です。',
+    questions: [
+      { text: '部署内での情報共有は十分にできていますか？', type: 'radio', options: [
+        { value: 'とてもできている' }, { value: 'ある程度できている' }, { value: 'あまりできていない' }
+      ] },
+      { text: '部署外との連携に問題を感じますか？', type: 'radio', options: [
+        { value: '問題なし' }, { value: '少しある' }, { value: 'かなりある' }
+      ] },
+      { text: '対面 or オンライン、どちらが話しやすいですか？', type: 'radio', options: [
+        { value: '対面' }, { value: 'オンライン' }, { value: 'どちらでも変わらない' }
+      ] },
+      { text: 'コミュニケーションの悩みがあれば教えてください。', type: 'text', options: [] },
+      { text: '改善のために会社にできそうな取り組みは？', type: 'text', options: [] }
+    ],
+    resultRestricted: true,
+    anonymous: true
+  },
+
+  funAnimeRanking: {
+    title: '【アニメ好き集合】推し作品TOP3',
+    description: 'アニメ好き同士、推し作品や好みを語ろう！',
+    questions: [
+      { text: '1番好きなアニメ作品は？', type: 'text', options: [] },
+      { text: '2番目に好きなアニメは？', type: 'text', options: [] },
+      { text: '3番目に好きなアニメは？', type: 'text', options: [] },
+      { text: '好きなキャラクターは？', type: 'text', options: [] },
+      { text: '好きなジャンル（複数選択可）', type: 'checkbox', options: [
+        { value: '日常' }, { value: 'バトル' }, { value: '恋愛' }, { value: 'SF' }, { value: 'ギャグ' }
+      ] },
+      { text: 'おすすめしたい隠れた名作は？', type: 'text', options: [] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
+  funLunchVote: {
+    title: '【今日のお昼どうする？】みんなの意見集め！',
+    description: 'ランチ候補を投票形式で決めよう！',
+    questions: [
+      { text: '今日のランチ候補を選んでください', type: 'checkbox', options: [
+        { value: 'ラーメン' }, { value: 'カレー' }, { value: 'パスタ' }, { value: '定食' }, { value: 'コンビニ飯' }
+      ] },
+      { text: 'ランチに求めるポイントは？', type: 'checkbox', options: [
+        { value: '安さ' }, { value: '栄養バランス' }, { value: 'スピード' }, { value: '美味しさ' }
+      ] },
+      { text: 'おすすめのランチ店があれば教えてください', type: 'text', options: [] },
+      { text: '一緒に食べたい人がいますか？（任意）', type: 'text', options: [] },
+      { text: '午後に備えて軽めがいいですか？', type: 'radio', options: [
+        { value: '軽め希望' }, { value: 'がっつり派' }, { value: 'どちらでもOK' }
+      ] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
+  funTravelSurvey: {
+    title: '【旅行アンケート】行きたい場所は？',
+    description: '次の旅行はどこへ？みんなの好みを教えて！',
+    questions: [
+      { text: '国内or海外どちらに行きたい？', type: 'radio', options: [
+        { value: '国内' }, { value: '海外' }, { value: 'どちらでも' }
+      ] },
+      { text: '行ってみたい具体的な場所は？', type: 'text', options: [] },
+      { text: '旅行の目的は？', type: 'checkbox', options: [
+        { value: '観光' }, { value: 'グルメ' }, { value: '温泉' }, { value: 'アクティビティ' }, { value: '買い物' }
+      ] },
+      { text: '誰と行きたいですか？', type: 'radio', options: [
+        { value: '友達' }, { value: '恋人' }, { value: '家族' }, { value: 'ひとり旅' }
+      ] },
+      { text: '旅行にかけたい予算は？', type: 'radio', options: [
+        { value: '〜1万円' }, { value: '1〜3万円' }, { value: '3〜5万円' }, { value: '5万円以上' }
+      ] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
+  funPetSurvey: {
+    title: '【ペット好きアンケート】あなたの推しペットは？',
+    description: '動物好きなら答えてね！飼ってる人も飼ってない人も歓迎！',
+    questions: [
+      { text: '現在飼っているペットは？', type: 'checkbox', options: [
+        { value: '犬' }, { value: '猫' }, { value: '鳥' }, { value: '爬虫類' }, { value: 'その他' }
+      ] },
+      { text: 'その子の名前（またはあだ名）', type: 'text', options: [] },
+      { text: 'ペットにどんな性格がありますか？', type: 'text', options: [] },
+      { text: 'いつ頃から飼っていますか？', type: 'text', options: [] },
+      { text: '動物に癒される瞬間はどんなとき？', type: 'text', options: [] },
+      { text: '飼っていない人：飼ってみたい動物は？', type: 'text', options: [] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
+  funGamePrefs: {
+    title: '【ゲーム診断】あなたのゲームタイプは？',
+    description: 'ゲーマーの皆さんの好みや傾向を大調査！',
+    questions: [
+      { text: '好きなジャンル（複数選択可）', type: 'checkbox', options: [
+        { value: 'RPG' }, { value: 'FPS/TPS' }, { value: 'シミュレーション' }, { value: 'パズル' }, { value: 'アドベンチャー' }
+      ] },
+      { text: '最近ハマったゲームタイトルは？', type: 'text', options: [] },
+      { text: 'プレイスタイルは？', type: 'radio', options: [
+        { value: 'じっくり派' }, { value: 'スピード重視' }, { value: '効率厨' }, { value: '雰囲気派' }
+      ] },
+      { text: 'どのプラットフォームで遊びますか？', type: 'checkbox', options: [
+        { value: 'PC' }, { value: 'PS5/PS4' }, { value: 'Switch' }, { value: 'スマホ' }, { value: 'その他' }
+      ] },
+      { text: 'ゲームで得意なこと or 苦手なことがあれば教えてください', type: 'text', options: [] },
+      { text: '理想のゲームとは？', type: 'text', options: [] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  }
+
 };
 
 const handleTemplateSelect = async (event) => {
@@ -333,8 +584,6 @@ const handleTemplateSelect = async (event) => {
   }
   const template = JSON.parse(selectedValue);
   await setTemplate(template);
-  // 選択肢を初期値に戻す
-  event.target.value = "";
 };
 
 const setTemplate = async (template) => {
@@ -587,13 +836,6 @@ const createSurvey = async () => {
       router.push({
         path: `/create/success/${response.id}`,
       });
-
-      survey.value = getDefaultSurvey();
-      nextTick(() => {
-        if (titleInput.value) {
-          titleInput.value.focus();
-        }
-      });
     } else {
       alert(`エラーが発生しました: ${response.message}`);
     }
@@ -645,10 +887,17 @@ const adjustTextareaHeight = (event) => {
 };
 
 onMounted(() => {
-  if (titleInput.value) {
-    titleInput.value.focus();
-    adjustTextareaHeight({ target: titleInput.value });
-  }
+  // ページが表示されるたびにフォームを初期状態にリセット
+  survey.value = getDefaultSurvey();
+  formSubmitted.value = false;
+  creatorNameError.value = false;
+
+  nextTick(() => {
+    if (titleInput.value) {
+      titleInput.value.focus();
+      adjustTextareaHeight({ target: titleInput.value });
+    }
+  });
 });
 </script>
 
