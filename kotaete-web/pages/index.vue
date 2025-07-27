@@ -52,6 +52,18 @@ import { ref, onMounted } from 'vue';
 const totalCreatedCount = ref(null);
 const loadingCount = ref(true); // ローディング状態を管理
 
+useHead({
+  title: 'KOTAETE - 簡単・無料のアンケート作成サービス',
+  meta: [
+    { name: 'description', content: 'KOTAETEは、登録不要で簡単に使える無料のアンケート作成サービスです。あなたの「知りたい」を、みんなの答えで解決しましょう。' },
+    { property: 'og:title', content: 'KOTAETE - 簡単・無料のアンケート作成サービス' },
+    { property: 'og:description', content: 'KOTAETEは、登録不要で簡単に使える無料のアンケート作成サービスです。あなたの「知りたい」を、みんなの答えで解決しましょう。' },
+    { property: 'og:image', content: 'https://kotaete.net/default-ogp.png' },
+    { property: 'og:url', content: 'https://kotaete.net' },
+    { property: 'twitter:card', content: 'summary_large_image' },
+  ],
+})
+
 const fetchTotalCreatedCount = async () => {
   loadingCount.value = true; // 読み込み開始時にtrueに設定
   try {

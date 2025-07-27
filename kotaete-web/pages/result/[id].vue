@@ -237,7 +237,8 @@ const fetchSurveyAndResults = async (key = null) => {
         inputKey.value = '';
       }
     } else {
-      throw new Error(surveyRes.message || 'KOTAETE情報の取得に失敗しました。');
+      // アンケートが存在しない場合、301リダイレクト
+      await navigateTo('/', { redirectCode: 301 });
     }
   } catch (e) {
     console.error('Error fetching results:', e);

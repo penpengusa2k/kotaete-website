@@ -208,10 +208,18 @@ const isExpired = computed(() => {
 
 const { data: surveyData, pending, error: fetchError } = await useAsyncData('survey', async () => {
   const res = await $fetch(`/api/gas-proxy?action=get&id=${surveyId}`);
-  if (res.result !== 'success') throw new Error(res.message || 'Fetch failed');
+  if (res.result !== 'success') {
+    // ライフサイクルで削除された場合などを想定
+    throw new Error(res.message || 'KOTAETEが見つかりませんでした。');
+  }
   res.data.questions = JSON.parse(res.data.questions);
   return res.data;
 });
+
+// データ取得でエラーが発生した場合（例: アンケートが存在しない）、ホームページにリダイレクト
+if (fetchError.value) {
+  await navigateTo('/', { redirectCode: 301 }); // 301リダイレクト
+}
 
 survey.value = surveyData.value;
 if (survey.value) {
