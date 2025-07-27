@@ -78,29 +78,35 @@
             <thead class="bg-neutral-darkest">
               <tr>
                 <th class="py-2 px-3 text-left text-xs font-medium text-white uppercase tracking-wider">回答者</th>
-                <th class="py-2 px-3 text-left text-xs font-medium text-white uppercase tracking-wider">タイムスタンプ</th>
+                <th class="py-2 px-3 text-left text-xs font-medium text-white uppercase tracking-wider">回答日時</th>
                 <th v-for="(question, qIndex) in surveyData.questions" :key="qIndex" class="py-2 px-3 text-left text-xs font-medium text-neutral-dark uppercase tracking-wider">
                   <Tooltip :content="formatQuestionHeader(question, qIndex)">
                     <span class="cursor-help">{{ `Q${qIndex + 1}` }}</span>
                   </Tooltip>
                 </th>
-                <th v-if="!surveyData.anonymous && resultHeaders.includes('username')" class="py-2 px-3 text-left text-xs font-medium text-white uppercase tracking-wider">ユーザー名</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-neutral-light">
               <tr v-for="(result, rIndex) in results" :key="rIndex" class="hover:bg-neutral-lightest">
                 <td class="py-2 px-3 text-sm text-neutral-darkest">
-                  <span v-if="surveyData.anonymous">匿名ユーザー ({{ result[resultHeaders.indexOf('respondent_id')]?.substring(0, 6) || 'N/A' }})</span>
-                  <span v-else>{{ result[resultHeaders.indexOf('respondent_id')] || 'N/A' }}</span>
+                  <span v-if="surveyData.anonymous">匿名ユーザー ({{ getRespondentIdShort(result) }})</span>
+                  <span v-else>{{ getUsername(result) }}</span>
                 </td>
-                <td class="py-2 px-3 text-sm text-neutral-darkest">{{ new Date(result[resultHeaders.indexOf('timestamp')]).toLocaleString() }}</td>
+                <td class="py-2 px-3 text-sm text-neutral-darkest">{{ formatTimestamp(result) }}</td>
                 <td v-for="(question, qIndex) in surveyData.questions" :key="qIndex" class="py-2 px-3 text-sm text-neutral-darkest">
-                  <Tooltip v-if="result[qIndex + 2] && String(result[qIndex + 2]).length > 20" :content="result[qIndex + 2]">
-                    <span class="inline-block max-w-[120px] truncate cursor-help">{{ truncateText(result[qIndex + 2], 20) }}</span>
-                  </Tooltip>
-                  <span v-else>{{ truncateText(result[qIndex + 2], 20) }}</span>
+                  <span v-if="question.type === 'date'">
+                    <Tooltip v-if="formatDateOnly(getAnswerByIndex(result, qIndex)) && String(formatDateOnly(getAnswerByIndex(result, qIndex))).length > 20" :content="formatDateOnly(getAnswerByIndex(result, qIndex))">
+                      <span class="inline-block max-w-[120px] truncate cursor-help">{{ truncateText(formatDateOnly(getAnswerByIndex(result, qIndex)), 20) }}</span>
+                    </Tooltip>
+                    <span v-else>{{ truncateText(formatDateOnly(getAnswerByIndex(result, qIndex)), 20) }}</span>
+                  </span>
+                  <span v-else>
+                    <Tooltip v-if="getAnswerByIndex(result, qIndex) && String(getAnswerByIndex(result, qIndex)).length > 20" :content="getAnswerByIndex(result, qIndex)">
+                      <span class="inline-block max-w-[120px] truncate cursor-help">{{ truncateText(getAnswerByIndex(result, qIndex), 20) }}</span>
+                    </Tooltip>
+                    <span v-else>{{ truncateText(getAnswerByIndex(result, qIndex), 20) }}</span>
+                  </span>
                 </td>
-                <td v-if="!surveyData.anonymous && resultHeaders.includes('username')" class="py-2 px-3 text-sm text-neutral-darkest">{{ result[resultHeaders.indexOf('username')] || 'N/A' }}</td>
               </tr>
             </tbody>
           </table>
@@ -153,6 +159,28 @@ const inputKey = ref('');
 const keyErrorMessage = ref('');
 const hasAccess = ref(false);
 const submittingKey = ref(false);
+
+// システムカラムのインデックスを動的に取得するためのComputedプロパティ
+const systemColumnIndices = computed(() => {
+  const indices = {
+    respondent_id: resultHeaders.value.indexOf('respondent_id'),
+    timestamp: resultHeaders.value.indexOf('timestamp'),
+    username: resultHeaders.value.indexOf('username'),
+  };
+  return indices;
+});
+
+// 質問の回答が始まるカラムのオフセットを計算
+const questionColumnOffset = computed(() => {
+  if (!surveyData.value || !resultHeaders.value) return 0;
+  // usernameがあるかないかでオフセットが変わる。
+  // respondent_id と timestamp は常に存在
+  let offset = 2; // respondent_id, timestamp
+  if (systemColumnIndices.value.username !== -1) { // usernameが存在する場合
+    offset = 3; // username, respondent_id, timestamp
+  }
+  return offset;
+});
 
 const isExpired = computed(() => {
   if (!surveyData.value || !surveyData.value.deadline) return false;
@@ -239,25 +267,88 @@ onMounted(async () => {
   await fetchSurveyAndResults(viewingKey);
 });
 
-const getAnswersForQuestion = (questionIndex) => {
-  const questionColIndex = questionIndex + 2;
-  if (questionColIndex >= resultHeaders.value.length) return [];
-  const question = surveyData.value.questions[questionIndex];
-  const respondentIdCol = resultHeaders.value.indexOf('respondent_id');
-  const usernameCol = resultHeaders.value.indexOf('username');
-  return results.value.map(res => ({
-    text: question.type === 'date' ? formatDateOnly(res[questionColIndex]) : res[questionColIndex],
-    respondentIdShort: respondentIdCol !== -1 ? res[respondentIdCol]?.substring(0, 6) || 'N/A' : 'N/A',
-    username: usernameCol !== -1 ? res[usernameCol] || 'N/A' : 'N/A'
-  })).filter(ans => ans.text);
+// 回答者IDのショートバージョンを取得
+const getRespondentIdShort = (resultRow) => {
+  const uuidIndex = systemColumnIndices.value.respondent_id;
+  return uuidIndex !== -1 && resultRow[uuidIndex] ? String(resultRow[uuidIndex]).substring(0, 6) : 'N/A';
 };
 
+// ユーザー名を取得
+const getUsername = (resultRow) => {
+  const usernameIndex = systemColumnIndices.value.username;
+  // 匿名ユーザーの場合、またはユーザー名が空の場合は「匿名ユーザー (UUID短縮形)」を返す
+  if (surveyData.value.anonymous || !resultRow[usernameIndex] || String(resultRow[usernameIndex]).trim() === '') {
+    return `匿名ユーザー (${getRespondentIdShort(resultRow)})`;
+  }
+  return String(resultRow[usernameIndex]);
+};
+
+
+// タイムスタンプをフォーマット（テーブル表示用）
+const formatTimestamp = (resultRow) => {
+  const timestampIndex = systemColumnIndices.value.timestamp;
+  if (timestampIndex !== -1 && resultRow[timestampIndex]) {
+    const date = new Date(resultRow[timestampIndex]);
+    if (!isNaN(date.getTime())) {
+      // YYYY/MM/DD HH:MM:SS 形式
+      return date.toLocaleString('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).replace(/\//g, '-'); // スラッシュをハイフンに置換
+    }
+  }
+  return 'N/A';
+};
+
+// 質問に対する回答をインデックスで取得
+const getAnswerByIndex = (resultRow, questionIndex) => {
+  // resultHeadersの 'username', 'respondent_id', 'timestamp' の位置を正確に把握し、その後の質問回答のインデックスを計算
+  const respondentIdIndex = systemColumnIndices.value.respondent_id;
+  const timestampIndex = systemColumnIndices.value.timestamp;
+  const usernameIndex = systemColumnIndices.value.username;
+
+  // 質問データの開始インデックスを特定する
+  // resultHeadersの中から質問Q1, Q2... に該当する部分を見つける
+  let startOfQuestionsIndex = 0;
+  if (resultHeaders.value.includes('Q1')) { // assuming Q1 is always the first question header
+    startOfQuestionsIndex = resultHeaders.value.indexOf('Q1');
+  } else {
+    // If 'Q1' is not directly in headers (e.g., custom headers from GAS),
+    // find the max index of system columns + 1
+    startOfQuestionsIndex = Math.max(respondentIdIndex, timestampIndex, usernameIndex) + 1;
+  }
+  
+  const colIndex = startOfQuestionsIndex + questionIndex;
+  return resultRow[colIndex];
+};
+
+
+const getAnswersForQuestion = (questionIndex) => {
+  const question = surveyData.value.questions[questionIndex];
+  const answers = results.value.map(res => {
+    const text = getAnswerByIndex(res, questionIndex);
+    const respondentIdShort = getRespondentIdShort(res);
+    const username = getUsername(res); // getUsername関数を使用
+
+    return {
+      text: question.type === 'date' ? formatDateOnly(text) : text,
+      respondentIdShort: respondentIdShort,
+      username: username
+    };
+  }).filter(ans => ans.text); // 回答があるもののみをフィルタリング
+  return answers;
+};
+
+
 const countOccurrences = (questionIndex, optionValue) => {
-  const questionColIndex = questionIndex + 2;
-  if (questionColIndex >= resultHeaders.value.length) return 0;
-  const answers = results.value.map(res => res[questionColIndex]).filter(Boolean);
+  const answers = results.value.map(res => getAnswerByIndex(res, questionIndex)).filter(Boolean);
   return answers.reduce((count, answer) => {
-    const individualAnswers = String(answer).split(', ');
+    // チェックボックスの場合、回答がカンマ区切りで複数ある可能性を考慮
+    const individualAnswers = String(answer).split(', ').map(s => s.trim());
     return count + (individualAnswers.includes(optionValue) ? 1 : 0);
   }, 0);
 };
@@ -266,9 +357,9 @@ const totalResponses = computed(() => results.value.length);
 
 const getPercentage = (count) => {
   if (totalResponses.value === 0) return 0;
-  const totalVotesForQuestion = results.value.length;
-  if (totalVotesForQuestion === 0) return 0;
-  return (count / totalVotesForQuestion) * 100;
+  // このパーセンテージは、その選択肢を選んだ回答者の割合を示すべき
+  // なので、分母は全体の回答数になる
+  return (count / totalResponses.value) * 100;
 };
 
 const truncateText = (text, maxLength = 50) => {
@@ -286,31 +377,39 @@ const downloadCsv = () => {
     alert('ダウンロードするデータがありません。');
     return;
   }
-  const fixedHeaders = ['回答者', 'タイムスタンプ'];
-  const questionHeaders = surveyData.value.questions.map((q, index) => formatQuestionHeader(q, index));
-  const optionalHeaders = [];
-  if (!surveyData.value.anonymous && resultHeaders.value.includes('username')) {
-    optionalHeaders.push('ユーザー名');
-  }
-  const allHeaders = [...fixedHeaders, ...questionHeaders, ...optionalHeaders].map(header => `"${header.replace(/"/g, '""')}"`).join(',');
+
+  // ヘッダーの生成
+  const headers = ['回答者', '回答日時']; // 固定ヘッダー
+
+  surveyData.value.questions.forEach((q, index) => {
+    headers.push(formatQuestionHeader(q, index));
+  });
+
+  const csvHeaders = headers.map(header => `"${header.replace(/"/g, '""')}"`).join(',');
+
+  // データの生成
   const rows = results.value.map(row => {
     const rowData = [];
-    rowData.push(`"${String(row[resultHeaders.value.indexOf('respondent_id')] || '').replace(/"/g, '""')}"`);
-    rowData.push(`"${new Date(row[resultHeaders.value.indexOf('timestamp')] || '').toLocaleString().replace(/"/g, '""')}"`);
+    
+    // 回答者 (匿名かどうかで表示を分ける)
+    rowData.push(`"${String(getUsername(row)).replace(/"/g, '""')}"`);
+    
+    // 回答日時
+    rowData.push(`"${formatTimestamp(row).replace(/"/g, '""')}"`);
+
+    // 各質問の回答
     surveyData.value.questions.forEach((question, qIndex) => {
-      const cellData = row[qIndex + 2];
-      let formattedCell = cellData;
+      let cellData = getAnswerByIndex(row, qIndex);
+      // date型の場合はformatDateOnlyを適用
       if (question.type === 'date') {
-        formattedCell = formatDateOnly(cellData);
+        cellData = formatDateOnly(cellData);
       }
-      rowData.push(`"${String(formattedCell || '').replace(/"/g, '""')}"`);
+      rowData.push(`"${String(cellData || '').replace(/"/g, '""')}"`);
     });
-    if (!surveyData.value.anonymous && resultHeaders.value.includes('username')) {
-      rowData.push(`"${String(row[resultHeaders.value.indexOf('username')] || '').replace(/"/g, '""')}"`);
-    }
     return rowData.join(',');
   });
-  const csvContent = [allHeaders, ...rows].join('\n');
+
+  const csvContent = [csvHeaders, ...rows].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
@@ -319,5 +418,4 @@ const downloadCsv = () => {
   link.click();
   document.body.removeChild(link);
 };
-
 </script>

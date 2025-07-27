@@ -56,29 +56,39 @@
             type="text"
             id="username"
             v-model="username"
-            class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
-            required
+            :class="[
+              'appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm',
+              formSubmitted && validationErrors.username ? 'border-red-500' : ''
+            ]"
             placeholder="あなたの名前を入力してください"
             :disabled="loading"
+            @blur="formSubmitted && validateForm()"
+            @input="formSubmitted && validateForm()"
           >
+          <p v-if="formSubmitted && validationErrors.username" class="text-red-500 text-xs italic mt-1">{{ validationErrors.username }}</p>
         </div>
 
         <hr v-if="!survey.anonymous" class="my-6">
         <div v-for="(question, index) in survey.questions" :key="index" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
           <label class="block text-gray-700 font-bold mb-2">
             Q{{ index + 1 }}. {{ question.text }}
+            <span class="text-red-500" v-if="question.type === 'text' || question.type === 'date' || question.type === 'radio'">*</span>
           </label>
 
           <div v-if="question.type === 'text'" class="mt-2">
             <textarea
               v-model="responses[index]"
-              class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
-              required
+              :class="[
+                'appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm',
+                formSubmitted && validationErrors[index] ? 'border-red-500' : ''
+              ]"
               maxlength="500"
               rows="3"
               :disabled="loading"
-              @input="adjustTextareaHeight"
+              @input="adjustTextareaHeight($event); formSubmitted && validateForm()"
+              @blur="formSubmitted && validateForm()"
             ></textarea>
+            <p v-if="formSubmitted && validationErrors[index]" class="text-red-500 text-xs italic mt-1">{{ validationErrors[index] }}</p>
             <p class="text-right text-sm text-gray-500 mt-1">{{ responses[index]?.length || 0 }} / 500</p>
           </div>
 
@@ -86,62 +96,80 @@
             <input
               type="date"
               v-model="responses[index]"
-              class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm"
-              required
+              :class="[
+                'appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm',
+                formSubmitted && validationErrors[index] ? 'border-red-500' : ''
+              ]"
               :disabled="loading"
+              @change="formSubmitted && validateForm()"
               @click="openDatePicker($event)"
+              @blur="formSubmitted && validateForm()"
             >
+            <p v-if="formSubmitted && validationErrors[index]" class="text-red-500 text-xs italic mt-1">{{ validationErrors[index] }}</p>
           </div>
 
           <div v-if="question.type === 'radio'" class="mt-2 space-y-2">
+            <div
+              :class="[
+                'p-2 rounded', // Add padding and rounding to the container
+                formSubmitted && validationErrors[index] ? 'border border-red-500' : '' // Apply red border to container
+              ]"
+            >
+              <div v-for="(option, oIndex) in question.options" :key="oIndex" class="flex items-center">
+                <label class="inline-flex items-center cursor-pointer text-gray-700">
+                  <input
+                    type="radio"
+                    :name="`question-${index}`"
+                    :value="option.value"
+                    v-model="responses[index]"
+                    class="form-radio h-5 w-5 text-primary border-neutral-light focus:ring-primary-dark transition-colors duration-200"
+                    :disabled="loading"
+                    @change="formSubmitted && validateForm()"
+                  >
+                  <span class="ml-3 break-all">{{ option.value }}</span>
+                </label>
+              </div>
+            </div>
+            <p v-if="formSubmitted && validationErrors[index]" class="text-red-500 text-xs italic mt-1">{{ validationErrors[index] }}</p>
+          </div>
+
+          <div v-if="question.type === 'checkbox'" class="mt-2 space-y-2">
             <div v-for="(option, oIndex) in question.options" :key="oIndex" class="flex items-center">
               <label class="inline-flex items-center cursor-pointer text-gray-700">
                 <input
-                  type="radio"
-                  :name="`question-${index}`"
+                  type="checkbox"
                   :value="option.value"
                   v-model="responses[index]"
-                  class="form-radio h-5 w-5 text-primary border-neutral-light focus:ring-primary-dark transition-colors duration-200"
-                  required
+                  class="form-checkbox h-5 w-5 text-primary border-neutral-light rounded focus:ring-primary-dark transition-colors duration-200"
                   :disabled="loading"
+                  @change="formSubmitted && validateForm()"
                 >
                 <span class="ml-3 break-all">{{ option.value }}</span>
               </label>
             </div>
           </div>
-
-          <div v-if="question.type === 'checkbox'" class="mt-2 space-y-2">
-               <div v-for="(option, oIndex) in question.options" :key="oIndex" class="flex items-center">
-                  <label class="inline-flex items-center cursor-pointer text-gray-700">
-                    <input
-                      type="checkbox"
-                      :value="option.value"
-                      v-model="responses[index]"
-                      class="form-checkbox h-5 w-5 text-primary border-neutral-light rounded focus:ring-primary-dark transition-colors duration-200"
-                      :disabled="loading"
-                    >
-                    <span class="ml-3 break-all">{{ option.value }}</span>
-                  </label>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-8">
-            <button
-              type="submit"
-              :class="[ (submitting) ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark', 'text-white font-bold py-3 px-6 rounded-lg w-full text-xl flex items-center justify-center shadow-md transition-colors duration-300' ]"
-              :disabled="submitting"
-            >
-              <span v-if="submitting" class="flex items-center">
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              送信中...
-            </span>
-            <span v-else>回答を送信</span>
-          </button>
         </div>
+
+        <div v-if="formSubmitted && Object.keys(validationErrors).length > 0" class="mt-4 p-4 rounded border bg-red-100 border-red-400 text-red-700">
+          <p>必須項目に未入力があります。</p>
+        </div>
+
+        <div class="mt-8">
+          <button
+            type="submit"
+            :class="[ submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark', 'text-white font-bold py-3 px-6 rounded-lg w-full text-xl flex items-center justify-center shadow-md transition-colors duration-300' ]"
+            :disabled="submitting"
+          >
+            <span v-if="submitting" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            送信中...
+          </span>
+          <span v-else>回答を送信</span>
+        </button>
+      </div>
       </form>
 
       <div v-if="submitStatus === 'error'" class="mt-4 p-4 rounded border bg-red-100 border-red-400 text-red-700">
@@ -152,7 +180,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useAsyncData, useHead, useRuntimeConfig, navigateTo } from '#imports';
 import { formatDeadline } from '~/utils/formatters';
 
@@ -170,6 +198,8 @@ const submitStatus = ref('');
 const respondentId = ref('');
 const hasSubmitted = ref(false);
 const username = ref('');
+const formSubmitted = ref(false); // フォームが一度でも送信されようとしたかどうかのフラグ
+const validationErrors = ref({}); // バリデーションエラーを保持するオブジェクト
 
 const isExpired = computed(() => {
   if (!survey.value || !survey.value.deadline) return false;
@@ -235,10 +265,21 @@ onMounted(async () => {
   }
 });
 
+// responses と username の変更を監視する watch は、
+// formSubmitted が true の場合のみ validateForm を呼び出すように変更
+watch([responses, username], () => {
+  if (formSubmitted.value) {
+    validateForm();
+  }
+}, { deep: true });
+
+
 const adjustTextareaHeight = (event) => {
-  const textarea = event.target;
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
+  if (event && event.target) {
+    const textarea = event.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
 };
 
 const openDatePicker = (event) => {
@@ -251,38 +292,73 @@ const openDatePicker = (event) => {
   }
 };
 
+const validateForm = () => {
+  const errors = {};
+
+  // ユーザー名のバリデーション
+  if (!survey.value.anonymous && (!username.value || username.value.trim() === '')) {
+    errors.username = 'ユーザー名を入力してください。';
+  }
+
+  // 各質問のバリデーション
+  survey.value.questions.forEach((question, index) => {
+    const responseValue = responses.value[index];
+
+    switch (question.type) {
+      case 'text':
+      case 'date':
+        if (!responseValue || (typeof responseValue === 'string' && responseValue.trim() === '')) {
+          errors[index] = 'この質問は必須です。';
+        }
+        break;
+      case 'radio':
+        if (!responseValue || responseValue === '') {
+          errors[index] = 'いずれかの選択肢を選んでください。';
+        }
+        break;
+      case 'checkbox':
+        // チェックボックスは未入力を許容するため、ここでは必須チェックを行わない
+        break;
+    }
+  });
+  validationErrors.value = errors; // validationErrors を更新
+  return Object.keys(errors).length === 0; // エラーがなければtrue
+};
+
 const submitResponse = async () => {
+  // 送信ボタンが押されたタイミングで formSubmitted を true に設定
+  // これにより、formSubmitted に依存するバリデーション表示が有効になる
+  formSubmitted.value = true; 
+
+  // フォーム全体のバリデーションを実行
+  if (!validateForm()) {
+    // バリデーションエラーがある場合は、具体的なエラーメッセージと赤枠で知らせる
+    // サーバー送信エラーと区別するため、submitMessage/submitStatusは更新しない
+    submitMessage.value = ''; // 以前のエラーメッセージをクリア
+    submitStatus.value = ''; // 以前のエラーステータスをクリア
+
+    // エラーがある場合は一番上のエラー要素にスクロール
+    const firstErrorElement = document.querySelector('.border-red-500');
+    if (firstErrorElement) {
+      firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
+
   const now = new Date();
   const deadline = new Date(survey.value.deadline);
   if (deadline < now) {
     submitMessage.value = 'このKOTAETEは回答期限を過ぎています。ページを更新します。';
     submitStatus.value = 'error';
-    isExpired.value = true;
     setTimeout(() => {
       location.reload();
     }, 2000);
     return;
   }
 
-  if (!survey.value.anonymous && (!username.value || username.value.trim() === '')) {
-    submitMessage.value = 'ユーザー名を入力してください。';
-    submitStatus.value = 'error';
-    return;
-  }
-
-  // Checkbox validation
-  for (let i = 0; i < survey.value.questions.length; i++) {
-    const question = survey.value.questions[i];
-    if (question.type === 'checkbox' && responses.value[i].length === 0) {
-        alert(`質問${i + 1}に回答してください。`);
-        return;
-    }
-  }
-
-
   submitting.value = true;
-  submitMessage.value = '';
-  submitStatus.value = '';
+  submitMessage.value = ''; // サーバー送信前のメッセージをクリア
+  submitStatus.value = ''; // サーバー送信前のステータスをクリア
 
   const formattedResponses = [...responses.value];
   survey.value.questions.forEach((q, index) => {
@@ -309,8 +385,12 @@ const submitResponse = async () => {
     if (response.result === 'success') {
       submitMessage.value = 'ご回答ありがとうございました！';
       submitStatus.value = 'success';
-      hasSubmitted.value = true;
-      localStorage.setItem(`submitted_${surveyId}`, 'true');
+      // わずかな遅延を挟んで hasSubmitted を更新
+      // DOM の更新サイクルを考慮し、エラーを防ぐための対策
+      setTimeout(() => {
+        hasSubmitted.value = true;
+        localStorage.setItem(`submitted_${surveyId}`, 'true');
+      }, 100); // 100ミリ秒の遅延
     } else {
       submitMessage.value = `回答の送信に失敗しました: ${response.message}`;
       submitStatus.value = 'error';
@@ -328,3 +408,11 @@ const goToResults = () => {
   navigateTo(`/result/${surveyId}`);
 };
 </script>
+
+<style scoped>
+/* input[type="date"]のデフォルトカレンダーアイコンを非表示 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+</style>
