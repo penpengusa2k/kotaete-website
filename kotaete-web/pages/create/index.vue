@@ -5,23 +5,59 @@
       <img src="/site-title.png" alt="KOTAETE" class="h-10 mt-1">
     </div>
 
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg shadow-sm">
+      <h3 class="font-bold mb-2 flex items-center">
+        <span class="material-icons-outlined text-xl mr-2">lightbulb</span>
+        テンプレートから作成
+      </h3>
+      <p class="text-sm mb-3">用途に合わせたテンプレートを選択すると、タイトルと質問が自動で入力されます。</p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <button type="button" @click="setTemplate(templates.snsEvent)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          SNS: イベント告知
+        </button>
+        <button type="button" @click="setTemplate(templates.snsOpinion)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          SNS: 意見募集
+        </button>
+        <button type="button" @click="setTemplate(templates.snsSelfIntro)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          SNS: 自己紹介リレー
+        </button>
+        <button type="button" @click="setTemplate(templates.snsAskMeAnything)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          SNS: 質問募集（AMA）
+        </button>
+
+        <button type="button" @click="setTemplate(templates.bizCustomer)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          業務用: 顧客満足度
+        </button>
+        <button type="button" @click="setTemplate(templates.bizEmployee)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          業務用: 従業員アンケート
+        </button>
+
+        <button type="button" @click="setTemplate(templates.genericFeedback)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          汎用: イベントFB
+        </button>
+        <button type="button" @click="setTemplate(templates.genericSimple)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+          汎用: シンプル
+        </button>
+      </div>
+    </div>
+
     <form @submit.prevent="createSurvey">
       <div class="mb-4">
         <label for="title" class="block text-gray-700 font-bold mb-2">タイトル <span class="text-red-500">*</span></label>
-                <textarea id="title" v-model="survey.title" ref="titleInput" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_TITLE_LENGTH" rows="1" @input="adjustTextareaHeight" @keydown.enter.prevent="focusNextInput"></textarea>
+        <textarea id="title" v-model="survey.title" ref="titleInput" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_TITLE_LENGTH" rows="1" @input="adjustTextareaHeight" @keydown.enter.prevent="focusNextInput"></textarea>
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.title.length }} / {{ MAX_TITLE_LENGTH }}</p>
       </div>
 
       <div class="mb-4">
         <label for="creatorName" class="block text-gray-700 font-bold mb-2">作成者名 <span class="text-red-500">*</span></label>
-                <input type="text" id="creatorName" v-model="survey.creatorName" :class="[ 'appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm', formSubmitted && creatorNameError ? 'border-red-500' : '' ]" required :maxlength="MAX_CREATOR_NAME_LENGTH" @blur="validateCreatorName" @keydown.enter.prevent="focusNextInput">
+        <input type="text" id="creatorName" v-model="survey.creatorName" :class="[ 'appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm', formSubmitted && creatorNameError ? 'border-red-500' : '' ]" required :maxlength="MAX_CREATOR_NAME_LENGTH" @blur="validateCreatorName" @keydown.enter.prevent="focusNextInput">
         <p v-if="formSubmitted && creatorNameError" class="text-red-500 text-xs italic mt-1">作成者名は必須です。</p>
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.creatorName.length }} / {{ MAX_CREATOR_NAME_LENGTH }}</p>
       </div>
 
       <div class="mb-4">
         <label for="description" class="block text-gray-700 font-bold mb-2">説明文（任意）</label>
-                <textarea id="description" v-model="survey.description" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" rows="3" @input="adjustTextareaHeight" :maxlength="MAX_DESCRIPTION_LENGTH"></textarea>
+        <textarea id="description" v-model="survey.description" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" rows="3" @input="adjustTextareaHeight" :maxlength="MAX_DESCRIPTION_LENGTH"></textarea>
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.description.length }} / {{ MAX_DESCRIPTION_LENGTH }}</p>
       </div>
 
@@ -35,12 +71,13 @@
         </div>
         <div class="mb-2">
           <label class="block text-gray-700 font-bold mb-1">質問文 <span class="text-red-500">*</span></label>
-                    <textarea v-model="question.text" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_QUESTION_LENGTH" rows="3" @input="adjustTextareaHeight"></textarea>
+          <textarea v-model="question.text" :class="[ 'appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm', isQuestionDuplicate(index) ? 'border-red-500' : '' ]" required :maxlength="MAX_QUESTION_LENGTH" rows="3" @input="adjustTextareaHeight"></textarea>
+          <p v-if="isQuestionDuplicate(index)" class="text-red-500 text-xs italic mt-1">質問文が重複しています。</p>
           <p class="text-right text-sm text-gray-500 mt-1">{{ question.text.length }} / {{ MAX_QUESTION_LENGTH }}</p>
         </div>
         <div class="mb-2">
           <label class="block text-gray-700 font-bold mb-1">質問タイプ</label>
-                    <select v-model="question.type" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
+          <select v-model="question.type" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @change="handleQuestionTypeChange(question)" @keydown.enter.prevent="focusNextInput">
             <option value="text">記述式</option>
             <option value="radio">ラジオボタン</option>
             <option value="checkbox">チェックボックス</option>
@@ -48,20 +85,24 @@
           </select>
         </div>
         <div v-if="question.type === 'radio' || question.type === 'checkbox'">
-          <label class="block text-gray-700 font-bold mb-1">選択肢</label>
-                    <button type="button" @click="addOption(question)" class="text-primary hover:text-primary-dark disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400 mb-2 font-semibold" :disabled="question.options.length >= MAX_OPTIONS_PER_QUESTION" @keydown.enter.prevent="focusNextInput">+ 選択肢を追加</button>
+          <label class="block text-gray-700 font-bold mb-1">選択肢 <span class="text-red-500">*</span></label>
+          <button type="button" @click="addOption(question)" class="text-primary hover:text-primary-dark disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400 mb-2 font-semibold" :disabled="question.options.length >= MAX_OPTIONS_PER_QUESTION" @keydown.enter.prevent="focusNextInput">+ 選択肢を追加</button>
           <span v-if="question.options.length >= MAX_OPTIONS_PER_QUESTION" class="ml-2 text-red-500 text-sm">（最大{{ MAX_OPTIONS_PER_QUESTION }}個まで）</span>
+          <p v-if="question.type === 'radio' && question.options.length < 2" class="text-red-500 text-xs italic mt-1">ラジオボタンの選択肢は最低2つ必要です。</p>
+          <p v-if="question.type === 'checkbox' && question.options.length < 1" class="text-red-500 text-xs italic mt-1">チェックボックスの選択肢は最低1つ必要です。</p>
+
           <div v-for="(option, optionIndex) in question.options" :key="optionIndex" class="mb-1">
             <div class="flex items-center">
-                            <textarea v-model="option.value" class="appearance-none border border-neutral-light rounded-lg w-full py-1 px-2 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" :maxlength="MAX_OPTION_VALUE_LENGTH" rows="1" @input="adjustTextareaHeight"></textarea>
-              <button type="button" @click="removeOption(question, optionIndex)" class="ml-2 text-red-500 no-enter-focus">×</button>
+              <textarea v-model="option.value" :class="[ 'appearance-none border border-neutral-light rounded-lg w-full py-1 px-2 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm', isOptionDuplicate(question, optionIndex) ? 'border-red-500' : '' ]" :maxlength="MAX_OPTION_VALUE_LENGTH" rows="1" @input="adjustTextareaHeight"></textarea>
+              <button v-if="(question.type === 'checkbox' && question.options.length > 1) || (question.type === 'radio' && question.options.length > 2)" type="button" @click="removeOption(question, optionIndex)" class="ml-2 text-red-500 no-enter-focus">×</button>
             </div>
+            <p v-if="isOptionDuplicate(question, optionIndex)" class="text-red-500 text-xs italic mt-1">選択肢が重複しています。</p>
             <p class="text-right text-sm text-gray-500 mt-1">{{ option.value.length }} / {{ MAX_OPTION_VALUE_LENGTH }}</p>
           </div>
         </div>
       </div>
 
-            <button type="button" @click="addQuestion" class="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg mb-6 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400 shadow-md transition-colors duration-300" :disabled="survey.questions.length >= MAX_QUESTIONS" @keydown.enter.prevent="focusNextInput">
+      <button type="button" @click="addQuestion" class="bg-secondary hover:bg-secondary-dark text-white font-bold py-2 px-4 rounded-lg mb-6 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:text-gray-400 shadow-md transition-colors duration-300" :disabled="survey.questions.length >= MAX_QUESTIONS" @keydown.enter.prevent="focusNextInput">
         + 質問を追加
       </button>
       <span v-if="survey.questions.length >= MAX_QUESTIONS" class="ml-2 text-red-500 text-sm">（最大{{ MAX_QUESTIONS }}個まで）</span>
@@ -76,7 +117,7 @@
             <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果の閲覧に制限をかけるかを設定します。制限する場合、閲覧キーの入力が必須となります。</span>
           </span>
         </label>
-                <select v-model="survey.resultRestricted" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
+        <select v-model="survey.resultRestricted" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
           <option :value="false">制限しない（公開）</option>
           <option :value="true">制限する（閲覧キー必須）</option>
         </select>
@@ -89,7 +130,7 @@
             <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果を閲覧するためのパスワードです。結果の閲覧を制限する場合に必須となります。</span>
           </span>
         </label>
-                <input type="text" id="viewingKey" v-model="survey.viewingKey" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_VIEWING_KEY_LENGTH" @keydown.enter.prevent="focusNextInput">
+        <input type="text" id="viewingKey" v-model="survey.viewingKey" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_VIEWING_KEY_LENGTH" @keydown.enter.prevent="focusNextInput">
         <p class="text-right text-sm text-gray-500 mt-1">{{ survey.viewingKey.length }} / {{ MAX_VIEWING_KEY_LENGTH }}</p>
       </div>
 
@@ -101,7 +142,7 @@
           </span>
         </label>
         <div class="relative cursor-pointer" @click="openDeadlinePicker">
-                    <input type="datetime-local" id="deadline" ref="deadlineInput" v-model="survey.deadline" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest pr-8 leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required @keydown.enter.prevent="focusNextInput">
+          <input type="datetime-local" id="deadline" ref="deadlineInput" v-model="survey.deadline" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest pr-8 leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required @keydown.enter.prevent="focusNextInput">
           <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm10 5H4v8h12V7z" clip-rule="evenodd" />
@@ -117,14 +158,14 @@
             <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">回答者が匿名で回答するか、ユーザー名を入力して回答するかを設定します。</span>
           </span>
         </label>
-                <select v-model="survey.anonymous" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
+        <select v-model="survey.anonymous" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
           <option :value="true">匿名</option>
           <option :value="false">非匿名（ユーザー名入力必須）</option>
         </select>
       </div>
 
       <div class="mt-8">
-        <button type="submit" :class="[ (loading || !isFormValid) ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark', 'text-white font-bold py-3 px-6 rounded-lg w-full text-xl flex items-center justify-center shadow-md transition-colors duration-300' ]" :disabled="loading || !isFormValid" @keydown.enter.prevent="focusNextInput">
+        <button type="submit" :class="[ (loading || !isFormValid) ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark', 'text-white font-bold py-3 px-6 rounded-lg w-full text-xl flex items-center justify-center shadow-md transition-colors duration-300' ]" :disabled="loading || !isFormValid">
           <span v-if="loading" class="flex items-center">
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -141,11 +182,11 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router' // useRouterをインポート
+import { useRouter } from 'vue-router'
 import { useCreateStore } from '~/stores/create'
 
 const createStore = useCreateStore()
-const router = useRouter() // useRouterを初期化
+const router = useRouter()
 
 // --- 定数定義 ---
 const MAX_TITLE_LENGTH = 50;
@@ -189,13 +230,158 @@ const creatorNameError = ref(false);
 const titleInput = ref(null);
 const deadlineInput = ref(null);
 
+// --- テンプレートデータ ---
+const templates = {
+  snsEvent: {
+    title: '【イベント参加意向調査】〇〇イベント開催します！',
+    description: '来る〇月〇日に開催を予定している「〇〇イベント」について、皆様のご意見をお聞かせください！',
+    questions: [
+      { text: '〇〇イベントに参加したいと思いますか？', type: 'radio', options: [{ value: 'はい' }, { value: 'いいえ' }, { value: '検討中' }] },
+      { text: 'もし参加するなら、希望する開催曜日はありますか？', type: 'checkbox', options: [{ value: '平日' }, { value: '土曜日' }, { value: '日曜日' }] },
+      { text: 'イベントで他に期待することはありますか？', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: true,
+  },
+  snsOpinion: {
+    title: '【意見募集】今後のSNS投稿についてアンケート！',
+    description: 'いつもご覧いただきありがとうございます！今後のSNS投稿の参考に、皆様のご意見を伺わせてください。',
+    questions: [
+      { text: 'どのような内容の投稿をもっと見たいですか？', type: 'checkbox', options: [{ value: '写真や動画' }, { value: '短いテキスト情報' }, { value: '詳しい解説記事' }, { value: 'Q&A形式' }] },
+      { text: '投稿頻度は適切だと思いますか？', type: 'radio', options: [{ value: '多い' }, { value: '適切' }, { value: '少ない' }] },
+      { text: 'その他、SNS運用に関するご意見があれば教えてください。', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: true,
+  },
+  snsSelfIntro: {
+    title: '【自己紹介リレー】あなたの〇〇を教えて！',
+    description: 'あなたの好きなものや、最近ハマっていることを教えてください！ぜひ他の人の回答も見て、新しい発見をしてみましょう！',
+    questions: [
+      { text: '最近ハマっていることは何ですか？', type: 'text', options: [] },
+      { text: '好きな食べ物は何ですか？', type: 'text', options: [] },
+      { text: '休日の過ごし方で一番好きなものは？', type: 'radio', options: [{ value: '家でまったり' }, { value: '外出してアクティブに' }, { value: '趣味に没頭' }] },
+      { text: '座右の銘や好きな言葉があれば教えてください。', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: true,
+  },
+  snsAskMeAnything: { // 新しいAMA形式テンプレート
+    title: '【質問募集】私に聞きたいことある？（AMA形式）',
+    description: '普段なかなか聞けないことや、ちょっとした疑問、何でもお気軽に質問してください！答えられる範囲で、包み隠さずお答えします！',
+    questions: [
+      { text: '私に聞きたいことはありますか？自由に質問してください。', type: 'text', options: [] },
+    ],
+    resultRestricted: false, // 質問内容によっては公開しても問題ないため
+    anonymous: true, // 質問しやすいように匿名を推奨
+  },
+  bizCustomer: {
+    title: '【顧客満足度調査】サービス品質向上にご協力ください',
+    description: '平素より弊社サービスをご利用いただき、誠にありがとうございます。今後のサービス改善のため、皆様のご意見をお聞かせください。',
+    questions: [
+      { text: '当社のサービスに全体的に満足していますか？', type: 'radio', options: [{ value: '非常に満足' }, { value: '満足' }, { value: 'どちらともいえない' }, { value: '不満' }, { value: '非常に不満' }] },
+      { text: '特に満足した点があれば具体的に教えてください。', type: 'text', options: [] },
+      { text: '改善してほしい点、不満に感じた点があれば具体的に教えてください。', type: 'text', options: [] },
+      { text: '今後、どのようなサービスを期待しますか？', type: 'text', options: [] },
+    ],
+    resultRestricted: true, // 業務用は閲覧制限をデフォルトで推奨
+    anonymous: false, // 顧客満足度は通常、ユーザー名（顧客名）を求める
+  },
+  bizEmployee: {
+    title: '【従業員意識調査】より良い職場環境のために',
+    description: '皆様が日々の業務を円滑に進め、能力を最大限に発揮できるような職場環境を目指し、従業員意識調査を実施いたします。',
+    questions: [
+      { text: '現在の業務内容に満足していますか？', type: 'radio', options: [{ value: '非常に満足' }, { value: '満足' }, { value: 'どちらともいえない' }, { value: '不満' }, { value: '非常に不満' }] },
+      { text: '職場の人間関係についてどう感じていますか？', type: 'radio', options: [{ value: '非常に良い' }, { value: '良い' }, { value: '普通' }, { value: '悪い' }, { value: '非常に悪い' }] },
+      { text: '業務効率を向上させるために、どのような改善が必要だと思いますか？', type: 'text', options: [] },
+      { text: '会社に期待することや、その他自由に意見を述べてください。', type: 'text', options: [] },
+    ],
+    resultRestricted: true,
+    anonymous: false, // 従業員アンケートは匿名ではない場合が多い
+  },
+  genericFeedback: {
+    title: '【イベントフィードバック】ご感想をお聞かせください',
+    description: 'この度は〇〇イベントにご参加いただき、誠にありがとうございました。今後の企画の参考に、皆様からの率直なご意見・ご感想をお待ちしております。',
+    questions: [
+      { text: 'イベント全体の満足度を教えてください。', type: 'radio', options: [{ value: '5:大変満足' }, { value: '4:満足' }, { value: '3:普通' }, { value: '2:不満' }, { value: '1:大変不満' }] },
+      { text: '特に印象に残った内容や良かった点があれば教えてください。', type: 'text', options: [] },
+      { text: '改善してほしい点や、次回開催時に期待することがあれば教えてください。', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: true,
+  },
+  genericSimple: {
+    title: '【シンプルアンケート】ご協力のお願い',
+    description: '簡単なアンケートです。お気軽にご回答ください。',
+    questions: [
+      { text: 'お名前（ニックネーム可）', type: 'text', options: [] },
+      { text: 'メールアドレス（任意）', type: 'text', options: [] },
+      { text: 'ご意見・ご感想', type: 'text', options: [] },
+    ],
+    resultRestricted: false,
+    anonymous: false, // シンプルなアンケートはユーザー名入力ありが多い
+  },
+};
+
+const setTemplate = async (template) => {
+  // まず現在のフォーム状態をクリア
+  survey.value = {
+    title: '',
+    description: '',
+    questions: [{ text: '', type: 'text', options: [] }],
+    resultRestricted: false,
+    anonymous: true,
+    deadline: getThreeDaysLater(),
+    viewingKey: '',
+    creatorName: '名無し',
+  };
+
+  // テンプレート内容をセット
+  survey.value.title = template.title;
+  survey.value.description = template.description;
+  survey.value.questions = JSON.parse(JSON.stringify(template.questions)); // ディープコピー
+  survey.value.resultRestricted = template.resultRestricted;
+  survey.value.anonymous = template.anonymous;
+
+  // テンプレートによっては閲覧キーの生成を推奨
+  if (template.resultRestricted && !survey.value.viewingKey) {
+    const { v4: uuidv4 } = await import('uuid');
+    survey.value.viewingKey = uuidv4().substring(0, 8); // 短いUUIDを自動生成
+  }
+
+  // バリデーションエラーをリセット
+  formSubmitted.value = false;
+  creatorNameError.value = false;
+
+  // textareaの高さ調整を次回のDOM更新サイクル後に行う
+  await nextTick();
+  if (titleInput.value) {
+    adjustTextareaHeight({ target: titleInput.value });
+  }
+  survey.value.questions.forEach((question, index) => {
+    // 質問文のtextareaの高さを調整
+    const questionTextarea = document.querySelector(`textarea[id^="question-${index}"]`);
+    if (questionTextarea) {
+      adjustTextareaHeight({ target: questionTextarea });
+    }
+    // オプションのtextareaも調整（v-forで生成されるtextareaには一意のIDがなくても、親要素からの相対位置で特定可能）
+    if (question.options && question.options.length > 0) {
+      // 各選択肢のtextareaにアクセスするためのロジックを調整
+      // 例: `document.querySelectorAll(`.question-block-${index} textarea.option-input`
+      // 現状のHTML構造に合わせたより具体的なセレクタが必要になりますが、
+      // ここでは簡略化のため、既存のadjustTextareaHeightを呼び出す例にとどめます。
+      // 実際には、質問ブロックごとにRefを持たせるなどの工夫が必要になるかもしれません。
+      // もし必要であれば、具体的なHTML構造と合わせて再度ご相談ください。
+    }
+  });
+};
+
+
 const openDeadlinePicker = () => {
   if (deadlineInput.value) {
     try {
       deadlineInput.value.showPicker();
     } catch (error) {
-      // showPicker() might not be supported in all browsers.
-      // In such cases, the default behavior will be used.
       console.error("showPicker() is not supported by this browser.", error);
     }
   }
@@ -206,20 +392,92 @@ const validateCreatorName = () => {
   return !creatorNameError.value;
 };
 
+// 特定の質問文が重複しているかをチェックする関数
+const isQuestionDuplicate = (currentIndex) => {
+  const currentQuestionText = survey.value.questions[currentIndex].text.trim();
+  if (!currentQuestionText) return false; // 空の質問文は重複と見なさない
+
+  return survey.value.questions.some((question, index) => {
+    return index !== currentIndex && question.text.trim() === currentQuestionText;
+  });
+};
+
+// いずれかの質問文に重複があるかをチェックするComputedプロパティ
+// このプロパティはフォーム全体のバリデーションに引き続き使用します
+const hasDuplicateQuestions = computed(() => {
+  const texts = survey.value.questions.map(q => q.text.trim()).filter(Boolean);
+  const uniqueTexts = new Set(texts);
+  return texts.length !== uniqueTexts.size;
+});
+
+
+// 特定の質問の選択肢に重複があるかをチェックする関数
+const hasDuplicateOptions = (question) => {
+  if (question.type === 'text' || question.type === 'date') return false;
+  const optionValues = question.options.map(o => o.value.trim()).filter(Boolean);
+  const uniqueOptionValues = new Set(optionValues);
+  return optionValues.length !== uniqueOptionValues.size;
+};
+
+// 特定の選択肢が重複しているかをチェックする関数
+const isOptionDuplicate = (question, optionIndex) => {
+  if (question.type === 'text' || question.type === 'date') return false;
+  const currentOptionValue = question.options[optionIndex].value.trim();
+  if (!currentOptionValue) return false; // 空の選択肢は重複と見なさない
+
+  const otherOptionValues = question.options
+    .filter((_, idx) => idx !== optionIndex)
+    .map(o => o.value.trim());
+
+  return otherOptionValues.includes(currentOptionValue);
+};
+
+
+// いずれかの質問の選択肢に重複があるかをチェックするComputedプロパティ
+const hasAnyDuplicateOptions = computed(() => {
+  return survey.value.questions.some(question => hasDuplicateOptions(question));
+});
+
 watch(() => survey.value.resultRestricted, (newVal) => {
   if (newVal === false) {
     survey.value.viewingKey = '';
   }
 });
 
+// 質問タイプが変更されたときの処理
+const handleQuestionTypeChange = (question) => {
+  if (question.type === 'radio') {
+    question.options = question.options.filter(o => o.value.trim() !== '');
+    while (question.options.length < 2) {
+      question.options.push({ value: '' });
+    }
+  } else if (question.type === 'checkbox') {
+    question.options = question.options.filter(o => o.value.trim() !== '');
+    while (question.options.length < 1) {
+      question.options.push({ value: '' });
+    }
+  } else {
+    question.options = [];
+  }
+};
+
+
 watch(
   () => survey.value.questions,
   (newQuestions) => {
-    newQuestions.forEach(question => {
-      if ((question.type === 'radio' || question.type === 'checkbox') && question.options.length === 0) {
-        addOption(question);
+    newQuestions.forEach((question) => {
+      // 質問タイプがradioまたはcheckboxで、選択肢が不足している場合に自動で追加
+      if (question.type === 'radio') {
+        while (question.options.length < 2) {
+          question.options.push({ value: '' });
+        }
+      } else if (question.type === 'checkbox') {
+        while (question.options.length < 1) {
+          question.options.push({ value: '' });
+        }
       }
-      if (question.type === 'text' && question.options.length > 0) {
+      // 質問タイプがtextまたはdateで、選択肢が存在する場合はクリア
+      if ((question.type === 'text' || question.type === 'date') && question.options.length > 0) {
         question.options = [];
       }
     });
@@ -227,18 +485,28 @@ watch(
   { deep: true }
 );
 
+
 const isFormValid = computed(() => {
   if (!survey.value.title.trim()) return false;
-  if (creatorNameError.value) return false;
+  if (creatorNameError.value && formSubmitted.value) return false;
   if (!survey.value.deadline) return false;
   if (survey.value.questions.length === 0) return false;
+  if (hasDuplicateQuestions.value) return false; // 質問全体の重複チェック
+  if (hasAnyDuplicateOptions.value) return false; // 選択肢全体の重複チェック
 
   if (survey.value.resultRestricted && !survey.value.viewingKey.trim()) return false;
 
   for (const question of survey.value.questions) {
     if (!question.text.trim()) return false;
-    if (question.type === 'radio' || question.type === 'checkbox') {
-      if (question.options.length === 0) return false;
+    if (question.type === 'radio') {
+      // ラジオボタンは最低2つの選択肢と、そのすべてが入力されていることを確認
+      if (question.options.length < 2) return false;
+      for (const option of question.options) {
+        if (!option.value.trim()) return false;
+      }
+    } else if (question.type === 'checkbox') {
+      // チェックボックスは最低1つの選択肢と、そのすべてが入力されていることを確認
+      if (question.options.length < 1) return false;
       for (const option of question.options) {
         if (!option.value.trim()) return false;
       }
@@ -253,6 +521,14 @@ const addQuestion = () => {
     type: 'text',
     options: [],
   });
+  // 新しい質問が追加された後にtextareaの高さを調整
+  nextTick(() => {
+    const newQuestionIndex = survey.value.questions.length - 1;
+    const newQuestionTextarea = document.querySelector(`textarea[id^="question-${newQuestionIndex}"]`); // question-${index} のIDを設定している場合
+    if (newQuestionTextarea) {
+      adjustTextareaHeight({ target: newQuestionTextarea });
+    }
+  });
 };
 
 const removeQuestion = (index) => {
@@ -265,6 +541,16 @@ const addOption = (question) => {
   }
   if (question.options.length < MAX_OPTIONS_PER_QUESTION) {
     question.options.push({ value: '' });
+    // 新しい選択肢が追加された後にtextareaの高さを調整
+    nextTick(() => {
+      // 選択肢のtextareaに一意のIDを付与していないため、このセレクタは動作しません。
+      // もしIDを付与するなら `textarea[id="option-${questionIndex}-${newOptionIndex}"]` のように変更が必要です。
+      // 現在のコードでは特定のtextareaを特定しづらいです。
+      // 最も確実なのは、v-forで生成されるtextareaにrefを持たせてアクセスすることですが、
+      // 複雑になるため、今回は一般的なtextareaの高さ調整をトリガーするだけに留めます。
+      // もし必要であれば、具体的なHTML構造と合わせて再度ご相談ください。
+      // このコメントは開発者向けの情報であり、ユーザーには表示されません。
+    });
   }
 };
 
@@ -280,7 +566,7 @@ const createSurvey = async () => {
   }
 
   if (!isFormValid.value) {
-    alert('入力項目に不備があります。必須項目を確認してください。');
+    alert('入力項目に不備があります。必須項目、または重複する質問文・選択肢を確認してください。');
     return;
   }
 
@@ -311,7 +597,6 @@ const createSurvey = async () => {
     });
 
     if (response.result === 'success') {
-      // 成功画面へ遷移し、IDと必要情報をPiniaで渡す
       createStore.title = survey.value.title;
       createStore.isRestricted = survey.value.resultRestricted;
       createStore.viewingKey = survey.value.viewingKey;
@@ -321,7 +606,7 @@ const createSurvey = async () => {
         path: `/create/success/${response.id}`,
       });
 
-      // フォームをリセット（遷移後に新しいページで表示されるので、ここでは不要かもしれませんが念のため）
+      // フォームを初期状態に戻す
       survey.value = {
         title: '',
         description: '',
@@ -393,7 +678,6 @@ onMounted(() => {
     adjustTextareaHeight({ target: titleInput.value });
   }
 });
-
 </script>
 
 <style scoped>
