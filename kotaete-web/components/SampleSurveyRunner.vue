@@ -4,7 +4,7 @@
     <div v-if="!submitted">
       <h2 class="font-semibold text-2xl mb-2">{{ sampleSurvey.title }}</h2>
       <div v-for="(question, qIndex) in sampleSurvey.questions" :key="qIndex" class="mb-4">
-        <p class="mb-2">{{ question.question_text }}</p>
+        <p class="mb-2 text-left text-lg sm:text-xl font-semibold text-gray-700"><span class="text-primary">Q{{ qIndex + 1 }}.</span> {{ question.question_text }}</p>
         <div v-if="question.question_type === '5-point'" class="flex justify-around">
           <button
             v-for="(option, oIndex) in question.options"
@@ -23,7 +23,7 @@
       <button
         @click="submitSurvey"
         :disabled="!isAllAnswered"
-        class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
+        class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
       >
         回答する
       </button>
@@ -34,7 +34,7 @@
 
       <div v-for="(question, index) in sampleSurvey.questions" :key="index" class="mb-12">
         <h4 class="text-lg sm:text-xl font-semibold text-gray-700 mb-4 flex items-center">
-          <span class="text-blue-500 mr-3">Q{{ index + 1 }}</span>
+          <span class="text-primary mr-3">Q{{ index + 1 }}</span>
           {{ question.question_text }}
         </h4>
         <div class="p-4 border border-gray-300 rounded-lg bg-white">
@@ -50,7 +50,7 @@
 
       <div class="text-center mt-6">
         <p class="mb-4">このように、簡単にアンケートの作成と結果の可視化ができます。</p>
-        <button @click="navigateTo('/create')" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+        <button @click="navigateTo('/create')" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
           自分でも作ってみよう
         </button>
       </div>
