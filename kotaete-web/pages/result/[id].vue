@@ -33,6 +33,21 @@
           </div>
         </div>
 
+        <div v-if="!isExpired && hasAccess && !hasUserAnswered" class="my-6">
+          <button @click="goToAnswerPage" :disabled="isNavigating" class="block w-full text-center bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-lg text-lg shadow-lg transition-transform transform hover:scale-105 disabled:opacity-75 disabled:cursor-wait">
+            <span v-if="isNavigating" class="flex items-center justify-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              読み込み中...
+            </span>
+            <span v-else>
+              自分もKOTAEる
+            </span>
+          </button>
+        </div>
+
         <div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-6">
           <p class="font-bold mb-1">重要なお知らせ:</p>
           <p class="text-sm">このKOTAETEは、回答期限から60日経過すると、その結果を含め自動的にシステムから削除されますので、必要な情報は早めにダウンロードしてください。</p>
@@ -160,7 +175,7 @@
 
 <script setup>
 import { ref, onMounted, computed, nextTick, onUpdated, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Tooltip from '~/components/Tooltip.vue'
 import { formatDeadline } from '~/utils/formatters'
 import { Chart, registerables } from 'chart.js';
@@ -169,6 +184,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 Chart.register(...registerables, ChartDataLabels);
 
 const route = useRoute();
+const router = useRouter();
 const surveyId = route.params.id;
 let viewingKey = route.query.key;
 
@@ -184,6 +200,24 @@ const hasAccess = ref(false);
 const submittingKey = ref(false);
 const likeCount = ref(0);
 const liked = ref(false);
+const isNavigating = ref(false);
+
+const hasUserAnswered = computed(() => {
+  if (process.client) {
+    return localStorage.getItem(`submitted_${surveyId}`) === 'true';
+  }
+  return false;
+});
+
+const goToAnswerPage = async () => {
+  isNavigating.value = true;
+  try {
+    await router.push(`/answer/${surveyId}`);
+  } catch (e) {
+    console.error('Failed to navigate:', e);
+    isNavigating.value = false; // Stop loading if navigation fails
+  }
+};
 
 // 各チャートのコンテナDOM要素への参照を保持
 const chartContainer = ref({});
@@ -292,9 +326,15 @@ const likeSurvey = async () => {
   if (liked.value) {
     return;
   }
-  liked.value = true; 
-  
+
+  // --- Step 1: Update UI and localStorage first (Optimistic Update) ---
+  liked.value = true;
+  likeCount.value++;
+  // Save to localStorage immediately to prevent issues on reload.
+  localStorage.setItem(`liked_survey_${surveyId}`, 'true');
+
   try {
+    // --- Step 2: Send request to the backend ---
     const response = await $fetch('/api/gas-proxy', {
       method: 'POST',
       headers: {
@@ -302,17 +342,23 @@ const likeSurvey = async () => {
       },
       body: JSON.stringify({ action: 'like', id: surveyId }),
     });
+
+    // --- Step 3: Handle backend response ---
     if (response.result === 'success') {
+      // Sync with the actual count from the server to ensure consistency.
       likeCount.value = response.like_count;
-      localStorage.setItem(`liked_survey_${surveyId}`, 'true');
     } else {
-      liked.value = false; 
-      alert(`エラーが発生しました: ${response.message}`);
+      // If the server reports a specific failure, notify the user.
+      // We do NOT revert the UI here, as the user might have intended to like it.
+      // A page refresh will show the true state.
+      alert(`サーバーでエラーが発生しました: ${response.message} ページを更新してください。`);
     }
   } catch (error) {
+    // This block catches network errors or reloads.
     console.error('Error liking survey:', error);
-    liked.value = false;
-    alert('いいねに失敗しました。');
+    // We do NOT revert the UI. The request might have succeeded on the server.
+    // Instead, we inform the user to check the state by reloading.
+    alert('通信に失敗しました。ページを再読み込みして、いいねが反映されているか確認してください。');
   }
 };
 

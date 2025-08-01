@@ -6,6 +6,15 @@
       <h1 class="text-3xl font-bold">KOTAETEランキング</h1>
     </div>
 
+    <div class="mb-4 flex justify-center bg-gray-100 rounded-lg p-1">
+      <button @click="switchRankingType('daily')" :class="['flex-1 text-center py-2 px-4 font-semibold transition-all duration-300 rounded-md', rankingType === 'daily' ? 'bg-white text-primary shadow' : 'text-gray-500 hover:bg-gray-200']">
+        デイリー
+      </button>
+      <button @click="switchRankingType('weekly')" :class="['flex-1 text-center py-2 px-4 font-semibold transition-all duration-300 rounded-md', rankingType === 'weekly' ? 'bg-white text-primary shadow' : 'text-gray-500 hover:bg-gray-200']">
+        ウィークリー
+      </button>
+    </div>
+
     <!-- タブ切り替え -->
     <div class="mb-6 flex border-b border-gray-200">
       <button @click="activeTab = 'likes'" :class="['flex-1 text-center py-3 px-4 font-semibold transition-colors duration-200', activeTab === 'likes' ? 'border-b-2 border-pink-500 text-pink-500' : 'text-gray-500 hover:bg-gray-100']">
@@ -52,7 +61,7 @@
               </h3>
               <div class="text-sm text-gray-600 flex items-center">
                 <span class="material-icons-outlined text-base mr-1 text-pink-500">thumb_up</span>
-                {{ item.like_count }} いいね
+                +{{ item.like_count }} いいね
               </div>
             </div>
           </li>
@@ -80,7 +89,7 @@
               </h3>
               <div class="text-sm text-gray-600 flex items-center">
                 <span class="material-icons-outlined text-base mr-1 text-blue-500">question_answer</span>
-                {{ item.response_count }} 回答
+                +{{ item.response_count }} 回答
               </div>
             </div>
           </li>
@@ -98,10 +107,13 @@ const loading = ref(true);
 const error = ref(null);
 const rankings = ref({ likes: [], responses: [] });
 const activeTab = ref('likes'); // 'likes' or 'responses'
+const rankingType = ref('daily'); // 'daily' or 'weekly'
 
 const fetchRankings = async () => {
+  loading.value = true;
+  error.value = null;
   try {
-    const response = await $fetch('/api/gas-proxy?action=getRankings');
+    const response = await $fetch(`/api/gas-proxy?action=getRankings&type=${rankingType.value}`);
     if (response.result === 'success') {
       rankings.value = response.data;
     } else {
@@ -112,6 +124,11 @@ const fetchRankings = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const switchRankingType = (type) => {
+  rankingType.value = type;
+  fetchRankings();
 };
 
 const getRankColor = (index) => {
