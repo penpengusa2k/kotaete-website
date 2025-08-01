@@ -431,15 +431,13 @@ const renderCharts = () => {
           datasets: [{
             label: '回答数',
             data: chartData,
-            backgroundColor: (context) => {
-              const chart = context.chart;
-              const { ctx, chartArea } = chart;
-              if (!chartArea || chartData.every(val => val === 0)) return 'rgba(200, 200, 200, 0.5)';
-              const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-              gradient.addColorStop(0, 'rgba(96, 165, 250, 0.8)');
-              gradient.addColorStop(1, 'rgba(236, 72, 153, 0.8)');
-              return gradient;
-            },
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.6)',
+              'rgba(255, 159, 64, 0.6)',
+              'rgba(255, 205, 86, 0.6)',
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(54, 162, 235, 0.6)'
+            ],
             borderColor: 'transparent',
             borderWidth: 0,
             borderRadius: 0,

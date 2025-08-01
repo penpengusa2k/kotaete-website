@@ -30,10 +30,24 @@
     </div>
     <div v-else>
       <h3 class="text-xl font-bold mb-4 text-center">ご回答ありがとうございました！</h3>
-      <p class="text-center mb-4">こちらがサンプルの集計結果です。</p>
-      <div>
-        <canvas id="sample-chart"></canvas>
+      <p class="text-center mb-8">こちらがサンプルの集計結果です。</p>
+
+      <div v-for="(question, index) in sampleSurvey.questions" :key="index" class="mb-12">
+        <h4 class="text-lg sm:text-xl font-semibold text-gray-700 mb-4 flex items-center">
+          <span class="text-blue-500 mr-3">Q{{ index + 1 }}</span>
+          {{ question.question_text }}
+        </h4>
+        <div class="p-4 border border-gray-300 rounded-lg bg-white">
+            <div class="flex items-center mb-2">
+              <p class="text-lg font-semibold text-gray-700">平均評価:</p>
+              <p class="text-2xl font-bold text-primary ml-2">{{ calculateAverage(index) }}</p>
+            </div>
+            <div class="relative h-56">
+              <canvas :id="`sample-chart-${index}`" class="absolute inset-0 w-full h-full bg-white rounded-md z-0"></canvas>
+            </div>
+          </div>
       </div>
+
       <div class="text-center mt-6">
         <p class="mb-4">このように、簡単にアンケートの作成と結果の可視化ができます。</p>
         <button @click="navigateTo('/create')" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
@@ -45,9 +59,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, nextTick, onUnmounted } from 'vue';
 import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+Chart.register(...registerables, ChartDataLabels);
 
 const sampleSurvey = {
   title: 'サンプル：サービス満足度調査',
@@ -67,74 +83,148 @@ const sampleSurvey = {
 
 const answers = ref(Array(sampleSurvey.questions.length).fill(null));
 const submitted = ref(false);
+const resultsData = ref([]);
+let chartInstances = [];
 
 const isAllAnswered = computed(() => answers.value.every(ans => ans !== null));
 
-let chartInstance = null;
+const calculateAverage = (qIndex) => {
+    const result = resultsData.value[qIndex];
+    if (!result || result.answers.length === 0) return 'N/A';
+    const sum = result.answers.reduce((acc, val) => acc + val, 0);
+    return (sum / result.answers.length).toFixed(2);
+};
 
 const submitSurvey = async () => {
-  if (isAllAnswered.value) {
-    submitted.value = true;
-    await nextTick(); // DOM更新を待つ
-    renderChart();
-  }
-};
+  if (!isAllAnswered.value) return;
 
-const renderChart = () => {
-  const ctx = document.getElementById('sample-chart');
-  if (!ctx) return;
-
-  const averageRatings = sampleSurvey.questions.map((_, qIndex) => {
-    // サンプルなので、実際の回答とランダム値を混ぜて平均を算出
-    const randomAnswers = Array.from({ length: 5 }, () => Math.floor(Math.random() * 5) + 1);
+  const generatedResults = sampleSurvey.questions.map((_, qIndex) => {
+    const randomAnswers = Array.from({ length: Math.floor(Math.random() * 20) + 10 }, () => Math.floor(Math.random() * 5) + 1);
     const allAnswers = [...randomAnswers, answers.value[qIndex]];
-    const sum = allAnswers.reduce((acc, val) => acc + val, 0);
-    return (sum / allAnswers.length).toFixed(1);
+    return { answers: allAnswers };
   });
+  
+  resultsData.value = generatedResults;
+  submitted.value = true;
 
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
+  await nextTick();
+  renderCharts();
+};
 
-  chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: sampleSurvey.questions.map(q => q.question_text),
-      datasets: [
-        {
-          label: '平均評価',
-          data: averageRatings,
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1,
+const renderCharts = () => {
+  destroyCharts();
+
+  sampleSurvey.questions.forEach((question, index) => {
+    const ctx = document.getElementById(`sample-chart-${index}`);
+    if (!ctx) return;
+
+    const result = resultsData.value[index];
+    const counts = [0, 0, 0, 0, 0];
+    result.answers.forEach(ans => { if (ans >= 1 && ans <= 5) counts[ans - 1]++; });
+    const chartLabels = ['1', '2', '3', '4', '5'];
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: '回答数',
+            data: counts,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.6)',
+              'rgba(255, 159, 64, 0.6)',
+              'rgba(255, 205, 86, 0.6)',
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(54, 162, 235, 0.6)'
+            ],
+            borderColor: 'transparent',
+            borderWidth: 0,
+            borderRadius: 0,
+            barThickness: 15,
+            borderSkipped: false,
+          }]
         },
-      ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 5,
-        },
-      },
-      plugins: {
-        title: {
-          display: true,
-          text: '回答結果の平均値',
-          font: {
-            size: 18,
-          },
-        },
-        tooltip: {
-          callbacks: {
-            label: function (context) {
-              return `平均: ${context.raw}`;
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          scales: {
+            x: {
+              display: false,
+              beginAtZero: true,
+              grid: {
+                display: false,
+                drawBorder: false,
+              },
+              ticks: {
+                display: false,
+              }
             },
+            y: {
+              ticks: {
+                color: '#444',
+                font: {
+                  size: 14,
+                  family: 'system-ui, sans-serif',
+                  weight: 'bold',
+                },
+              },
+              grid: {
+                display: false,
+                drawBorder: false,
+              }
+            }
           },
-        },
-      },
-    },
+          plugins: {
+            legend: {
+              display: false
+            },
+            title: {
+              display: false
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              callbacks: {
+                title: (context) => `評価: ${context[0].label} (${context[0].formattedValue}票)`,
+                label: () => ''
+              },
+            },
+            datalabels: {
+              anchor: 'end',
+              align: 'end',
+              offset: 4,
+              color: '#444',
+              font: {
+                weight: 'bold',
+                size: 14,
+              },
+              formatter: (value) => value + '票'
+            }
+          },
+          layout: {
+            padding: {
+              left: 10,
+              right: 40,
+              top: 10,
+              bottom: 10
+            }
+          },
+        }
+      });
+      chartInstances.push(chart);
   });
 };
+
+const destroyCharts = () => {
+    chartInstances.forEach(chart => chart.destroy());
+    chartInstances = [];
+}
+
+onUnmounted(() => {
+    destroyCharts();
+});
 
 </script>
