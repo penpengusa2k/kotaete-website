@@ -1,4 +1,3 @@
-
 // --- CONFIGURATION ---
 const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('GOOGLE_SHEET_ID');
 const MASTER_SHEET_NAME = 'master';
