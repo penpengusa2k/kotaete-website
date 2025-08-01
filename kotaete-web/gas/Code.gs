@@ -1,3 +1,4 @@
+
 // --- CONFIGURATION ---
 const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('GOOGLE_SHEET_ID');
 const MASTER_SHEET_NAME = 'master';
@@ -6,6 +7,7 @@ const CONTACT_SPREADSHEET_ID = PropertiesService.getScriptProperties().getProper
 const NOTIFICATION_EMAIL = PropertiesService.getScriptProperties().getProperty('NOTIFICATION_EMAIL');
 const BACKUP_FOLDER_ID = PropertiesService.getScriptProperties().getProperty('BACKUP_FOLDER_ID');
 const STATS_SHEET_NAME = 'stats'; // 追加: 統計シート名
+const RANKING_SHEET_NAME = 'ranking';
 
 // Main entry point for GET requests
 function doGet(e) {
@@ -22,6 +24,8 @@ function doGet(e) {
         throw new Error('List action is no longer supported.');
       case 'getStats': // 追加: 統計取得アクション
         return createJsonResponse(handleGetStats());
+      case 'getRankings':
+        return createJsonResponse(handleGetRankings());
       default:
         throw new Error('Invalid action specified.');
     }
@@ -47,6 +51,9 @@ function doPost(e) {
         break;
       case 'contact':
         result = handleContact(data);
+        break;
+      case 'like':
+        result = handleLike(requestBody.id);
         break;
       case 'toggleResultRestricted':
         throw new Error('Toggle public action is no longer supported.');
@@ -138,6 +145,38 @@ function handleGetStats() {
   return { result: 'success', totalCreatedCount: totalCount };
 }
 
+function handleGetRankings() {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const rankingSheet = spreadsheet.getSheetByName(RANKING_SHEET_NAME);
+  if (!rankingSheet || rankingSheet.getLastRow() < 2) {
+    return { result: 'success', data: { likes: [], responses: [] } };
+  }
+
+  const data = rankingSheet.getRange(2, 1, rankingSheet.getLastRow() - 1, 6).getValues();
+  
+  const likes = [];
+  const responses = [];
+
+  data.forEach(row => {
+    if (row[0]) { // likes_id が存在すれば
+      likes.push({
+        id: row[0],
+        title: row[1],
+        like_count: row[2]
+      });
+    }
+    if (row[3]) { // responses_id が存在すれば
+      responses.push({
+        id: row[3],
+        title: row[4],
+        response_count: row[5]
+      });
+    }
+  });
+
+  return { result: 'success', data: { likes, responses } };
+}
+
 // --- POST HANDLERS ---
 function handleCreate(data) {
   const questions = JSON.parse(data.questions);
@@ -150,7 +189,7 @@ function handleCreate(data) {
     }
   }
   const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
-  const newRow = [data.id, data.title, data.description, data.result_restricted, data.deadline, new Date(), data.viewing_key, data.anonymous, data.questions, data.creator_name];
+  const newRow = [data.id, data.title, data.description, data.result_restricted, data.deadline, new Date(), data.viewing_key, data.anonymous, data.questions, data.creator_name, 0, 0, false, data.result_restricted, false]; // like_count, response_count, is_protected, is_ranking_excluded (閲覧制限で除外), is_in_ranking
   masterSheet.appendRow(newRow);
 
   // Create a new sheet for responses
@@ -159,9 +198,9 @@ function handleCreate(data) {
   // Add respondent_id and timestamp to the headers
   let headers = [];
   if (data.anonymous) {
-    headers = ['respondent_id', 'timestamp', ...questions.map(q => q.text)];
+    headers = ['respondent_id', 'timestamp', ...questions.map((q, i) => `Q${i + 1}. ${q.text}`)];
   } else {
-    headers = ['username', 'respondent_id', 'timestamp', ...questions.map(q => q.text)];
+    headers = ['username', 'respondent_id', 'timestamp', ...questions.map((q, i) => `Q${i + 1}. ${q.text}`)];
   }
   spreadsheet.insertSheet(responseSheetName).getRange(1, 1, 1, headers.length).setValues([headers]);
 
@@ -188,9 +227,11 @@ function handleAnswer(data) {
   const masterHeader = masterData.shift();
   const idCol = masterHeader.indexOf('id');
   const deadlineCol = masterHeader.indexOf('deadline');
+  const responseCountCol = masterHeader.indexOf('response_count');
 
-  const surveyRow = masterData.find(row => row[idCol] == data.id);
-  if (!surveyRow) throw new Error('アンケートが見つかりません。');
+  const surveyRowIndex = masterData.findIndex(row => row[idCol] == data.id);
+  if (surveyRowIndex === -1) throw new Error('アンケートが見つかりません。');
+  const surveyRow = masterData[surveyRowIndex];
 
   const deadlineRaw = surveyRow[deadlineCol];
   const deadline = new Date(deadlineRaw);
@@ -238,7 +279,32 @@ function handleAnswer(data) {
   }
   sheet.appendRow(newRow);
 
+  // Increment response count
+  const currentResponseCount = surveyRow[responseCountCol] || 0;
+  masterSheet.getRange(surveyRowIndex + 2, responseCountCol + 1).setValue(currentResponseCount + 1);
+
   return { result: 'success' };
+}
+
+function handleLike(id) {
+  if (!id) throw new Error('Survey ID is required.');
+
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
+  const data = sheet.getDataRange().getValues();
+  const header = data.shift();
+  const idCol = header.indexOf('id');
+  const likeCountCol = header.indexOf('like_count');
+
+  const surveyRowIndex = data.findIndex(row => row[idCol] == id);
+  if (surveyRowIndex === -1) throw new Error('Survey not found.');
+  
+  const surveyRow = data[surveyRowIndex];
+  const currentLikeCount = surveyRow[likeCountCol] || 0;
+  const newLikeCount = currentLikeCount + 1;
+
+  sheet.getRange(surveyRowIndex + 2, likeCountCol + 1).setValue(newLikeCount);
+
+  return { result: 'success', like_count: newLikeCount };
 }
 
 // New handler for contact form submissions
@@ -274,11 +340,68 @@ ${data.message}
   return { result: 'success', message: 'お問い合わせを受け付けました。' };
 }
 
-/**
- * Cleans up old surveys and their corresponding response sheets.
- * Surveys with a deadline more than 10 days in the past will be deleted.
- */
-function cleanUpOldSurveys() {
+function updateRankings() {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const masterSheet = spreadsheet.getSheetByName(MASTER_SHEET_NAME);
+  const data = masterSheet.getDataRange().getValues();
+  const header = data.shift();
+
+  const idCol = header.indexOf('id');
+  const titleCol = header.indexOf('title');
+  const likeCountCol = header.indexOf('like_count');
+  const responseCountCol = header.indexOf('response_count');
+  const isProtectedCol = header.indexOf('is_protected');
+  const isRankingExcludedCol = header.indexOf('is_ranking_excluded');
+
+  const surveys = data.map(row => rowToObject(row, header)).filter(survey => !survey.is_ranking_excluded);
+
+  const topLikes = surveys.sort((a, b) => b.like_count - a.like_count).slice(0, 10);
+  const topResponses = surveys.sort((a, b) => b.response_count - a.response_count).slice(0, 10);
+
+  let rankingSheet = spreadsheet.getSheetByName(RANKING_SHEET_NAME);
+  if (!rankingSheet) {
+    rankingSheet = spreadsheet.insertSheet(RANKING_SHEET_NAME);
+  }
+  rankingSheet.clear();
+  
+  // Write Headers
+  const rankingHeaders = ['likes_id', 'likes_title', 'likes_count', 'responses_id', 'responses_title', 'responses_count'];
+  rankingSheet.getRange(1, 1, 1, 6).setValues([rankingHeaders]);
+
+  // Prepare data rows
+  const numRows = Math.max(topLikes.length, topResponses.length);
+  const rowsToWrite = [];
+  for (let i = 0; i < numRows; i++) {
+    const like = topLikes[i];
+    const response = topResponses[i];
+    rowsToWrite.push([
+      like ? like.id : '',
+      like ? like.title : '',
+      like ? like.like_count : '',
+      response ? response.id : '',
+      response ? response.title : '',
+      response ? response.response_count : ''
+    ]);
+  }
+
+  // Write data to sheet
+  if (rowsToWrite.length > 0) {
+    rankingSheet.getRange(2, 1, rowsToWrite.length, 6).setValues(rowsToWrite);
+  }
+
+  // Update protected flag in master sheet
+  const rankedIds = new Set([...topLikes.map(s => s.id), ...topResponses.map(s => s.id)]);
+  for (let i = 0; i < data.length; i++) {
+      const surveyId = data[i][idCol];
+      if (rankedIds.has(surveyId)) {
+          masterSheet.getRange(i + 2, isProtectedCol + 1).setValue(true);
+      } else {
+          masterSheet.getRange(i + 2, isProtectedCol + 1).setValue(false);
+      }
+  }
+}
+
+function performDailyMaintenance() {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   const masterSheet = spreadsheet.getSheetByName(MASTER_SHEET_NAME);
   if (!masterSheet) {
@@ -286,8 +409,8 @@ function cleanUpOldSurveys() {
     return;
   }
 
+  // --- 1. Backup the spreadsheet ---
   let backupSuccessful = false;
-  // --- Backup the spreadsheet before cleanup ---
   try {
     const backupFolder = DriveApp.getFolderById(BACKUP_FOLDER_ID);
     const spreadsheetFile = DriveApp.getFileById(SPREADSHEET_ID);
@@ -299,55 +422,77 @@ function cleanUpOldSurveys() {
   } catch (e) {
     Logger.log(`Error during backup: ${e.message}`);
     if (NOTIFICATION_EMAIL) {
-      const subject = 'KOTAETE: スプレッドシートのバックアップに失敗しました';
+      const subject = 'KOTAETE: 重大なエラー - バックアップに失敗しました';
       const body = `
 スプレッドシートの自動バックアップ中にエラーが発生しました。
 
 エラーメッセージ: ${e.message}
 
-バックアップが失敗したため、古いアンケートの削除処理はスキップされました。
-手動でバックアップとクリーンアップを確認してください。
+バックアップが失敗したため、後続のランキング更新および古いアンケートの削除処理は実行されませんでした。
+手動で状況を確認してください。
 `;
       MailApp.sendEmail(NOTIFICATION_EMAIL, subject, body);
     }
-    // If backup fails, do NOT proceed with deletion
-    return;
-  }
-  // --- End Backup ---
-
-  const dataRange = masterSheet.getDataRange();
-  const values = dataRange.getValues();
-  const header = values[0];
-  const surveys = values.slice(1); // Exclude header row
-
-  const idColIndex = header.indexOf('id');
-  const deadlineColIndex = header.indexOf('deadline');
-
-  if (idColIndex === -1 || deadlineColIndex === -1) {
-    Logger.log('Required columns (id or deadline) not found in master sheet. Exiting cleanup.');
-    return;
+    return; // If backup fails, do NOT proceed.
   }
 
-  const now = new Date();
-  const sixtyDaysAgo = new Date(now.setDate(now.getDate() - 60));
-
-  const surveysToDelete = [];
-  const rowsToDelete = []; // Store row indices to delete from master sheet
-
-  // Iterate from bottom to top to avoid issues with row deletion
-  for (let i = surveys.length - 1; i >= 0; i--) {
-    const survey = surveys[i];
-    const surveyId = survey[idColIndex];
-    const deadline = new Date(survey[deadlineColIndex]);
-
-    if (deadline < sixtyDaysAgo) {
-      surveysToDelete.push(surveyId);
-      rowsToDelete.push(i + 2); // +2 because of header row and 0-indexed array
-    }
-  }
-
-  // Only proceed with deletion if backup was successful
+  // --- Subsequent processes only run if backup was successful ---
   if (backupSuccessful) {
+    // --- 2. Update Rankings ---
+    try {
+      Logger.log('Starting ranking update...');
+      updateRankings();
+      Logger.log('Ranking update completed successfully.');
+    } catch (e) {
+      Logger.log(`Error during ranking update: ${e.message}`);
+      if (NOTIFICATION_EMAIL) {
+        const subject = 'KOTAETE: 警告 - ランキングの更新に失敗しました';
+        const body = `
+ランキングの自動更新中にエラーが発生しました。
+
+エラーメッセージ: ${e.message}
+
+この後、古いアンケートの削除処理は引き続き実行されますが、ランキングが最新でない可能性がありますのでご確認ください。
+`;
+        MailApp.sendEmail(NOTIFICATION_EMAIL, subject, body);
+      }
+      // Do not stop the process, continue to cleanup.
+    }
+
+    // --- 3. Clean up old surveys ---
+    Logger.log('Starting cleanup of old surveys...');
+    const dataRange = masterSheet.getDataRange();
+    const values = dataRange.getValues();
+    const header = values[0];
+    const surveys = values.slice(1); // Exclude header row
+
+    const idColIndex = header.indexOf('id');
+    const deadlineColIndex = header.indexOf('deadline');
+    const isProtectedColIndex = header.indexOf('is_protected');
+
+    if (idColIndex === -1 || deadlineColIndex === -1 || isProtectedColIndex === -1) {
+      Logger.log('Required columns (id, deadline, or is_protected) not found. Exiting cleanup.');
+      return;
+    }
+
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+    const surveysToDelete = [];
+    const rowsToDelete = []; // Store row indices to delete from master sheet
+
+    for (let i = surveys.length - 1; i >= 0; i--) {
+      const survey = surveys[i];
+      const surveyId = survey[idColIndex];
+      const deadline = new Date(survey[deadlineColIndex]);
+      const isProtected = survey[isProtectedColIndex];
+
+      if (deadline < sixtyDaysAgo && !isProtected) {
+        surveysToDelete.push(surveyId);
+        rowsToDelete.push(i + 2); // +2 because of header row and 0-indexed array
+      }
+    }
+
     // Delete rows from master sheet
     rowsToDelete.forEach(rowIndex => {
       masterSheet.deleteRow(rowIndex);
@@ -366,9 +511,11 @@ function cleanUpOldSurveys() {
       }
     });
 
-    Logger.log(`Cleanup complete. Deleted ${surveysToDelete.length} old surveys.`);
-  } else {
-    Logger.log('Backup failed, skipping cleanup process.');
+    if (surveysToDelete.length > 0) {
+        Logger.log(`Cleanup complete. Deleted ${surveysToDelete.length} old surveys.`);
+    } else {
+        Logger.log('Cleanup complete. No old surveys to delete.');
+    }
   }
 }
 
@@ -398,3 +545,4 @@ function rowToObject(row, header) {
     return obj;
   }, {});
 }
+

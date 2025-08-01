@@ -24,11 +24,18 @@
             <span class="font-bold">{{ isExpired ? '回答締切済' : '回答受付中' }}:</span>
             {{ formatDeadline(surveyData.deadline) }}
           </p>
+          <div class="mt-4 flex items-center">
+            <button @click="likeSurvey" :disabled="liked" class="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-pink-500 hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span class="material-icons-outlined mr-2">thumb_up</span>
+              いいね！
+            </button>
+            <span class="ml-4 text-lg font-bold text-gray-700">{{ likeCount }}</span>
+          </div>
         </div>
 
         <div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-6">
           <p class="font-bold mb-1">重要なお知らせ:</p>
-          <p class="text-sm">このKOTAETEは、回答期限から60日経過すると、その結果を含め自動的にシステムから削除されます。削除されたアンケートは復元できませんので、必要な情報は早めにダウンロードしてください。</p>
+          <p class="text-sm">このKOTAETEは、回答期限から60日経過すると、その結果を含め自動的にシステムから削除されますので、必要な情報は早めにダウンロードしてください。</p>
         </div>
 
         <hr class="my-6">
@@ -38,28 +45,37 @@
           </h3>
 
           <div v-if="question.type === 'text' || question.type === 'date'">
-            <ul class="list-disc list-inside bg-neutral-lightest p-3 rounded-lg border border-neutral-light">
-              <li v-for="(answer, aIndex) in getAnswersForQuestion(index)" :key="aIndex" class="mb-1 text-gray-700">
-                {{ answer.text }}
-                <span v-if="surveyData.anonymous" class="text-xs text-gray-500 ml-1"> (匿名ユーザー {{ answer.respondentIdShort }})
-                </span>
-                <span v-else class="text-xs text-gray-500 ml-1"> ({{ answer.username }}) </span>
-              </li>
-              <li v-if="getAnswersForQuestion(index).length === 0" class="text-gray-500 text-sm italic">
-                まだ回答がありません。
-              </li>
-            </ul>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div v-for="(answer, aIndex) in getAnswersForQuestion(index)" :key="aIndex" class="bg-blue-50 p-3 rounded-lg border border-blue-200 shadow-sm">
+                <p class="text-gray-800">{{ answer.text }}</p>
+                <p class="text-xs text-gray-500 mt-2 text-right">
+                  <span v-if="surveyData.anonymous">匿名ユーザー {{ answer.respondentIdShort }}</span>
+                  <span v-else>{{ answer.username }}</span>
+                </p>
+              </div>
+            </div>
+            <p v-if="getAnswersForQuestion(index).length === 0" class="text-gray-500 text-sm italic mt-4">
+              まだ回答がありません。
+            </p>
           </div>
 
-          <div v-if="question.type === 'radio' || question.type === 'checkbox'" class="space-y-3">
-            <div v-for="option in question.options" :key="option.value" class="p-2 bg-neutral-lightest rounded-lg border border-neutral-light">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-neutral-darkest break-all mr-2">{{ option.value }}</span>
-                <span class="font-bold text-primary whitespace-nowrap">{{ countOccurrences(index, option.value) }}票</span>
-              </div>
-              <div class="w-full bg-neutral-light rounded-full h-2.5">
-                <div class="bg-primary h-2.5 rounded-full" :style="{ width: getPercentage(countOccurrences(index, option.value)) + '%' }"></div>
-              </div>
+          <div v-if="['5-point', 'radio', 'checkbox'].includes(question.type)" class="p-4 border border-gray-300 rounded-lg bg-white">
+            <div v-if="question.type === '5-point'" class="flex items-center mb-2">
+              <p class="text-lg font-semibold text-gray-700">平均評価:</p>
+              <p class="text-2xl font-bold text-primary ml-2">{{ calculateAverage(index) }}</p>
+            </div>
+            <div :ref="el => chartContainer[index] = el" class="relative h-56">
+              <canvas :id="`chart-${index}`" class="absolute inset-0 w-full h-full bg-white rounded-md z-0"></canvas>
+            </div>
+            <!-- 凡例を追加 -->
+            <div v-if="['radio', 'checkbox'].includes(question.type)" class="mt-4 pt-4 border-t border-gray-200">
+              <h4 class="text-sm font-semibold text-gray-600 mb-2">凡例</h4>
+              <ul class="list-none space-y-1 text-xs sm:text-sm">
+                <li v-for="(option, optIndex) in question.options" :key="optIndex" class="flex items-start">
+                  <span class="font-bold mr-2 w-8 shrink-0 text-center">{{ getCircleNumber(optIndex) }}</span>
+                  <span class="flex-1 break-words">{{ option.value }}</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -99,6 +115,9 @@
                       <span class="inline-block max-w-[120px] truncate cursor-help">{{ truncateText(formatDateOnly(getAnswerByIndex(result, qIndex)), 20) }}</span>
                     </Tooltip>
                     <span v-else>{{ truncateText(formatDateOnly(getAnswerByIndex(result, qIndex)), 20) }}</span>
+                  </span>
+                  <span v-else-if="question.type === '5-point'">
+                    {{ getAnswerByIndex(result, qIndex) }}
                   </span>
                   <span v-else>
                     <Tooltip v-if="getAnswerByIndex(result, qIndex) && String(getAnswerByIndex(result, qIndex)).length > 20" :content="getAnswerByIndex(result, qIndex)">
@@ -140,10 +159,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick, onUpdated, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import Tooltip from '~/components/Tooltip.vue'
 import { formatDeadline } from '~/utils/formatters'
+import { Chart, registerables } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+Chart.register(...registerables, ChartDataLabels);
 
 const route = useRoute();
 const surveyId = route.params.id;
@@ -159,8 +182,20 @@ const inputKey = ref('');
 const keyErrorMessage = ref('');
 const hasAccess = ref(false);
 const submittingKey = ref(false);
+const likeCount = ref(0);
+const liked = ref(false);
 
-// システムカラムのインデックスを動的に取得するためのComputedプロパティ
+// 各チャートのコンテナDOM要素への参照を保持
+const chartContainer = ref({});
+
+// カスタムツールチップ要素への参照
+let customTooltipEl = null;
+
+const numberedCircle = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫', '⑬', '⑭', '⑮', '⑯', '⑰', '⑱', '⑲', '⑳'];
+const getCircleNumber = (index) => {
+  return numberedCircle[index] || `(${index + 1})`;
+};
+
 const systemColumnIndices = computed(() => {
   const indices = {
     respondent_id: resultHeaders.value.indexOf('respondent_id'),
@@ -168,18 +203,6 @@ const systemColumnIndices = computed(() => {
     username: resultHeaders.value.indexOf('username'),
   };
   return indices;
-});
-
-// 質問の回答が始まるカラムのオフセットを計算
-const questionColumnOffset = computed(() => {
-  if (!surveyData.value || !resultHeaders.value) return 0;
-  // usernameがあるかないかでオフセットが変わる。
-  // respondent_id と timestamp は常に存在
-  let offset = 2; // respondent_id, timestamp
-  if (systemColumnIndices.value.username !== -1) { // usernameが存在する場合
-    offset = 3; // username, respondent_id, timestamp
-  }
-  return offset;
 });
 
 const isExpired = computed(() => {
@@ -212,6 +235,8 @@ const fetchSurveyAndResults = async (key = null) => {
     if (surveyRes.result === 'success') {
       surveyData.value = surveyRes.data;
       surveyData.value.questions = JSON.parse(surveyRes.data.questions);
+      likeCount.value = surveyRes.data.like_count || 0;
+      liked.value = localStorage.getItem(`liked_survey_${surveyId}`) === 'true';
 
       if (surveyData.value.result_restricted && !key) {
         showKeyInput.value = true;
@@ -237,7 +262,6 @@ const fetchSurveyAndResults = async (key = null) => {
         inputKey.value = '';
       }
     } else {
-      // アンケートが存在しない場合、301リダイレクト
       await navigateTo('/', { redirectCode: 301 });
     }
   } catch (e) {
@@ -264,34 +288,374 @@ const submitKey = async () => {
   }
 };
 
+const likeSurvey = async () => {
+  if (liked.value) {
+    return;
+  }
+  liked.value = true; 
+  
+  try {
+    const response = await $fetch('/api/gas-proxy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: JSON.stringify({ action: 'like', id: surveyId }),
+    });
+    if (response.result === 'success') {
+      likeCount.value = response.like_count;
+      localStorage.setItem(`liked_survey_${surveyId}`, 'true');
+    } else {
+      liked.value = false; 
+      alert(`エラーが発生しました: ${response.message}`);
+    }
+  } catch (error) {
+    console.error('Error liking survey:', error);
+    liked.value = false;
+    alert('いいねに失敗しました。');
+  }
+};
+
+// --- カスタムツールチップ関連関数 ---
+const getOrCreateCustomTooltip = () => {
+  if (!customTooltipEl) {
+    customTooltipEl = document.createElement('div');
+    customTooltipEl.className = 'custom-chart-tooltip'; 
+    document.body.appendChild(customTooltipEl); 
+  }
+  return customTooltipEl;
+};
+
+const showCustomTooltip = (text, x, y) => {
+  const tooltip = getOrCreateCustomTooltip();
+  tooltip.innerHTML = text;
+  
+  // ツールチップの現在サイズを取得
+  // `offset` プロパティは、要素がレンダリングされるまで正確な値を持たない場合があるため
+  // `getBoundingClientRect` を使用するのがより確実です。
+  // ただし、今回はシンプルに、ツールチップが表示される前に計算するため、DOMツリーに
+  // 追加された直後であれば問題ありません。
+  
+  // まず表示してサイズを確定させる（opacity:0の状態で）
+  tooltip.style.opacity = '0.01'; // 一時的に非常に薄く表示
+  tooltip.style.left = '0px'; // 仮の位置
+  tooltip.style.top = '0px';   // 仮の位置
+  
+  // DOMに反映されるのを待つ
+  requestAnimationFrame(() => {
+    const tooltipRect = tooltip.getBoundingClientRect();
+    let finalX = x + window.scrollX + 10; // カーソルから少しずらす
+    let finalY = y + window.scrollY + 10;
+
+    // 画面右端からはみ出す場合の調整
+    if (finalX + tooltipRect.width > window.innerWidth + window.scrollX) {
+      finalX = window.innerWidth + window.scrollX - tooltipRect.width - 10; // 画面右端から10pxマージン
+    }
+    // 画面下端からはみ出す場合の調整
+    if (finalY + tooltipRect.height > window.innerHeight + window.scrollY) {
+      finalY = y + window.scrollY - tooltipRect.height - 10; // カーソル位置の上側
+    }
+    // 画面左端からはみ出す場合の調整
+    if (finalX < window.scrollX) {
+      finalX = window.scrollX + 10; // 画面左端から10pxマージン
+    }
+    // 画面上端からはみ出す場合の調整
+    if (finalY < window.scrollY) {
+      finalY = window.scrollY + 10; // 画面上端から10pxマージン
+    }
+
+    tooltip.style.left = `${finalX}px`;
+    tooltip.style.top = `${finalY}px`;
+    tooltip.style.opacity = '1';
+  });
+};
+
+const hideCustomTooltip = () => {
+  if (customTooltipEl) {
+    customTooltipEl.style.opacity = '0';
+  }
+};
+
+// --- Chart.js の描画とイベント設定 ---
+const renderCharts = () => {
+  // 既存のチャートがあれば破棄
+  if (window.myCharts) {
+    Object.values(window.myCharts).forEach(chart => {
+      // イベントリスナーを削除してから破棄
+      if (chart.canvas.__labelHoverListener) {
+        chart.canvas.removeEventListener('mousemove', chart.canvas.__labelHoverListener);
+        chart.canvas.removeEventListener('mouseout', hideCustomTooltip);
+        delete chart.canvas.__labelHoverListener;
+      }
+      chart.destroy();
+    });
+  }
+  window.myCharts = {};
+
+  surveyData.value.questions.forEach((question, index) => {
+    if (['5-point', 'radio', 'checkbox'].includes(question.type)) {
+      const ctx = document.getElementById(`chart-${index}`);
+      if (!ctx) return;
+
+      let chartLabels = [];
+      let originalLabels = []; // 元のラベルを保持
+      let chartData = [];
+      let tooltipTitleCallback;
+
+      if (question.type === '5-point') {
+        const answers = getAnswersForQuestion(index).map(a => parseInt(a.text, 10)).filter(n => !isNaN(n) && n >= 1 && n <= 5);
+        const counts = [0, 0, 0, 0, 0];
+        answers.forEach(ans => { if (ans >= 1 && ans <= 5) counts[ans - 1]++; });
+        chartLabels = ['1', '2', '3', '4', '5'];
+        originalLabels = chartLabels; // 5段階評価はラベルが短いのでそのまま
+        chartData = counts;
+        tooltipTitleCallback = (context) => `評価: ${context[0].label} (${context[0].formattedValue}票)`;
+      } else if (question.type === 'radio' || question.type === 'checkbox') {
+        originalLabels = question.options.map(o => o.value);
+        chartLabels = originalLabels.map((_, i) => getCircleNumber(i));
+        chartData = originalLabels.map(option => countOccurrences(index, option));
+        
+        tooltipTitleCallback = (context) => {
+            if (context[0]) {
+                const originalLabel = originalLabels[context[0].dataIndex];
+                return `${originalLabel} (${context[0].formattedValue}票)`;
+            }
+            return '';
+        };
+      }
+
+      window.myCharts[index] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: '回答数',
+            data: chartData,
+            backgroundColor: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea || chartData.every(val => val === 0)) return 'rgba(200, 200, 200, 0.5)';
+              const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+              gradient.addColorStop(0, 'rgba(96, 165, 250, 0.8)');
+              gradient.addColorStop(1, 'rgba(236, 72, 153, 0.8)');
+              return gradient;
+            },
+            borderColor: 'transparent',
+            borderWidth: 0,
+            borderRadius: 0,
+            barThickness: 15,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          scales: {
+            x: {
+              display: false,
+              beginAtZero: true,
+              grid: {
+                display: false,
+                drawBorder: false,
+              },
+              ticks: {
+                display: false,
+              }
+            },
+            y: {
+              ticks: {
+                color: '#444',
+                font: {
+                  size: 14,
+                  family: 'system-ui, sans-serif',
+                  weight: 'bold',
+                },
+              },
+              grid: {
+                display: false,
+                drawBorder: false,
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            title: {
+              display: false
+            },
+            tooltip: {
+              enabled: true, // 棒にホバーした時の標準ツールチップは有効
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              callbacks: {
+                title: tooltipTitleCallback,
+                label: function(context) {
+                  return '';
+                },
+                afterLabel: function(context) {
+                  const selectedValue = originalLabels[context.dataIndex];
+                  const voters = results.value.filter(row => {
+                    const answer = getAnswerByIndex(row, index);
+                    if (question.type === 'checkbox') {
+                      return String(answer).split(', ').map(s => s.trim()).includes(selectedValue);
+                    } else {
+                      return String(answer) === String(selectedValue);
+                    }
+                  }).map(row => getUsername(row));
+
+                  if (voters.length > 0) {
+                    const maxVotersToShow = 5;
+                    const displayedVoters = voters.slice(0, maxVotersToShow);
+                    let tooltipText = `投票者: ${displayedVoters.join(', ')}`;
+                    if (voters.length > maxVotersToShow) {
+                      tooltipText += ` 他${voters.length - maxVotersToShow}名`;
+                    }
+                    return tooltipText;
+                  } else {
+                    return '投票者はいません。';
+                  }
+                }
+              },
+              external: null
+            },
+            datalabels: {
+              anchor: 'end',
+              align: 'end',
+              offset: 4,
+              color: '#444',
+              font: {
+                weight: 'bold',
+                size: 14,
+              },
+              formatter: function(value, context) {
+                return value + '票';
+              }
+            }
+          },
+          layout: {
+            padding: {
+              left: 10,
+              right: 40,
+              top: 10,
+              bottom: 10
+            }
+          },
+          animation: {
+            onComplete: () => {
+              setupChartEventListeners(window.myCharts[index], originalLabels);
+            }
+          }
+        }
+      });
+    }
+  });
+};
+
+// Y軸ラベル用のイベントリスナー設定
+const setupChartEventListeners = (chart, labels) => {
+  const canvas = chart.canvas;
+  const ctx = chart.ctx;
+  const yAxis = chart.scales.y;
+
+  // 既存のリスナーがあれば削除
+  if (canvas.__labelHoverListener) {
+    canvas.removeEventListener('mousemove', canvas.__labelHoverListener);
+    canvas.removeEventListener('mouseout', hideCustomTooltip);
+  }
+
+  // イベントリスナーの定義
+  const handleMouseMove = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    let hoveredLabel = null;
+
+    labels.forEach((label, i) => {
+      const labelY = yAxis.getPixelForValue(yAxis.ticks[i].value);
+      const labelX = yAxis.left; 
+
+      const labelWidth = yAxis.width; 
+      const labelHeight = 20; 
+
+      if (x >= labelX - 10 && x <= labelX + labelWidth + 10 && 
+          y >= labelY - labelHeight / 2 && y <= labelY + labelHeight / 2) {
+        hoveredLabel = labels[i];
+      }
+    });
+
+    if (hoveredLabel) {
+      // マウスの位置をそのままツールチップの位置にする
+      showCustomTooltip(hoveredLabel, event.clientX, event.clientY);
+    } else {
+      hideCustomTooltip();
+    }
+  };
+
+  canvas.addEventListener('mousemove', handleMouseMove);
+  canvas.__labelHoverListener = handleMouseMove; 
+  canvas.addEventListener('mouseout', hideCustomTooltip);
+};
+
+
+const calculateAverage = (questionIndex) => {
+    const answers = getAnswersForQuestion(questionIndex).map(a => parseInt(a.text, 10)).filter(n => !isNaN(n) && n >= 1 && n <= 5);
+    if (answers.length === 0) return 'N/A';
+    const sum = answers.reduce((acc, val) => acc + val, 0);
+    return (sum / answers.length).toFixed(2);
+};
+
 onMounted(async () => {
   await fetchSurveyAndResults(viewingKey);
 });
 
-// 回答者IDのショートバージョンを取得
+onUpdated(() => {
+  if (surveyData.value && hasAccess.value && surveyData.value.questions.some(q => ['5-point', 'radio', 'checkbox'].includes(q.type))) {
+    nextTick(() => {
+      renderCharts();
+    });
+  }
+});
+
+onBeforeUnmount(() => {
+  if (customTooltipEl && customTooltipEl.parentNode) {
+    customTooltipEl.parentNode.removeChild(customTooltipEl);
+    customTooltipEl = null;
+  }
+  if (window.myCharts) {
+    Object.values(window.myCharts).forEach(chart => {
+      if (chart.canvas.__labelHoverListener) {
+        chart.canvas.removeEventListener('mousemove', chart.canvas.__labelHoverListener);
+        chart.canvas.removeEventListener('mouseout', hideCustomTooltip);
+      }
+      chart.destroy();
+    });
+    window.myCharts = {};
+  }
+});
+
+
 const getRespondentIdShort = (resultRow) => {
   const uuidIndex = systemColumnIndices.value.respondent_id;
   return uuidIndex !== -1 && resultRow[uuidIndex] ? String(resultRow[uuidIndex]).substring(0, 6) : 'N/A';
 };
 
-// ユーザー名を取得
 const getUsername = (resultRow) => {
   const usernameIndex = systemColumnIndices.value.username;
-  // 匿名ユーザーの場合、またはユーザー名が空の場合は「匿名ユーザー (UUID短縮形)」を返す
   if (surveyData.value.anonymous || !resultRow[usernameIndex] || String(resultRow[usernameIndex]).trim() === '') {
     return `匿名ユーザー (${getRespondentIdShort(resultRow)})`;
   }
   return String(resultRow[usernameIndex]);
 };
 
-
-// タイムスタンプをフォーマット（テーブル表示用）
 const formatTimestamp = (resultRow) => {
   const timestampIndex = systemColumnIndices.value.timestamp;
   if (timestampIndex !== -1 && resultRow[timestampIndex]) {
     const date = new Date(resultRow[timestampIndex]);
     if (!isNaN(date.getTime())) {
-      // YYYY/MM/DD HH:MM:SS 形式
       return date.toLocaleString('ja-JP', {
         year: 'numeric',
         month: '2-digit',
@@ -299,56 +663,52 @@ const formatTimestamp = (resultRow) => {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
-      }).replace(/\//g, '-'); // スラッシュをハイフンに置換
+      }).replace(/\//g, '-');
     }
   }
   return 'N/A';
 };
 
-// 質問に対する回答をインデックスで取得
 const getAnswerByIndex = (resultRow, questionIndex) => {
-  // resultHeadersの 'username', 'respondent_id', 'timestamp' の位置を正確に把握し、その後の質問回答のインデックスを計算
-  const respondentIdIndex = systemColumnIndices.value.respondent_id;
-  const timestampIndex = systemColumnIndices.value.timestamp;
-  const usernameIndex = systemColumnIndices.value.username;
-
-  // 質問データの開始インデックスを特定する
-  // resultHeadersの中から質問Q1, Q2... に該当する部分を見つける
-  let startOfQuestionsIndex = 0;
-  if (resultHeaders.value.includes('Q1')) { // assuming Q1 is always the first question header
-    startOfQuestionsIndex = resultHeaders.value.indexOf('Q1');
-  } else {
-    // If 'Q1' is not directly in headers (e.g., custom headers from GAS),
-    // find the max index of system columns + 1
-    startOfQuestionsIndex = Math.max(respondentIdIndex, timestampIndex, usernameIndex) + 1;
+  if (!surveyData.value || !surveyData.value.questions || !resultHeaders.value) {
+    return undefined;
   }
-  
-  const colIndex = startOfQuestionsIndex + questionIndex;
+  const question = surveyData.value.questions[questionIndex];
+  if (!question) {
+    return undefined;
+  }
+  const expectedHeaderPrefix = `Q${questionIndex + 1}.`;
+  let colIndex = -1;
+  for (let i = 0; i < resultHeaders.value.length; i++) {
+    if (resultHeaders.value[i] && resultHeaders.value[i].startsWith(expectedHeaderPrefix)) {
+      colIndex = i;
+      break;
+    }
+  }
+  if (colIndex === -1) {
+    return undefined;
+  }
   return resultRow[colIndex];
 };
-
 
 const getAnswersForQuestion = (questionIndex) => {
   const question = surveyData.value.questions[questionIndex];
   const answers = results.value.map(res => {
     const text = getAnswerByIndex(res, questionIndex);
     const respondentIdShort = getRespondentIdShort(res);
-    const username = getUsername(res); // getUsername関数を使用
-
+    const username = getUsername(res);
     return {
       text: question.type === 'date' ? formatDateOnly(text) : text,
       respondentIdShort: respondentIdShort,
       username: username
     };
-  }).filter(ans => ans.text); // 回答があるもののみをフィルタリング
+  }).filter(ans => ans.text);
   return answers;
 };
-
 
 const countOccurrences = (questionIndex, optionValue) => {
   const answers = results.value.map(res => getAnswerByIndex(res, questionIndex)).filter(Boolean);
   return answers.reduce((count, answer) => {
-    // チェックボックスの場合、回答がカンマ区切りで複数ある可能性を考慮
     const individualAnswers = String(answer).split(', ').map(s => s.trim());
     return count + (individualAnswers.includes(optionValue) ? 1 : 0);
   }, 0);
@@ -358,8 +718,6 @@ const totalResponses = computed(() => results.value.length);
 
 const getPercentage = (count) => {
   if (totalResponses.value === 0) return 0;
-  // このパーセンテージは、その選択肢を選んだ回答者の割合を示すべき
-  // なので、分母は全体の回答数になる
   return (count / totalResponses.value) * 100;
 };
 
@@ -370,7 +728,7 @@ const truncateText = (text, maxLength = 50) => {
 };
 
 const formatQuestionHeader = (question, index) => {
-  return `Q${index + 1}. ${question.text}`;
+  return question.text;
 };
 
 const downloadCsv = () => {
@@ -378,30 +736,16 @@ const downloadCsv = () => {
     alert('ダウンロードするデータがありません。');
     return;
   }
-
-  // ヘッダーの生成
-  const headers = ['回答者', '回答日時']; // 固定ヘッダー
-
-  surveyData.value.questions.forEach((q, index) => {
-    headers.push(formatQuestionHeader(q, index));
-  });
-
+  const headers = ['回答者', '回答日時'];
+  const questionHeaders = resultHeaders.value.filter(header => header.startsWith('Q'));
+  headers.push(...questionHeaders);
   const csvHeaders = headers.map(header => `"${header.replace(/"/g, '""')}"`).join(',');
-
-  // データの生成
   const rows = results.value.map(row => {
     const rowData = [];
-    
-    // 回答者 (匿名かどうかで表示を分ける)
     rowData.push(`"${String(getUsername(row)).replace(/"/g, '""')}"`);
-    
-    // 回答日時
     rowData.push(`"${formatTimestamp(row).replace(/"/g, '""')}"`);
-
-    // 各質問の回答
     surveyData.value.questions.forEach((question, qIndex) => {
       let cellData = getAnswerByIndex(row, qIndex);
-      // date型の場合はformatDateOnlyを適用
       if (question.type === 'date') {
         cellData = formatDateOnly(cellData);
       }
@@ -409,7 +753,6 @@ const downloadCsv = () => {
     });
     return rowData.join(',');
   });
-
   const csvContent = [csvHeaders, ...rows].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
@@ -420,3 +763,26 @@ const downloadCsv = () => {
   document.body.removeChild(link);
 };
 </script>
+
+<style>
+/* カスタムツールチップの基本スタイル */
+.custom-chart-tooltip {
+  background: rgba(0, 0, 0, 0.85); /* 少し濃い背景色 */
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  /* ここから変更 */
+  white-space: normal; /* 折り返しを有効にする */
+  word-wrap: break-word; /* 長い単語も折り返す */
+  overflow-wrap: break-word; /* 同上 (モダンブラウザ向け) */
+  max-width: 300px; /* 最大幅を設定 */
+  /* ここまで変更 */
+  pointer-events: none; 
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  z-index: 1000;
+  position: absolute;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* シャドウを追加して視認性向上 */
+}
+</style>

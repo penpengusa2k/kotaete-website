@@ -12,7 +12,11 @@
           テンプレートから作成（任意）
         </h3>
         <p class="text-sm mb-3">バズ狙い？実用性重視？目的別テンプレートでサクッと作成！</p>
-        <select @change="handleTemplateSelect" class="appearance-none border border-blue-light rounded-lg w-full py-2 px-3 text-blue-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-blue-dark focus:border-transparent transition-all duration-200 shadow-sm">
+        <select 
+          v-model="selectedTemplateValue"
+          @change="handleTemplateSelect" 
+          class="appearance-none border border-blue-light rounded-lg w-full py-2 px-3 text-blue-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-blue-dark focus:border-transparent transition-all duration-200 shadow-sm"
+        >
           <option value="">テンプレートを選ぶ</option>
           <optgroup label="SNS向けテンプレート">
             <option :value="JSON.stringify(templates.snsFunnyPersonality)">SNS: 性格バレアンケート</option>
@@ -91,6 +95,7 @@
             <option value="text">記述式</option>
             <option value="radio">ラジオボタン</option>
             <option value="checkbox">チェックボックス</option>
+            <option value="5-point">5段階評価</option>
             <option value="date">日付</option>
           </select>
         </div>
@@ -124,20 +129,26 @@
         <label class="block text-gray-700 font-bold mb-2">結果の閲覧制限
           <span class="relative group">
             <span class="ml-1 text-gray-500 cursor-pointer material-icons-outlined text-base align-middle">info</span>
-            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果の閲覧に制限をかけるかを設定します。制限する場合、閲覧キーの入力が必須となります。</span>
+            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果の閲覧に制限をかけるかを設定します。制限する場合、閲覧キーの入力が必須となり、ランキングの集計対象から除外されます。</span>
           </span>
         </label>
         <select v-model="survey.resultRestricted" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
           <option :value="false">制限しない（公開）</option>
           <option :value="true">制限する（閲覧キー必須）</option>
         </select>
+        <p v-if="survey.resultRestricted" class="text-sm text-orange-600 mt-2 p-2 bg-orange-50 border border-orange-200 rounded-md">
+          ※ 結果を閲覧制限すると、このKOTAETEはランキングの集計対象から除外されます。
+        </p>
+        <p v-else class="text-sm text-green-600 mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+          ※ 結果を公開すると、このKOTAETEはランキングの集計対象になります。
+        </p>
       </div>
 
       <div v-if="survey.resultRestricted" class="mb-4">
         <label for="viewingKey" class="block text-gray-700 font-bold mb-2">結果閲覧キー <span class="text-red-500">*</span>
           <span class="relative group">
             <span class="ml-1 text-gray-500 cursor-pointer material-icons-outlined text-base align-middle">info</span>
-            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果を閲覧するためのパスワードです。結果の閲覧を制限する場合に必須となります。</span>
+            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果を閲覧するためのパスワードです。結果の閲覧を制限する場合に必須となり、ランキングの集計対象から除外されます。</span>
           </span>
         </label>
         <input type="text" id="viewingKey" v-model="survey.viewingKey" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_VIEWING_KEY_LENGTH" @keydown.enter.prevent="focusNextInput">
@@ -242,6 +253,8 @@ const creatorNameError = ref(false);
 const titleInput = ref(null);
 const deadlineInput = ref(null);
 
+const selectedTemplateValue = ref('');
+
 // --- テンプレートデータ ---
 const templates = {
   snsFunnyPersonality: {
@@ -268,8 +281,8 @@ const templates = {
       { text: '私って恋愛対象になりますか？', type: 'radio', options: [
         { value: 'なる' }, { value: 'ならない' }, { value: '迷う' }
       ] },
-      { text: '付き合ったら楽しそう？', type: 'radio', options: [
-        { value: 'めっちゃ楽しそう' }, { value: '普通かな' }, { value: '不安かも' }
+      { text: '付き合ったら楽しそう度', type: '5-point', options: [
+        { value: '5: めっちゃ楽しそう' }, { value: '4: 楽しそう' }, { value: '3: 普通' }, { value: '2: 微妙' }, { value: '1: 不安かも' }
       ] },
       { text: '第一印象のスコア（100点満点中）', type: 'radio', options: [
         { value: '90〜100' }, { value: '70〜89' }, { value: '50〜69' }, { value: 'それ以下' }
@@ -286,14 +299,14 @@ const templates = {
     title: '【匿名評価】私って何点？',
     description: '見た目？性格？人間力？あなたからの点数をこっそり知りたい！',
     questions: [
-      { text: '私の総合点は？', type: 'radio', options: [
-        { value: '100点満点' }, { value: '80点くらい' }, { value: '50点以下' }
+      { text: '私を一言で評価すると？', type: '5-point', options: [
+        { value: '5: 最高' }, { value: '4: かなり良い' }, { value: '3: 普通' }, { value: '2: 微妙' }, { value: '1: 厳しい' }
       ] },
-      { text: '見た目の評価（10点満点）', type: 'radio', options: [
-        { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
+      { text: '見た目の評価', type: '5-point', options: [
+        { value: '5: とても魅力的' }, { value: '4: 魅力的' }, { value: '3: 普通' }, { value: '2: 改善が必要' }, { value: '1: 評価不能' }
       ] },
-      { text: '性格の評価（10点満点）', type: 'radio', options: [
-        { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
+      { text: '性格の評価', type: '5-point', options: [
+        { value: '5: 完璧' }, { value: '4: とても良い' }, { value: '3: 普通' }, { value: '2: 少し気になる' }, { value: '1: 改善が必要' }
       ] },
       { text: '良いと思う点は？', type: 'text', options: [] },
       { text: '直した方がいい点があれば教えてください', type: 'text', options: [] },
@@ -337,8 +350,8 @@ const templates = {
     description: '友達って言える？あなたの本音を教えてください！',
     questions: [
       { text: '初対面の印象は？', type: 'text', options: [] },
-      { text: '一緒にいて楽しいと感じる？', type: 'radio', options: [
-        { value: 'とても楽しい' }, { value: 'まあまあ' }, { value: '微妙かも' }
+      { text: '一緒にいて楽しいと感じる度', type: '5-point', options: [
+        { value: '5: とても楽しい' }, { value: '4: 楽しい' }, { value: '3: 普通' }, { value: '2: 微妙' }, { value: '1: 少しつらい' }
       ] },
       { text: '連絡頻度はどのくらい？', type: 'radio', options: [
         { value: '毎日' }, { value: '週に1回' }, { value: '月1回以下' }
@@ -374,8 +387,8 @@ const templates = {
       { text: 'その理由や背景も教えて！', type: 'text', options: [] },
       { text: '誰と一緒にやったら面白そう？', type: 'text', options: [] },
       { text: 'SNSでバズりそうな要素ある？', type: 'text', options: [] },
-      { text: '難易度レベルは？', type: 'radio', options: [
-        { value: '超簡単' }, { value: 'まあまあ' }, { value: 'ガチでキツい' }
+      { text: '難易度レベルは？', type: '5-point', options: [
+        { value: '5: 超簡単' }, { value: '4: 比較的簡単' }, { value: '3: 普通' }, { value: '2: 難しい' }, { value: '1: ガチでキツい' }
       ] }
     ],
     resultRestricted: false,
@@ -386,17 +399,17 @@ const templates = {
     title: '【顧客満足度調査】サービス品質向上にご協力ください',
     description: '日頃のご利用ありがとうございます。今後の改善の参考にさせていただきます。',
     questions: [
-      { text: '当社のサービスに満足していますか？', type: 'radio', options: [
-        { value: '非常に満足' }, { value: '満足' }, { value: '普通' }, { value: '不満' }, { value: '非常に不満' }
+      { text: '当社のサービス総合満足度', type: '5-point', options: [
+        { value: '5: 非常に満足' }, { value: '4: 満足' }, { value: '3: 普通' }, { value: '2: やや不満' }, { value: '1: 非常に不満' }
       ] },
       { text: 'どの点に満足していますか？', type: 'text', options: [] },
       { text: '改善してほしい点はありますか？', type: 'text', options: [] },
-      { text: 'スタッフの対応についてどう感じましたか？', type: 'radio', options: [
-        { value: 'とても良い' }, { value: '良い' }, { value: '普通' }, { value: '悪い' }
+      { text: 'スタッフの対応満足度', type: '5-point', options: [
+        { value: '5: とても良い' }, { value: '4: 良い' }, { value: '3: 普通' }, { value: '2: 少し悪い' }, { value: '1: 悪い' }
       ] },
       { text: '今後どんなサービスを望みますか？', type: 'text', options: [] },
-      { text: 'このサービスを他人に勧めたいですか？', type: 'radio', options: [
-        { value: '強く勧めたい' }, { value: 'まあ勧めたい' }, { value: '勧めない' }
+      { text: '他者へのおすすめ度', type: '5-point', options: [
+        { value: '5: 強く勧めたい' }, { value: '4: 勧めたい' }, { value: '3: どちらでもない' }, { value: '2: 勧めない' }, { value: '1: 全く勧めない' }
       ] }
     ],
     resultRestricted: true,
@@ -407,11 +420,11 @@ const templates = {
     title: '【従業員意識調査】より良い職場環境のために',
     description: '従業員の声をもとに、職場改善を目指しています。',
     questions: [
-      { text: '現在の仕事内容に満足していますか？', type: 'radio', options: [
-        { value: '非常に満足' }, { value: '満足' }, { value: '普通' }, { value: '不満' }
+      { text: '現在の仕事内容への満足度', type: '5-point', options: [
+        { value: '5: 非常に満足' }, { value: '4: 満足' }, { value: '3: 普通' }, { value: '2: やや不満' }, { value: '1: 不満' }
       ] },
-      { text: '上司・同僚との関係性はいかがですか？', type: 'radio', options: [
-        { value: '良好' }, { value: '普通' }, { value: '悪い' }
+      { text: '上司・同僚との関係性', type: '5-point', options: [
+        { value: '5: 非常に良好' }, { value: '4: 良好' }, { value: '3: 普通' }, { value: '2: 少し悪い' }, { value: '1: 悪い' }
       ] },
       { text: '働きやすさを10点満点で評価すると？', type: 'radio', options: [
         { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
@@ -428,12 +441,12 @@ const templates = {
     title: '【イベント参加者アンケート】ご意見ください',
     description: '本イベントにご参加いただきありがとうございました。今後の運営の参考とさせていただきます。',
     questions: [
-      { text: 'イベントの満足度を教えてください。', type: 'radio', options: [
-        { value: '大変満足' }, { value: '満足' }, { value: '普通' }, { value: 'やや不満' }, { value: '不満' }
+      { text: 'イベントの総合満足度', type: '5-point', options: [
+        { value: '5: 大変満足' }, { value: '4: 満足' }, { value: '3: 普通' }, { value: '2: やや不満' }, { value: '1: 不満' }
       ] },
       { text: '最も印象に残ったプログラムは何ですか？', type: 'text', options: [] },
-      { text: 'スタッフの対応はいかがでしたか？', type: 'radio', options: [
-        { value: 'とても良かった' }, { value: '普通' }, { value: '悪かった' }
+      { text: 'スタッフの対応はいかがでしたか？', type: '5-point', options: [
+        { value: '5: とても良かった' }, { value: '4: 良かった' }, { value: '3: 普通' }, { value: '2: 少し悪かった' }, { value: '1: 悪かった' }
       ] },
       { text: '会場やオンライン配信の環境について感想を教えてください。', type: 'text', options: [] },
       { text: '今後どのようなテーマで開催してほしいですか？', type: 'text', options: [] },
@@ -461,8 +474,8 @@ const templates = {
     title: '【社内コミュニケーション調査】風通しはどう？',
     description: 'チームワークや人間関係に関する実態を把握し、改善につなげるための調査です。',
     questions: [
-      { text: '部署内での情報共有は十分にできていますか？', type: 'radio', options: [
-        { value: 'とてもできている' }, { value: 'ある程度できている' }, { value: 'あまりできていない' }
+      { text: '部署内の情報共有の満足度', type: '5-point', options: [
+        { value: '5: とてもできている' }, { value: '4: ある程度できている' }, { value: '3: 普通' }, { value: '2: あまりできていない' }, { value: '1: 全くできていない' }
       ] },
       { text: '部署外との連携に問題を感じますか？', type: 'radio', options: [
         { value: '問題なし' }, { value: '少しある' }, { value: 'かなりある' }
@@ -561,8 +574,8 @@ const templates = {
         { value: 'RPG' }, { value: 'FPS/TPS' }, { value: 'シミュレーション' }, { value: 'パズル' }, { value: 'アドベンチャー' }
       ] },
       { text: '最近ハマったゲームタイトルは？', type: 'text', options: [] },
-      { text: 'プレイスタイルは？', type: 'radio', options: [
-        { value: 'じっくり派' }, { value: 'スピード重視' }, { value: '効率厨' }, { value: '雰囲気派' }
+      { text: 'あなたのゲーム熱度は？', type: '5-point', options: [
+        { value: '5: 毎日プレイ' }, { value: '4: 週に数回' }, { value: '3: たまに' }, { value: '2: ほとんどしない' }, { value: '1: 全くしない' }
       ] },
       { text: 'どのプラットフォームで遊びますか？', type: 'checkbox', options: [
         { value: 'PC' }, { value: 'PS5/PS4' }, { value: 'Switch' }, { value: 'スマホ' }, { value: 'その他' }
@@ -572,14 +585,50 @@ const templates = {
     ],
     resultRestricted: false,
     anonymous: true
-  }
+  },
 
+  funMusicVibes: {
+    title: '【音楽の好み】あなたのプレイリスト見せて！',
+    description: '気分を上げる曲から、一人で聴く曲まで、あなたの音楽の好みを知りたい！',
+    questions: [
+      { text: '最近よく聴くアーティストは？', type: 'text', options: [] },
+      { text: 'よく聴く音楽ジャンルは？', type: 'checkbox', options: [
+        { value: 'J-POP' }, { value: 'K-POP' }, { value: '洋楽' }, { value: 'ロック' }, { value: 'クラシック' }
+      ] },
+      { text: '好きな曲の雰囲気を5段階で表すと？', type: '5-point', options: [
+        { value: '5: アップテンポで元気が出る' }, { value: '4: リラックスできるミディアムテンポ' }, { value: '3: 普通' }, { value: '2: しっとりしたバラード' }, { value: '1: 激しいロック・メタル' }
+      ] },
+      { text: 'カラオケの十八番は？', type: 'text', options: [] },
+      { text: 'おすすめのプレイリストがあれば教えて！', type: 'text', options: [] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
+  bizProjectReview: {
+    title: '【プロジェクト振り返り】次への改善点を探る',
+    description: '今回のプロジェクトについて、みんなで率直に振り返りましょう。',
+    questions: [
+      { text: '今回のプロジェクトの成功度', type: '5-point', options: [
+        { value: '5: 大成功' }, { value: '4: 成功' }, { value: '3: どちらとも言えない' }, { value: '2: やや失敗' }, { value: '1: 失敗' }
+      ] },
+      { text: 'プロジェクトの目標は明確でしたか？', type: '5-point', options: [
+        { value: '5: とても明確だった' }, { value: '4: 明確だった' }, { value: '3: 普通' }, { value: '2: あまり明確ではなかった' }, { value: '1: 全く明確ではなかった' }
+      ] },
+      { text: 'チームワークは良好でしたか？', type: '5-point', options: [
+        { value: '5: 非常に良好' }, { value: '4: 良好' }, { value: '3: 普通' }, { value: '2: 少し問題があった' }, { value: '1: かなり問題があった' }
+      ] },
+      { text: 'よかった点・うまくいった点を教えてください。', type: 'text', options: [] },
+      { text: '改善すべき点・反省点を教えてください。', type: 'text', options: [] }
+    ],
+    resultRestricted: true,
+    anonymous: false
+  }
 };
 
 const handleTemplateSelect = async (event) => {
   const selectedValue = event.target.value;
   if (!selectedValue) {
-    // 「テンプレートを選択してください」が選ばれた場合は何もしない
     return;
   }
   const template = JSON.parse(selectedValue);
@@ -620,6 +669,7 @@ const resetToDefault = async () => {
     survey.value = getDefaultSurvey();
     formSubmitted.value = false;
     creatorNameError.value = false;
+    selectedTemplateValue.value = '';
 
     await nextTick();
     if (titleInput.value) {
@@ -661,14 +711,14 @@ const hasDuplicateQuestions = computed(() => {
 });
 
 const hasDuplicateOptions = (question) => {
-  if (question.type === 'text' || question.type === 'date') return false;
+  if (question.type === 'text' || question.type === 'date' || question.type === '5-point') return false;
   const optionValues = question.options.map(o => o.value.trim()).filter(Boolean);
   const uniqueOptionValues = new Set(optionValues);
   return optionValues.length !== uniqueOptionValues.size;
 };
 
 const isOptionDuplicate = (question, optionIndex) => {
-  if (question.type === 'text' || question.type === 'date') return false;
+  if (question.type === 'text' || question.type === 'date' || question.type === '5-point') return false;
   const currentOptionValue = question.options[optionIndex].value.trim();
   if (!currentOptionValue) return false;
 
@@ -718,7 +768,7 @@ watch(
           question.options.push({ value: '' });
         }
       }
-      if ((question.type === 'text' || question.type === 'date') && question.options.length > 0) {
+      if ((question.type === 'text' || question.type === 'date' || question.type === '5-point') && question.options.length > 0) {
         question.options = [];
       }
     });

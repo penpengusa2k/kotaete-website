@@ -15,11 +15,26 @@
           これまでに作成されたKOTAETEの数: <strong class="text-gray-400 text-xl sm:text-2xl">---</strong> 件
         </p>
       </div>
-      <div class="mt-4 sm:mt-6 text-center">
-        <NuxtLink to="/create" class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 animate-subtle-bounce custom-button-width">
-          <span class="material-icons-outlined mr-2">add_circle_outline</span>
-          さっそくKOTAETEを試してみる
-        </NuxtLink>
+    </div>
+
+    <!-- Sample Survey Runner Section -->
+    <div class="mt-10 sm:mt-16 text-center animate-section-fade-in">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">まずは試してみよう</h2>
+      <div class="max-w-2xl mx-auto">
+        <SampleSurveyRunner />
+      </div>
+    </div>
+
+    <!-- Template Questions Section -->
+    <div class="mt-10 sm:mt-16 animate-section-fade-in">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">テンプレートから作成</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <TemplateQuestionCard
+          v-for="template in templates"
+          :key="template.id"
+          :template="template"
+          @create="handleCreateFromTemplate"
+        />
       </div>
     </div>
 
@@ -44,6 +59,14 @@
       </div>
     </div>
 
+    <!-- Moved and modified create link -->
+    <div class="mt-10 sm:mt-16 text-center">
+        <NuxtLink to="/create" class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 animate-subtle-bounce custom-button-width">
+          <span class="material-icons-outlined mr-2">add_circle_outline</span>
+          自分でも作ってみよう
+        </NuxtLink>
+    </div>
+
     <div class="mt-10 sm:mt-16 text-center animate-section-fade-in delay-spread-section">
       <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">KOTAETEを広めて応援しよう！</h2>
       <p class="text-lg sm:text-xl text-gray-600 mb-8">
@@ -59,13 +82,13 @@
         </a>
         <a :href="`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(siteUrl)}&text=${encodeURIComponent(shareText)}`" target="_blank" class="p-5 bg-white rounded-lg shadow-md flex flex-col items-center justify-center hover:shadow-lg transition-all duration-300 animate-share-card-fade-in delay-share-2">
           <svg class="w-10 h-10 mb-2 text-green-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M12.0007 2.00067C6.48667 2.00067 2.00067 6.48667 2.00067 12.0007C2.00067 17.5147 6.48667 22.0007 12.0007 22.0007C17.5147 22.0007 22.0007 17.5147 22.0007 12.0007C22.0007 6.48667 17.5147 2.00067 12.0007 2.00067ZM16.2733 16.0355C15.8202 16.5912 14.8817 17.1147 13.0694 17.1147C10.749 17.1147 8.97495 15.6593 8.97495 13.2384C8.97495 10.8358 10.7061 9.42398 13.0456 9.42398C14.0044 9.42398 14.7571 9.77884 15.3409 10.282C15.5492 9.0792 15.8428 7.97011 15.8428 7.97011L14.7562 7.97011C14.7562 7.97011 13.7548 8.01956 12.9157 8.01956C10.2731 8.01956 8.52809 9.94303 8.52809 12.8252C8.52809 15.7073 10.284 17.6308 12.9266 17.6308C14.4691 17.6308 15.7297 16.7469 16.5936 15.8252C16.9238 15.4851 17.1472 15.0622 17.2882 14.6548H16.2733V16.0355Z"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12.0007 2.00067C6.48667 2.00067 2.00067 6.48667 2.00067 12.0007C2.00067 17.5147 6.48667 22.0007 12.0007 22.0007C17.5147 22.0007 22.0007 17.5147 22.0007 12.0007C22.0007 6.48667 17.5147 2.00067 12.0007 2.00067ZM16.2733 16.0355C15.8202 16.5912 14.8817 17.1147 13.0694 17.1147C10.749 17.1147 8.97495 15.6593 8.97495 13.2384C8.97495 10.8358 10.7061 9.42398 13.0456 9.42398C14.0044 9.42398 14.7571 9.77884 15.3409 10.282C15.5492 9.0792 15.8428 7.97011 15.8428 7.97011L14.7562 7.97011C14.7562 7.97011 13.7548 8.01956 12.9157 8.01956C10.2731 8.01956 8.52809 9.94303 8.52809 12.8252C8.52809 15.7073 10.284 17.6308 12.9266 17.6308C14.4691 17.6308 15.7297 16.7469 16.5936 15.8252C16.9238 15.4851 17.1472 15.0622 17.2882 14.6548H16.2733V16.0355Z"></path>
           </svg>
           <span class="text-lg font-semibold text-gray-900">LINEでシェア</span>
         </a>
         <a :href="`https://www.threads.net/intent/post?text=${encodeURIComponent(shareText)}`" target="_blank" class="p-5 bg-white rounded-lg shadow-md flex flex-col items-center justify-center hover:shadow-lg transition-all duration-300 animate-share-card-fade-in delay-share-3">
           <svg class="w-10 h-10 mb-2 text-purple-600" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2C6.477 2 2 6.477 2 12c0 3.09 1.407 5.862 3.636 7.758l.364.305c.393.33.884.517 1.4.517.547 0 1.077-.2 1.49-.56l1.42-1.243c.347-.304.78-.465 1.23-.465h.9c.665 0 1.304.263 1.77.73l1.16 1.16c.453.452 1.1.707 1.77.707.513 0 1.007-.17 1.41-.48l.347-.287C20.582 17.837 22 15.073 22 12c0-5.523-4.477-10-10-10z"/>
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 3.09 1.407 5.862 3.636 7.758l.364.305c.393.33.884.517 1.4.517.547 0 1.077-.2 1.49-.56l1.42-1.243c.347-.304.78-.465 1.23-.465h.9c.665 0 1.304.263 1.77.73l1.16 1.16c.453.452 1.1.707 1.77.707.513 0 1.007-.17 1.41-.48l.347-.287C20.582 17.837 22 15.073 22 12c0-5.523-4.477-10-10-10z"></path>
           </svg>
           <span class="text-lg font-semibold text-gray-900">Threadsでシェア</span>
         </a>
@@ -76,6 +99,9 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+// import { templates } from '@/lib/templates';
+import SampleSurveyRunner from '@/components/SampleSurveyRunner.vue';
+import TemplateQuestionCard from '@/components/TemplateQuestionCard.vue';
 
 const totalCreatedCount = ref(null);
 const loadingCount = ref(true); // ローディング状態を管理
@@ -117,6 +143,10 @@ const fetchTotalCreatedCount = async () => {
       loadingCount.value = false;
     }, 100);
   }
+};
+
+const handleCreateFromTemplate = (templateId) => {
+  navigateTo({ path: '/create', query: { template: templateId } });
 };
 
 onMounted(() => {

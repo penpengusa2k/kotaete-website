@@ -12,13 +12,16 @@
   "dependencies": {
     "@nuxtjs/google-adsense": "^3.0.0",
     "@pinia/nuxt": "^0.11.2",
+    "chart.js": "^4.4.3",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "confetti-js": "^0.0.18",
     "nuxt": "^3.17.5",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.4.1",
     "sharp": "^0.34.3",
     "text-to-svg": "^3.1.5",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "vue-chartjs": "^5.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
