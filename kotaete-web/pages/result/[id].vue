@@ -61,8 +61,18 @@
 
           <div v-if="question.type === 'text' || question.type === 'date'">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <div v-for="(answer, aIndex) in getAnswersForQuestion(index)" :key="aIndex" class="bg-blue-50 p-3 rounded-lg border border-blue-200 shadow-sm">
-                <p class="text-gray-800">{{ answer.text }}</p>
+              <div v-for="(answer, aIndex) in getAnswersForQuestion(index)" :key="aIndex" class="bg-blue-50 p-3 rounded-lg border border-blue-200 shadow-sm flex flex-col">
+                <div class="flex-grow">
+                  <p v-if="!isLongText(answer.text) || isAnswerExpanded(index, aIndex)" class="text-gray-800 whitespace-pre-wrap break-words">
+                    {{ answer.text }}
+                  </p>
+                  <p v-else class="text-gray-800 whitespace-pre-wrap break-words">
+                    {{ truncateText(answer.text, 100) }}
+                  </p>
+                </div>
+                <button v-if="isLongText(answer.text)" @click="toggleAnswer(index, aIndex)" class="text-sm text-primary hover:underline self-start mt-2 font-semibold">
+                  {{ isAnswerExpanded(index, aIndex) ? '閉じる' : '続きを読む' }}
+                </button>
                 <p class="text-xs text-gray-500 mt-2 text-right">
                   <span v-if="surveyData.anonymous">匿名ユーザー {{ answer.respondentIdShort }}</span>
                   <span v-else>{{ answer.username }}</span>
@@ -201,6 +211,20 @@ const submittingKey = ref(false);
 const likeCount = ref(0);
 const liked = ref(false);
 const isNavigating = ref(false);
+const expandedAnswers = ref({}); // { 'questionIndex-answerIndex': true/false }
+
+const isLongText = (text) => {
+  return typeof text === 'string' && text.length > 100;
+};
+
+const isAnswerExpanded = (questionIndex, answerIndex) => {
+  return !!expandedAnswers.value[`${questionIndex}-${answerIndex}`];
+};
+
+const toggleAnswer = (questionIndex, answerIndex) => {
+  const key = `${questionIndex}-${answerIndex}`;
+  expandedAnswers.value[key] = !expandedAnswers.value[key];
+};
 
 const hasUserAnswered = computed(() => {
   if (process.client) {
@@ -656,13 +680,14 @@ onMounted(async () => {
   await fetchSurveyAndResults(viewingKey);
 });
 
-onUpdated(() => {
+// surveyData または results が変更されたときにグラフを再描画
+watch([surveyData, results], () => {
   if (surveyData.value && hasAccess.value && surveyData.value.questions.some(q => ['5-point', 'radio', 'checkbox'].includes(q.type))) {
     nextTick(() => {
       renderCharts();
     });
   }
-});
+}, { deep: true }); // deep: true はオブジェクトのネストされた変更も監視するため
 
 onBeforeUnmount(() => {
   if (customTooltipEl && customTooltipEl.parentNode) {
