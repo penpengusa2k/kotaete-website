@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-4xl font-extrabold text-center text-blue-700 mb-8">よくある質問 (FAQ)</h1>
+    <h1 class="text-4xl font-extrabold text-center text-blue-500 mb-8">よくある質問 (FAQ)</h1>
 
     <div class="space-y-8 text-gray-800">
       <section class="bg-white p-6 sm:p-8 rounded-xl shadow-md border border-gray-100">

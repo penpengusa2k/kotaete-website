@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
     await unlink(tempFontPath); // 読み込んだら削除（クリーンアップ）
 
     const targetWidth = 1200;
-    const targetHeight = 600;
+    const targetHeight = 630;
     const fontSize = 40;
     const textYOffset = 20; // 折り返しによるずれを考慮して調整
     const startX = targetWidth * 0.22; // 左マージンを22%に設定 (折り返し計算用)
@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
     const svgPngBuffer = await sharp(Buffer.from(fullSvg)).png().toBuffer();
 
     const outputBuffer = await image
-      .resize(targetWidth, targetHeight, { fit: 'contain' })
+      .resize(targetWidth, targetHeight, { fit: 'cover' })
       .composite([{ input: svgPngBuffer, top: 0, left: 0 }])
       .jpeg({ quality: 90 })
       .toBuffer();

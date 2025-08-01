@@ -86,6 +86,7 @@
           <li><span class="font-bold text-gray-900">質問数:</span> 最大50個</li>
           <li><span class="font-bold text-gray-900">選択肢の数:</span> 1質問につき最大10個</li>
           <li><span class="font-bold text-gray-900">選択肢の値:</span> 500文字まで</li>
+          <li><span class="font-bold text-gray-900">内容の適正:</span> 公序良俗に反する内容、他者を誹謗中傷する内容、個人情報を含む内容など、不適当と判断されたアンケートは、予告なく削除される場合があります。</li>
           <li><span class="font-bold text-gray-900">アンケートの保存期間:</span> 回答期限から60日経過したアンケートは、その結果を含め自動的にシステムから削除されます。削除されたアンケートは復元できません。</li>
         </ul>
         <h3 class="text-xl font-medium mt-6 mb-2 flex items-center"><span class="material-icons-outlined text-red-600 mr-2">mail</span>お問い合わせフォームの制約</h3>

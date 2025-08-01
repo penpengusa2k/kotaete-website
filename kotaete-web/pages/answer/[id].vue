@@ -133,6 +133,26 @@
             <p v-if="formSubmitted && validationErrors[index]" class="text-red-500 text-xs italic mt-1">{{ validationErrors[index] }}</p>
           </div>
 
+          <div v-if="question.type === '5-point'" class="mt-2">
+            <div class="flex justify-around p-2 rounded" :class="{'border border-red-500': formSubmitted && validationErrors[index]}">
+              <button
+                v-for="n in 5"
+                :key="n"
+                type="button"
+                @click="responses[index] = n; formSubmitted && validateForm()"
+                :class="{
+                  'bg-blue-500 text-white': responses[index] === n,
+                  'bg-gray-200 text-gray-700': responses[index] !== n,
+                }"
+                class="p-2 rounded-full w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                :disabled="loading"
+              >
+                {{ n }}
+              </button>
+            </div>
+            <p v-if="formSubmitted && validationErrors[index]" class="text-red-500 text-xs italic mt-1">{{ validationErrors[index] }}</p>
+          </div>
+
           <div v-if="question.type === 'checkbox'" class="mt-2 space-y-2">
             <div v-for="(option, oIndex) in question.options" :key="oIndex" class="flex items-center">
               <label class="inline-flex items-center cursor-pointer text-gray-700">
@@ -223,7 +243,7 @@ if (fetchError.value) {
 
 survey.value = surveyData.value;
 if (survey.value) {
-  responses.value = survey.value.questions.map(q => (q.type === 'checkbox' ? [] : ''));
+  responses.value = survey.value.questions.map(q => (q.type === 'checkbox' ? [] : null));
 }
 loading.value = pending.value;
 error.value = fetchError.value?.message || '';
@@ -320,7 +340,8 @@ const validateForm = () => {
         }
         break;
       case 'radio':
-        if (!responseValue || responseValue === '') {
+      case '5-point':
+        if (responseValue === null || responseValue === '') {
           errors[index] = 'いずれかの選択肢を選んでください。';
         }
         break;

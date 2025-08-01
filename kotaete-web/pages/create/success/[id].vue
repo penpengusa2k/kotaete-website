@@ -143,10 +143,9 @@ onMounted(() => {
     const confetti = new ConfettiGenerator(confettiSettings);
     confetti.render();
 
-    // Stop confetti after 5 seconds
-    // setTimeout(() => {
-    //   confetti.clear();
-    // }, 5000);
+    setTimeout(() => {
+      confetti.clear();
+    }, 5000);
   });
 });
 

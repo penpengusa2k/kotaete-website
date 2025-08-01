@@ -12,31 +12,35 @@
           テンプレートから作成（任意）
         </h3>
         <p class="text-sm mb-3">バズ狙い？実用性重視？目的別テンプレートでサクッと作成！</p>
-        <select @change="handleTemplateSelect" class="appearance-none border border-blue-light rounded-lg w-full py-2 px-3 text-blue-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-blue-dark focus:border-transparent transition-all duration-200 shadow-sm">
+        <select 
+          v-model="selectedTemplateValue"
+          @change="handleTemplateSelect" 
+          class="appearance-none border border-blue-light rounded-lg w-full py-2 px-3 text-blue-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-blue-dark focus:border-transparent transition-all duration-200 shadow-sm"
+        >
           <option value="">テンプレートを選ぶ</option>
           <optgroup label="SNS向けテンプレート">
-            <option :value="JSON.stringify(templates.snsFunnyPersonality)">SNS: 性格バレアンケート</option>
-            <option :value="JSON.stringify(templates.snsCrushCheck)">SNS: 気になる人に聞いてみた</option>
-            <option :value="JSON.stringify(templates.snsRatingMe)">SNS: 私って何点？</option>
-            <option :value="JSON.stringify(templates.snsSelfIntro)">SNS: 自己紹介リレー</option>
-            <option :value="JSON.stringify(templates.snsWhoAmI)">SNS: 私ってどんな人診断</option>
-            <option :value="JSON.stringify(templates.snsFriendshipTest)">SNS: 友情度チェック</option>
-            <option :value="JSON.stringify(templates.snsComplimentBox)">SNS: 褒めてボックス</option>
-            <option :value="JSON.stringify(templates.snsDareMe)">SNS: やってほしいこと募集</option>
+            <option :value="templates.snsFunnyPersonality.id">SNS: 性格バレアンケート</option>
+            <option :value="templates.snsCrushCheck.id">SNS: 気になる人に聞いてみた</option>
+            <option :value="templates.snsRatingMe.id">SNS: 私って何点？</option>
+            <option :value="templates.snsSelfIntro.id">SNS: 自己紹介リレー</option>
+            <option :value="templates.snsWhoAmI.id">SNS: 私ってどんな人診断</option>
+            <option :value="templates.snsFriendshipTest.id">SNS: 友情度チェック</option>
+            <option :value="templates.snsComplimentBox.id">SNS: 褒めてボックス</option>
+            <option :value="templates.snsDareMe.id">SNS: やってほしいこと募集</option>
           </optgroup>
           <optgroup label="業務用テンプレート">
-            <option :value="JSON.stringify(templates.bizCustomer)">業務用: 顧客満足度</option>
-            <option :value="JSON.stringify(templates.bizEmployee)">業務用: 従業員アンケート</option>
-            <option :value="JSON.stringify(templates.bizEventFeedback)">業務用: イベント満足度</option>
-            <option :value="JSON.stringify(templates.bizServiceImprovement)">業務用: 改善提案募集</option>
-            <option :value="JSON.stringify(templates.bizInternalComms)">業務用: 社内コミュニケーション調査</option>
+            <option :value="templates.bizCustomer.id">業務用: 顧客満足度</option>
+            <option :value="templates.bizEmployee.id">業務用: 従業員アンケート</option>
+            <option :value="templates.bizEventFeedback.id">業務用: イベント満足度</option>
+            <option :value="templates.bizServiceImprovement.id">業務用: 改善提案募集</option>
+            <option :value="templates.bizInternalComms.id">業務用: 社内コミュニケーション調査</option>
           </optgroup>
           <optgroup label="日常・趣味系テンプレート">
-            <option :value="JSON.stringify(templates.funAnimeRanking)">日常: 好きなアニメランキング</option>
-            <option :value="JSON.stringify(templates.funLunchVote)">日常: 今日のランチ決め</option>
-            <option :value="JSON.stringify(templates.funTravelSurvey)">日常: 旅行の好みアンケート</option>
-            <option :value="JSON.stringify(templates.funPetSurvey)">日常: ペットについて教えて</option>
-            <option :value="JSON.stringify(templates.funGamePrefs)">日常: ゲームの好み診断</option>
+            <option :value="templates.funAnimeRanking.id">日常: 好きなアニメランキング</option>
+            <option :value="templates.funLunchVote.id">日常: 今日のランチ決め</option>
+            <option :value="templates.funTravelSurvey.id">日常: 旅行の好みアンケート</option>
+            <option :value="templates.funPetSurvey.id">日常: ペットについて教えて</option>
+            <option :value="templates.funGamePrefs.id">日常: ゲームの好み診断</option>
           </optgroup>
         </select>
       </div>
@@ -91,6 +95,7 @@
             <option value="text">記述式</option>
             <option value="radio">ラジオボタン</option>
             <option value="checkbox">チェックボックス</option>
+            <option value="5-point">5段階評価</option>
             <option value="date">日付</option>
           </select>
         </div>
@@ -124,20 +129,26 @@
         <label class="block text-gray-700 font-bold mb-2">結果の閲覧制限
           <span class="relative group">
             <span class="ml-1 text-gray-500 cursor-pointer material-icons-outlined text-base align-middle">info</span>
-            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果の閲覧に制限をかけるかを設定します。制限する場合、閲覧キーの入力が必須となります。</span>
+            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果の閲覧に制限をかけるかを設定します。制限する場合、閲覧キーの入力が必須となり、ランキングの集計対象から除外されます。</span>
           </span>
         </label>
         <select v-model="survey.resultRestricted" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" @keydown.enter.prevent="focusNextInput">
           <option :value="false">制限しない（公開）</option>
           <option :value="true">制限する（閲覧キー必須）</option>
         </select>
+        <p v-if="survey.resultRestricted" class="text-sm text-orange-600 mt-2 p-2 bg-orange-50 border border-orange-200 rounded-md">
+          ※ 結果を閲覧制限すると、このKOTAETEはランキングの集計対象から除外されます。
+        </p>
+        <p v-else class="text-sm text-green-600 mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+          ※ 結果を公開すると、このKOTAETEはランキングの集計対象になります。
+        </p>
       </div>
 
       <div v-if="survey.resultRestricted" class="mb-4">
         <label for="viewingKey" class="block text-gray-700 font-bold mb-2">結果閲覧キー <span class="text-red-500">*</span>
           <span class="relative group">
             <span class="ml-1 text-gray-500 cursor-pointer material-icons-outlined text-base align-middle">info</span>
-            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果を閲覧するためのパスワードです。結果の閲覧を制限する場合に必須となります。</span>
+            <span class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-700 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-xs text-center">KOTAETE結果を閲覧するためのパスワードです。結果の閲覧を制限する場合に必須となり、ランキングの集計対象から除外されます。</span>
           </span>
         </label>
         <input type="text" id="viewingKey" v-model="survey.viewingKey" class="appearance-none border border-neutral-light rounded-lg w-full py-2 px-3 text-neutral-darkest leading-tight focus:outline-none focus:ring-2 focus:ring-primary-dark focus:border-transparent transition-all duration-200 shadow-sm" required :maxlength="MAX_VIEWING_KEY_LENGTH" @keydown.enter.prevent="focusNextInput">
@@ -192,11 +203,15 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useCreateStore } from '~/stores/create'
+import { templates } from '~/lib/templates' // テンプレートデータをインポート
 
 const createStore = useCreateStore()
 const router = useRouter()
+const route = useRoute() // useRoute を追加
+
+console.log('Templates object in create page:', templates); // DEBUG: テンプレートオブジェクトの確認
 
 // --- 定数定義 ---
 const MAX_TITLE_LENGTH = 50;
@@ -242,352 +257,27 @@ const creatorNameError = ref(false);
 const titleInput = ref(null);
 const deadlineInput = ref(null);
 
+const selectedTemplateValue = ref('');
+
 // --- テンプレートデータ ---
-const templates = {
-  snsFunnyPersonality: {
-    title: '【ぶっちゃけ教えて】私ってどんな人？',
-    description: 'あなたが思う私の印象やキャラを匿名で教えてください！',
-    questions: [
-      { text: '私の第一印象は？', type: 'text', options: [] },
-      { text: '正直、私の性格を一言でいうと？', type: 'text', options: [] },
-      { text: '私を動物に例えると？', type: 'text', options: [] },
-      { text: '一番似合うと思う職業は？', type: 'text', options: [] },
-      { text: '私の口癖、何か思い出せる？', type: 'text', options: [] },
-      { text: '私って友達に紹介したいタイプ？', type: 'radio', options: [
-        { value: 'ぜひ紹介したい' }, { value: '場合によるかも' }, { value: 'ちょっと無理かも' }
-      ] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  snsCrushCheck: {
-    title: '【匿名で回答】気になる人に聞いてみた！',
-    description: 'ちょっとドキドキ…気になるあの人のホンネ、聞いてみませんか？',
-    questions: [
-      { text: '私って恋愛対象になりますか？', type: 'radio', options: [
-        { value: 'なる' }, { value: 'ならない' }, { value: '迷う' }
-      ] },
-      { text: '付き合ったら楽しそう？', type: 'radio', options: [
-        { value: 'めっちゃ楽しそう' }, { value: '普通かな' }, { value: '不安かも' }
-      ] },
-      { text: '第一印象のスコア（100点満点中）', type: 'radio', options: [
-        { value: '90〜100' }, { value: '70〜89' }, { value: '50〜69' }, { value: 'それ以下' }
-      ] },
-      { text: '正直、今の印象は？', type: 'text', options: [] },
-      { text: 'どんなところが魅力的？', type: 'text', options: [] },
-      { text: '逆にちょっと気になるところは？', type: 'text', options: [] }
-    ],
-    resultRestricted: true,
-    anonymous: true
-  },
-
-  snsRatingMe: {
-    title: '【匿名評価】私って何点？',
-    description: '見た目？性格？人間力？あなたからの点数をこっそり知りたい！',
-    questions: [
-      { text: '私の総合点は？', type: 'radio', options: [
-        { value: '100点満点' }, { value: '80点くらい' }, { value: '50点以下' }
-      ] },
-      { text: '見た目の評価（10点満点）', type: 'radio', options: [
-        { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
-      ] },
-      { text: '性格の評価（10点満点）', type: 'radio', options: [
-        { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
-      ] },
-      { text: '良いと思う点は？', type: 'text', options: [] },
-      { text: '直した方がいい点があれば教えてください', type: 'text', options: [] },
-      { text: '総合コメントお願いします！', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  snsSelfIntro: {
-    title: '【自己紹介リレー】あなたの〇〇を教えて！',
-    description: 'あなたの好きなものや、最近ハマっていることを教えてください！',
-    questions: [
-      { text: '好きな食べ物は？', type: 'text', options: [] },
-      { text: '最近ハマってることは？', type: 'text', options: [] },
-      { text: '休日の過ごし方は？', type: 'text', options: [] },
-      { text: '自分を一言で表すと？', type: 'text', options: [] },
-      { text: '好きな音楽・アーティストは？', type: 'text', options: [] },
-      { text: '今年の目標を教えてください！', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  snsWhoAmI: {
-    title: '【私ってどんな人？】本音で答えて！',
-    description: '匿名だからこそ聞けるホンネ！私の印象教えて！',
-    questions: [
-      { text: '私を色で表すと？', type: 'text', options: [] },
-      { text: '私に足りないものは？', type: 'text', options: [] },
-      { text: '逆に、良いところも！', type: 'text', options: [] },
-      { text: '私の特徴を一言で表すと？', type: 'text', options: [] },
-      { text: '私ってどんな場面で輝いてると思う？', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  snsFriendshipTest: {
-    title: '【友情度チェック】私たちどれくらい仲良し？',
-    description: '友達って言える？あなたの本音を教えてください！',
-    questions: [
-      { text: '初対面の印象は？', type: 'text', options: [] },
-      { text: '一緒にいて楽しいと感じる？', type: 'radio', options: [
-        { value: 'とても楽しい' }, { value: 'まあまあ' }, { value: '微妙かも' }
-      ] },
-      { text: '連絡頻度はどのくらい？', type: 'radio', options: [
-        { value: '毎日' }, { value: '週に1回' }, { value: '月1回以下' }
-      ] },
-      { text: '喧嘩したら仲直りできそう？', type: 'radio', options: [
-        { value: 'すぐできそう' }, { value: '時間かかりそう' }, { value: '無理かも' }
-      ] },
-      { text: 'もっと仲良くなるには何が必要？', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  snsComplimentBox: {
-    title: '【褒めてボックス】あなたの良いところ教えて！',
-    description: '匿名で褒め合おう！ちょっと嬉しい気分になれるかも？',
-    questions: [
-      { text: 'あなたが思う私の長所は？', type: 'text', options: [] },
-      { text: '一緒にいて安心できるポイントは？', type: 'text', options: [] },
-      { text: '「ありがとう」と言いたいことは？', type: 'text', options: [] },
-      { text: '私の努力を感じた瞬間があれば教えて！', type: 'text', options: [] },
-      { text: '最後に一言メッセージがあればどうぞ！', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  snsDareMe: {
-    title: '【やってみた募集】なにしてほしい？',
-    description: '挑戦してみたいから、アイデア募集します！',
-    questions: [
-      { text: '私にやってほしいことは？', type: 'text', options: [] },
-      { text: 'その理由や背景も教えて！', type: 'text', options: [] },
-      { text: '誰と一緒にやったら面白そう？', type: 'text', options: [] },
-      { text: 'SNSでバズりそうな要素ある？', type: 'text', options: [] },
-      { text: '難易度レベルは？', type: 'radio', options: [
-        { value: '超簡単' }, { value: 'まあまあ' }, { value: 'ガチでキツい' }
-      ] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  bizCustomer: {
-    title: '【顧客満足度調査】サービス品質向上にご協力ください',
-    description: '日頃のご利用ありがとうございます。今後の改善の参考にさせていただきます。',
-    questions: [
-      { text: '当社のサービスに満足していますか？', type: 'radio', options: [
-        { value: '非常に満足' }, { value: '満足' }, { value: '普通' }, { value: '不満' }, { value: '非常に不満' }
-      ] },
-      { text: 'どの点に満足していますか？', type: 'text', options: [] },
-      { text: '改善してほしい点はありますか？', type: 'text', options: [] },
-      { text: 'スタッフの対応についてどう感じましたか？', type: 'radio', options: [
-        { value: 'とても良い' }, { value: '良い' }, { value: '普通' }, { value: '悪い' }
-      ] },
-      { text: '今後どんなサービスを望みますか？', type: 'text', options: [] },
-      { text: 'このサービスを他人に勧めたいですか？', type: 'radio', options: [
-        { value: '強く勧めたい' }, { value: 'まあ勧めたい' }, { value: '勧めない' }
-      ] }
-    ],
-    resultRestricted: true,
-    anonymous: false
-  },
-
-  bizEmployee: {
-    title: '【従業員意識調査】より良い職場環境のために',
-    description: '従業員の声をもとに、職場改善を目指しています。',
-    questions: [
-      { text: '現在の仕事内容に満足していますか？', type: 'radio', options: [
-        { value: '非常に満足' }, { value: '満足' }, { value: '普通' }, { value: '不満' }
-      ] },
-      { text: '上司・同僚との関係性はいかがですか？', type: 'radio', options: [
-        { value: '良好' }, { value: '普通' }, { value: '悪い' }
-      ] },
-      { text: '働きやすさを10点満点で評価すると？', type: 'radio', options: [
-        { value: '10' }, { value: '8〜9' }, { value: '6〜7' }, { value: '5以下' }
-      ] },
-      { text: '福利厚生に対するご意見があればお聞かせください。', type: 'text', options: [] },
-      { text: '改善してほしい点は？', type: 'text', options: [] },
-      { text: '自由にご意見・ご提案をお願いします。', type: 'text', options: [] }
-    ],
-    resultRestricted: true,
-    anonymous: false
-  },
-
-  bizEventFeedback: {
-    title: '【イベント参加者アンケート】ご意見ください',
-    description: '本イベントにご参加いただきありがとうございました。今後の運営の参考とさせていただきます。',
-    questions: [
-      { text: 'イベントの満足度を教えてください。', type: 'radio', options: [
-        { value: '大変満足' }, { value: '満足' }, { value: '普通' }, { value: 'やや不満' }, { value: '不満' }
-      ] },
-      { text: '最も印象に残ったプログラムは何ですか？', type: 'text', options: [] },
-      { text: 'スタッフの対応はいかがでしたか？', type: 'radio', options: [
-        { value: 'とても良かった' }, { value: '普通' }, { value: '悪かった' }
-      ] },
-      { text: '会場やオンライン配信の環境について感想を教えてください。', type: 'text', options: [] },
-      { text: '今後どのようなテーマで開催してほしいですか？', type: 'text', options: [] },
-      { text: 'その他、自由なご意見があればご記入ください。', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  bizServiceImprovement: {
-    title: '【改善提案募集】もっと良くするには？',
-    description: 'サービスや社内制度をより良くするためのご意見を募集しています。',
-    questions: [
-      { text: '現在困っていることがあれば教えてください。', type: 'text', options: [] },
-      { text: 'サービスや業務フローの改善案を自由にご記入ください。', type: 'text', options: [] },
-      { text: '提案する改善案の効果やメリットは何ですか？', type: 'text', options: [] },
-      { text: 'すぐに実行できそうな工夫があれば教えてください。', type: 'text', options: [] },
-      { text: '改善にあたり障害となることがあればご記入ください。', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  bizInternalComms: {
-    title: '【社内コミュニケーション調査】風通しはどう？',
-    description: 'チームワークや人間関係に関する実態を把握し、改善につなげるための調査です。',
-    questions: [
-      { text: '部署内での情報共有は十分にできていますか？', type: 'radio', options: [
-        { value: 'とてもできている' }, { value: 'ある程度できている' }, { value: 'あまりできていない' }
-      ] },
-      { text: '部署外との連携に問題を感じますか？', type: 'radio', options: [
-        { value: '問題なし' }, { value: '少しある' }, { value: 'かなりある' }
-      ] },
-      { text: '対面 or オンライン、どちらが話しやすいですか？', type: 'radio', options: [
-        { value: '対面' }, { value: 'オンライン' }, { value: 'どちらでも変わらない' }
-      ] },
-      { text: 'コミュニケーションの悩みがあれば教えてください。', type: 'text', options: [] },
-      { text: '改善のために会社にできそうな取り組みは？', type: 'text', options: [] }
-    ],
-    resultRestricted: true,
-    anonymous: true
-  },
-
-  funAnimeRanking: {
-    title: '【アニメ好き集合】推し作品TOP3',
-    description: 'アニメ好き同士、推し作品や好みを語ろう！',
-    questions: [
-      { text: '1番好きなアニメ作品は？', type: 'text', options: [] },
-      { text: '2番目に好きなアニメは？', type: 'text', options: [] },
-      { text: '3番目に好きなアニメは？', type: 'text', options: [] },
-      { text: '好きなキャラクターは？', type: 'text', options: [] },
-      { text: '好きなジャンル（複数選択可）', type: 'checkbox', options: [
-        { value: '日常' }, { value: 'バトル' }, { value: '恋愛' }, { value: 'SF' }, { value: 'ギャグ' }
-      ] },
-      { text: 'おすすめしたい隠れた名作は？', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  funLunchVote: {
-    title: '【今日のお昼どうする？】みんなの意見集め！',
-    description: 'ランチ候補を投票形式で決めよう！',
-    questions: [
-      { text: '今日のランチ候補を選んでください', type: 'checkbox', options: [
-        { value: 'ラーメン' }, { value: 'カレー' }, { value: 'パスタ' }, { value: '定食' }, { value: 'コンビニ飯' }
-      ] },
-      { text: 'ランチに求めるポイントは？', type: 'checkbox', options: [
-        { value: '安さ' }, { value: '栄養バランス' }, { value: 'スピード' }, { value: '美味しさ' }
-      ] },
-      { text: 'おすすめのランチ店があれば教えてください', type: 'text', options: [] },
-      { text: '一緒に食べたい人がいますか？（任意）', type: 'text', options: [] },
-      { text: '午後に備えて軽めがいいですか？', type: 'radio', options: [
-        { value: '軽め希望' }, { value: 'がっつり派' }, { value: 'どちらでもOK' }
-      ] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  funTravelSurvey: {
-    title: '【旅行アンケート】行きたい場所は？',
-    description: '次の旅行はどこへ？みんなの好みを教えて！',
-    questions: [
-      { text: '国内or海外どちらに行きたい？', type: 'radio', options: [
-        { value: '国内' }, { value: '海外' }, { value: 'どちらでも' }
-      ] },
-      { text: '行ってみたい具体的な場所は？', type: 'text', options: [] },
-      { text: '旅行の目的は？', type: 'checkbox', options: [
-        { value: '観光' }, { value: 'グルメ' }, { value: '温泉' }, { value: 'アクティビティ' }, { value: '買い物' }
-      ] },
-      { text: '誰と行きたいですか？', type: 'radio', options: [
-        { value: '友達' }, { value: '恋人' }, { value: '家族' }, { value: 'ひとり旅' }
-      ] },
-      { text: '旅行にかけたい予算は？', type: 'radio', options: [
-        { value: '〜1万円' }, { value: '1〜3万円' }, { value: '3〜5万円' }, { value: '5万円以上' }
-      ] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  funPetSurvey: {
-    title: '【ペット好きアンケート】あなたの推しペットは？',
-    description: '動物好きなら答えてね！飼ってる人も飼ってない人も歓迎！',
-    questions: [
-      { text: '現在飼っているペットは？', type: 'checkbox', options: [
-        { value: '犬' }, { value: '猫' }, { value: '鳥' }, { value: '爬虫類' }, { value: 'その他' }
-      ] },
-      { text: 'その子の名前（またはあだ名）', type: 'text', options: [] },
-      { text: 'ペットにどんな性格がありますか？', type: 'text', options: [] },
-      { text: 'いつ頃から飼っていますか？', type: 'text', options: [] },
-      { text: '動物に癒される瞬間はどんなとき？', type: 'text', options: [] },
-      { text: '飼っていない人：飼ってみたい動物は？', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  },
-
-  funGamePrefs: {
-    title: '【ゲーム診断】あなたのゲームタイプは？',
-    description: 'ゲーマーの皆さんの好みや傾向を大調査！',
-    questions: [
-      { text: '好きなジャンル（複数選択可）', type: 'checkbox', options: [
-        { value: 'RPG' }, { value: 'FPS/TPS' }, { value: 'シミュレーション' }, { value: 'パズル' }, { value: 'アドベンチャー' }
-      ] },
-      { text: '最近ハマったゲームタイトルは？', type: 'text', options: [] },
-      { text: 'プレイスタイルは？', type: 'radio', options: [
-        { value: 'じっくり派' }, { value: 'スピード重視' }, { value: '効率厨' }, { value: '雰囲気派' }
-      ] },
-      { text: 'どのプラットフォームで遊びますか？', type: 'checkbox', options: [
-        { value: 'PC' }, { value: 'PS5/PS4' }, { value: 'Switch' }, { value: 'スマホ' }, { value: 'その他' }
-      ] },
-      { text: 'ゲームで得意なこと or 苦手なことがあれば教えてください', type: 'text', options: [] },
-      { text: '理想のゲームとは？', type: 'text', options: [] }
-    ],
-    resultRestricted: false,
-    anonymous: true
-  }
-
-};
+// templates オブジェクトは lib/templates.js からインポートされるため、ここでは定義しない
 
 const handleTemplateSelect = async (event) => {
-  const selectedValue = event.target.value;
-  if (!selectedValue) {
-    // 「テンプレートを選択してください」が選ばれた場合は何もしない
+  const selectedId = event.target.value;
+  console.log('Selected template ID from dropdown:', selectedId); // DEBUG: プルダウン選択値の確認
+  if (!selectedId) {
     return;
   }
-  const template = JSON.parse(selectedValue);
-  await setTemplate(template);
+  // templates オブジェクトから直接テンプレートを取得
+  const template = Object.values(templates).find(t => t.id === selectedId);
+  console.log('Found template from dropdown:', template); // DEBUG: テンプレート検索結果の確認
+  if (template) {
+    await setTemplate(template);
+  }
 };
 
 const setTemplate = async (template) => {
-  survey.value = getDefaultSurvey(); // まずデフォルトに戻してからテンプレートを適用
+  // survey.value = getDefaultSurvey(); // ここを削除
 
   survey.value.title = template.title;
   survey.value.description = template.description;
@@ -620,6 +310,7 @@ const resetToDefault = async () => {
     survey.value = getDefaultSurvey();
     formSubmitted.value = false;
     creatorNameError.value = false;
+    selectedTemplateValue.value = '';
 
     await nextTick();
     if (titleInput.value) {
@@ -661,14 +352,14 @@ const hasDuplicateQuestions = computed(() => {
 });
 
 const hasDuplicateOptions = (question) => {
-  if (question.type === 'text' || question.type === 'date') return false;
+  if (question.type === 'text' || question.type === 'date' || question.type === '5-point') return false;
   const optionValues = question.options.map(o => o.value.trim()).filter(Boolean);
   const uniqueOptionValues = new Set(optionValues);
   return optionValues.length !== uniqueOptionValues.size;
 };
 
 const isOptionDuplicate = (question, optionIndex) => {
-  if (question.type === 'text' || question.type === 'date') return false;
+  if (question.type === 'text' || question.type === 'date' || question.type === '5-point') return false;
   const currentOptionValue = question.options[optionIndex].value.trim();
   if (!currentOptionValue) return false;
 
@@ -718,7 +409,7 @@ watch(
           question.options.push({ value: '' });
         }
       }
-      if ((question.type === 'text' || question.type === 'date') && question.options.length > 0) {
+      if ((question.type === 'text' || question.type === 'date' || question.type === '5-point') && question.options.length > 0) {
         question.options = [];
       }
     });
@@ -891,6 +582,16 @@ onMounted(() => {
   survey.value = getDefaultSurvey();
   formSubmitted.value = false;
   creatorNameError.value = false;
+
+  // クエリパラメータにテンプレートIDがあれば適用
+  const templateId = route.query.template;
+  if (templateId) {
+    const foundTemplate = Object.values(templates).find(t => t.id === templateId);
+    if (foundTemplate) {
+      setTemplate(foundTemplate);
+      selectedTemplateValue.value = templateId; // プルダウンも連動させる
+    }
+  }
 
   nextTick(() => {
     if (titleInput.value) {
