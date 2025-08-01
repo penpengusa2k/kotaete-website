@@ -19,7 +19,7 @@
 
     <!-- Sample Survey Runner Section -->
     <div class="mt-10 sm:mt-16 text-center animate-section-fade-in">
-      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">まずは試してみよう</h2>
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">まずはお試し</h2>
       <div class="max-w-2xl mx-auto">
         <SampleSurveyRunner />
       </div>
@@ -28,14 +28,36 @@
     <!-- Template Questions Section -->
     <div class="mt-10 sm:mt-16 animate-section-fade-in">
       <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">テンプレートから作成</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <TemplateQuestionCard
-          v-for="template in templates"
-          :key="template.id"
-          :template="template"
-          @create="handleCreateFromTemplate"
-        />
+      <div class="max-w-4xl mx-auto relative">
+        <swiper
+          :modules="modules"
+          :slides-per-view="1"
+          :space-between="20"
+          :navigation="true"
+          :pagination="{ clickable: true }"
+          :scrollbar="{ draggable: true }"
+          :autoplay="{ delay: 5000, disableOnInteraction: false }"
+          :breakpoints="{
+            640: { slidesPerView: 2, spaceBetween: 30 },
+            1024: { slidesPerView: 3, spaceBetween: 40 }
+          }"
+          class="template-swiper"
+        >
+          <swiper-slide v-for="template in templateList" :key="template.id">
+            <TemplateQuestionCard
+              :template="template"
+            />
+          </swiper-slide>
+        </swiper>
       </div>
+    </div>
+
+    <!-- Moved and modified create link -->
+    <div class="mt-10 sm:mt-16 text-center">
+        <NuxtLink to="/create" class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 animate-subtle-bounce custom-button-width">
+          <span class="material-icons-outlined mr-2">add_circle_outline</span>
+          自分でも作ってみよう
+        </NuxtLink>
     </div>
 
     <div class="mt-10 sm:mt-16 text-center animate-section-fade-in">
@@ -57,14 +79,6 @@
           <p class="text-gray-700">集まった回答はリアルタイムでグラフ化。CSVダウンロードで詳細な分析も可能です。</p>
         </div>
       </div>
-    </div>
-
-    <!-- Moved and modified create link -->
-    <div class="mt-10 sm:mt-16 text-center">
-        <NuxtLink to="/create" class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 animate-subtle-bounce custom-button-width">
-          <span class="material-icons-outlined mr-2">add_circle_outline</span>
-          自分でも作ってみよう
-        </NuxtLink>
     </div>
 
     <div class="mt-10 sm:mt-16 text-center animate-section-fade-in delay-spread-section">
@@ -99,13 +113,31 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-// import { templates } from '@/lib/templates';
+import { templates } from '~/lib/templates'; // テンプレートデータをインポート
 import SampleSurveyRunner from '@/components/SampleSurveyRunner.vue';
 import TemplateQuestionCard from '@/components/TemplateQuestionCard.vue';
+
+// Swiperのインポート
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Navigation, Pagination, Scrollbar, A11y, Autoplay } from 'swiper/modules';
+
+// SwiperのCSSをインポート
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
 
 const totalCreatedCount = ref(null);
 const loadingCount = ref(true); // ローディング状態を管理
 const baseUrl = useRuntimeConfig().public.baseUrl;
+
+// templates オブジェクトを配列に変換
+const templateList = computed(() => {
+  return Object.values(templates);
+});
+
+// Swiper modules
+const modules = [Navigation, Pagination, Scrollbar, A11y, Autoplay];
 
 useHead({
   title: 'KOTAETE - 簡単・無料のアンケート作成サービス',

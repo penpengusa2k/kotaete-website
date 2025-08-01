@@ -1,18 +1,16 @@
 <template>
-  <div class="border p-4 rounded-lg shadow-md">
-    <h3 class="font-bold text-lg mb-2">{{ template.title }}</h3>
-    <ul class="list-disc list-inside mb-4">
-      <li v-for="(question, index) in template.questions" :key="index">
-        {{ question.question_text }}
-      </li>
-    </ul>
-    <button
-      @click="handleCreateFromTemplate"
-      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-    >
-      このテンプレートで作成
-    </button>
-  </div>
+  <NuxtLink :to="`/create?template=${template.id}`" class="block h-full">
+    <div class="border p-4 rounded-lg shadow-md flex flex-col min-h-[270px] h-full transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer">
+      <h3 class="font-bold text-lg mb-2">{{ template.title }}</h3>
+      <ul class="list-disc mb-4 flex-grow overflow-hidden">
+        <li v-for="(question, index) in template.questions.slice(0, 3)" :key="index">
+          ・{{ question.text }}
+        </li>
+        <li v-if="template.questions.length > 3" class="text-gray-500">...</li>
+      </ul>
+      <!-- ボタンを削除 -->
+    </div>
+  </NuxtLink>
 </template>
 
 <script setup>
@@ -23,9 +21,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['create']);
+// emit は不要になるため削除
+// const emit = defineEmits(['create']);
 
-const handleCreateFromTemplate = () => {
-  emit('create', props.template.id);
-};
+// handleCreateFromTemplate も不要になるため削除
+// const handleCreateFromTemplate = () => {
+//   emit('create', props.template.id);
+// };
 </script>

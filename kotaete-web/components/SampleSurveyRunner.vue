@@ -19,6 +19,22 @@
             {{ oIndex + 1 }}
           </button>
         </div>
+        <div v-else-if="question.question_type === 'radio'" class="flex flex-col space-y-2">
+          <label
+            v-for="(option, oIndex) in question.options"
+            :key="oIndex"
+            class="inline-flex items-center cursor-pointer"
+          >
+            <input
+              type="radio"
+              :name="`question-${qIndex}`"
+              :value="oIndex + 1"
+              v-model="answers[qIndex]"
+              class="form-radio h-5 w-5 text-blue-600"
+            >
+            <span class="ml-2 text-gray-700">{{ option }}</span>
+          </label>
+        </div>
       </div>
       <button
         @click="submitSurvey"
@@ -38,7 +54,7 @@
           {{ question.question_text }}
         </h4>
         <div class="p-4 border border-gray-300 rounded-lg bg-white">
-            <div class="flex items-center mb-2">
+            <div v-if="question.question_type === '5-point'" class="flex items-center mb-2">
               <p class="text-lg font-semibold text-gray-700">平均評価:</p>
               <p class="text-2xl font-bold text-primary ml-2">{{ calculateAverage(index) }}</p>
             </div>
@@ -50,7 +66,8 @@
 
       <div class="text-center mt-6">
         <p class="mb-4">このように、簡単にアンケートの作成と結果の可視化ができます。</p>
-        <button @click="navigateTo('/create')" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+        <button @click="navigateTo('/create')" class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 custom-button-width">
+          <span class="material-icons-outlined mr-2">add_circle_outline</span>
           自分でも作ってみよう
         </button>
       </div>
@@ -66,17 +83,17 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 Chart.register(...registerables, ChartDataLabels);
 
 const sampleSurvey = {
-  title: 'サンプル：サービス満足度調査',
+  title: 'サンプル：気軽に答えてみよう！',
   questions: [
     {
-      question_text: 'このサイトの使いやすさはいかがですか？',
+      question_text: '今日のあなたの満足度は何点ですか？',
       question_type: '5-point',
-      options: ['とても悪い', '悪い', '普通', '良い', 'とても良い'],
+      options: ['1', '2', '3', '4', '5'],
     },
     {
-      question_text: 'デザインは魅力的ですか？',
-      question_type: '5-point',
-      options: ['全くそう思わない', 'そう思わない', '普通', 'そう思う', '非常にそう思う'],
+      question_text: '休日の過ごし方、どちらが好きですか？',
+      question_type: 'radio',
+      options: ['家でゆっくり過ごす', '外に出かけてアクティブに過ごす'],
     },
   ],
 };
@@ -98,9 +115,16 @@ const calculateAverage = (qIndex) => {
 const submitSurvey = async () => {
   if (!isAllAnswered.value) return;
 
-  const generatedResults = sampleSurvey.questions.map((_, qIndex) => {
-    const randomAnswers = Array.from({ length: Math.floor(Math.random() * 20) + 10 }, () => Math.floor(Math.random() * 5) + 1);
-    const allAnswers = [...randomAnswers, answers.value[qIndex]];
+  const generatedResults = sampleSurvey.questions.map((question, qIndex) => {
+    let allAnswers;
+    if (question.question_type === '5-point') {
+      const randomAnswers = Array.from({ length: Math.floor(Math.random() * 20) + 10 }, () => Math.floor(Math.random() * 5) + 1);
+      allAnswers = [...randomAnswers, answers.value[qIndex]];
+    } else if (question.question_type === 'radio') {
+      // ラジオボタンの場合、選択肢のインデックスを回答として扱う
+      const randomAnswers = Array.from({ length: Math.floor(Math.random() * 20) + 10 }, () => Math.floor(Math.random() * question.options.length) + 1);
+      allAnswers = [...randomAnswers, answers.value[qIndex]];
+    }
     return { answers: allAnswers };
   });
   
@@ -118,10 +142,38 @@ const renderCharts = () => {
     const ctx = document.getElementById(`sample-chart-${index}`);
     if (!ctx) return;
 
-    const result = resultsData.value[index];
-    const counts = [0, 0, 0, 0, 0];
-    result.answers.forEach(ans => { if (ans >= 1 && ans <= 5) counts[ans - 1]++; });
-    const chartLabels = ['1', '2', '3', '4', '5'];
+    let chartLabels = [];
+    let chartData = [];
+    let tooltipTitleCallback;
+
+    if (question.question_type === '5-point') {
+      const result = resultsData.value[index];
+      const counts = [0, 0, 0, 0, 0];
+      result.answers.forEach(ans => { if (ans >= 1 && ans <= 5) counts[ans - 1]++; });
+      chartLabels = ['1', '2', '3', '4', '5'];
+      chartData = counts;
+      tooltipTitleCallback = (context) => `評価: ${context[0].label} (${context[0].formattedValue}票)`;
+    } else if (question.question_type === 'radio') {
+      const result = resultsData.value[index];
+      const counts = {};
+      question.options.forEach(option => counts[option] = 0);
+      result.answers.forEach(ans => {
+        // answers[qIndex] は 1-indexed なので、options のインデックスに戻す
+        const optionText = question.options[ans - 1];
+        if (optionText) {
+          counts[optionText]++;
+        }
+      });
+      chartLabels = question.options;
+      chartData = question.options.map(option => counts[option]);
+      tooltipTitleCallback = (context) => {
+        if (context[0]) {
+          const originalLabel = chartLabels[context[0].dataIndex];
+          return `${originalLabel} (${context[0].formattedValue}票)`;
+        }
+        return '';
+      };
+    }
 
     const chart = new Chart(ctx, {
         type: 'bar',
@@ -129,13 +181,15 @@ const renderCharts = () => {
           labels: chartLabels,
           datasets: [{
             label: '回答数',
-            data: counts,
+            data: chartData,
             backgroundColor: [
               'rgba(255, 99, 132, 0.6)',
               'rgba(255, 159, 64, 0.6)',
               'rgba(255, 205, 86, 0.6)',
               'rgba(75, 192, 192, 0.6)',
-              'rgba(54, 162, 235, 0.6)'
+              'rgba(54, 162, 235, 0.6)',
+              'rgba(153, 102, 255, 0.6)',
+              'rgba(201, 203, 207, 0.6)'
             ],
             borderColor: 'transparent',
             borderWidth: 0,
@@ -188,7 +242,7 @@ const renderCharts = () => {
               titleColor: '#fff',
               bodyColor: '#fff',
               callbacks: {
-                title: (context) => `評価: ${context[0].label} (${context[0].formattedValue}票)`,
+                title: tooltipTitleCallback,
                 label: () => ''
               },
             },
