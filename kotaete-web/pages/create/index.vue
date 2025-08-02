@@ -215,8 +215,6 @@ const createStore = useCreateStore()
 const router = useRouter()
 const route = useRoute() // useRoute を追加
 
-console.log('Templates object in create page:', templates); // DEBUG: テンプレートオブジェクトの確認
-
 // --- 定数定義 ---
 const MAX_TITLE_LENGTH = 50;
 const MAX_CREATOR_NAME_LENGTH = 50;
@@ -268,13 +266,11 @@ const selectedTemplateValue = ref('');
 
 const handleTemplateSelect = async (event) => {
   const selectedId = event.target.value;
-  console.log('Selected template ID from dropdown:', selectedId); // DEBUG: プルダウン選択値の確認
   if (!selectedId) {
     return;
   }
   // templates オブジェクトから直接テンプレートを取得
   const template = Object.values(templates).find(t => t.id === selectedId);
-  console.log('Found template from dropdown:', template); // DEBUG: テンプレート検索結果の確認
   if (template) {
     await setTemplate(template);
   }

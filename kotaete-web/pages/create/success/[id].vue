@@ -100,7 +100,7 @@
     </div>
 
     <transition name="fade">
-      <div v-if="showCopiedMessage" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg">
+      <div v-if="showCopiedMessage" class="fixed bottom-[60px] left-1/2 -translate-x-1/2 bg-blue-500 text-white py-2 px-4 rounded-lg shadow-lg z-50">
         クリップボードにコピーしました！
       </div>
     </transition>
@@ -173,7 +173,7 @@ const postTextarea = ref(null);
 const postText = computed(() => {
   return `KOTAETE「${surveyTitle.value}」が爆誕！ぜひKOTAETEください！
 ${answerUrl.value}
-#KOTAETE #KOTAETEは簡単に作成できるアンケートサービスです`;
+#KOTAETE #匿名アンケート`;
 });
 
 const lineShareText = computed(() => {

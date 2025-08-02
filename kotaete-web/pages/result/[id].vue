@@ -11,7 +11,7 @@
       <h2 class="font-bold text-xl mb-2">エラーが発生しました</h2>
       <p class="text-base">{{ error }}</p>
     </div>
-    <div v-else-if="surveyData">
+    <div v-else-if="surveyData" id="result-content">
       <div v-if="hasAccess">
         <div class="flex items-center mb-4">
           <span class="text-3xl font-bold mr-2 text-primary">みんなの</span>
@@ -53,8 +53,41 @@
           <p class="text-sm">このKOTAETEは、回答期限から60日経過すると、その結果を含め自動的にシステムから削除されますので、必要な情報は早めにダウンロードしてください。</p>
         </div>
 
+        <div class="mb-8">
+          <h3 class="text-xl font-bold mb-3">結果をシェアしよう！</h3>
+          <div class="flex flex-wrap gap-3 mb-4">
+            <button @click="downloadImage" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              結果を画像でDLする
+            </button>
+            <a :href="`https://twitter.com/intent/tweet?text=${encodeURIComponent(postText)}`" target="_blank" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-6.597-8.717L5.25 22H1.942l7.356-8.406L2.25 2.25h3.308l5.979 7.679L18.244 2.25zM10.449 19.92L4.31 4.6H6.02L12.15 19.92h-1.701zm.464-1.797l-1.702-1.701L16.17 4.6h1.701l-7.058 13.523z"></path></svg>
+              Xでシェア
+            </a>
+            <a :href="`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(resultUrl)}&text=${encodeURIComponent(lineShareText)}`" target="_blank" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.707 7.293l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L10 12.586l4.293-4.293a1 1 0 011.414 1.414z"></path></svg>
+              LINEでシェア
+            </a>
+            <a :href="`https://www.threads.net/intent/post?text=${encodeURIComponent(postText)}`" target="_blank" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2C6.477 2 2 6.477 2 12c0 3.09 1.407 5.862 3.636 7.758l.364.305c.393.33.884.517 1.4.517.547 0 1.077-.2 1.49-.56l1.42-1.243c.347-.304.78-.465 1.23-.465h.9c.665 0 1.304.263 1.77.73l1.16 1.16c.453.452 1.1.707 1.77.707.513 0 1.007-.17 1.41-.48l.347-.287C20.582 17.837 22 15.073 22 12c0-5.523-4.477-10-10-10z"/>
+              </svg>
+              Threadsでシェア
+            </a>
+          </div>
+          <div class="p-4 bg-gray-50 rounded border">
+            <div class="flex items-center mb-1">
+              <p class="text-sm font-semibold mr-2">コピーして拡散しよう！:</p>
+              <button @click="copyToClipboard(postText, $event)" class="p-1 bg-gray-200 hover:bg-gray-300 rounded">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              </button>
+            </div>
+            <textarea readonly class="w-full p-1 text-sm border rounded bg-white" rows="3" @focus="$event.target.select()" ref="postTextarea">{{ postText }}</textarea>
+          </div>
+        </div>
+
         <hr class="my-6">
-        <div v-for="(question, index) in surveyData.questions" :key="index" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
+        <div id="result-content" v-for="(question, index) in surveyData.questions" :key="index" class="mb-6 p-4 bg-white rounded-lg shadow-md border border-neutral-light">
           <h3 class="text-xl font-bold text-gray-800 mb-3">
             Q{{ index + 1 }}. {{ question.text }}
           </h3>
@@ -181,6 +214,11 @@
       </div>
     </div>
   </div>
+  <transition name="fade">
+    <div v-if="showCopiedMessage" class="fixed bottom-[60px] left-1/2 -translate-x-1/2 bg-blue-500 text-white py-2 px-4 rounded-lg shadow-lg z-50">
+      クリップボードにコピーしました！
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -190,13 +228,18 @@ import Tooltip from '~/components/Tooltip.vue'
 import { formatDeadline } from '~/utils/formatters'
 import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import html2canvas from 'html2canvas';
 
 Chart.register(...registerables, ChartDataLabels);
 
 const route = useRoute();
 const router = useRouter();
+const config = useRuntimeConfig();
 const surveyId = route.params.id;
 let viewingKey = route.query.key;
+
+const baseUrl = config.public.baseUrl;
+const resultUrl = computed(() => `${baseUrl}/result/${surveyId}`);
 
 const surveyData = ref(null);
 const results = ref([]);
@@ -800,6 +843,62 @@ const formatQuestionHeader = (question, index) => {
   return question.text;
 };
 
+const postText = computed(() => {
+  return `KOTAETE「${surveyData.value?.title || 'アンケート'}」の結果を見てみよう！
+${resultUrl.value}
+#KOTAETE #匿名アンケート`;
+});
+
+const lineShareText = computed(() => {
+  return `KOTAETE「${surveyData.value?.title || 'アンケート'}」の結果が公開されました！`;
+});
+
+const showCopiedMessage = ref(false);
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    showCopiedMessage.value = true;
+    setTimeout(() => {
+      showCopiedMessage.value = false;
+    }, 2000);
+  } catch (err) {
+    console.error('クリップボードへのコピーに失敗しました:', err);
+    alert('クリップボードへのコピーに失敗しました。手動でコピーしてください。');
+  }
+};
+
+const downloadImage = async () => {
+  const element = document.getElementById('result-content');
+  if (!element) {
+    alert('キャプチャする要素が見つかりません。');
+    return;
+  }
+
+  // スクロール位置を一時的にリセット
+  const originalScrollY = window.scrollY;
+  window.scrollTo(0, 0);
+
+  try {
+    const canvas = await html2canvas(element, {
+      scale: 2, // 高解像度でキャプチャ
+      useCORS: true, // 外部画像を扱う場合
+    });
+
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `kotaete_result_${surveyId}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('画像のダウンロードに失敗しました:', error);
+    alert('結果画像のダウンロードに失敗しました。ブラウザのスクリーンショット機能をご利用ください。');
+  } finally {
+    // スクロール位置を元に戻す
+    window.scrollTo(0, originalScrollY);
+  }
+};
+
 const downloadCsv = () => {
   if (results.value.length === 0) {
     alert('ダウンロードするデータがありません。');
@@ -831,6 +930,7 @@ const downloadCsv = () => {
   link.click();
   document.body.removeChild(link);
 };
+
 </script>
 
 <style>
