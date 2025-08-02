@@ -3,8 +3,9 @@
   <div>
     <div class="flex items-center mb-6">
       <span class="material-icons-outlined text-4xl text-primary mr-2">leaderboard</span>
-      <h1 class="text-3xl font-bold">KOTAETEランキング</h1>
+      <h1 class="text-3xl font-bold">ランキング</h1>
     </div>
+    <p class="text-xs text-gray-500 -mt-4 mb-6 text-center">※デイリーランキングは毎日、ウィークリーランキングは毎週月曜日の午前5時頃に更新されます。</p>
 
     <div class="mb-4 flex justify-center bg-gray-100 rounded-lg p-1">
       <button @click="switchRankingType('daily')" :class="['flex-1 text-center py-2 px-4 font-semibold transition-all duration-300 rounded-md', rankingType === 'daily' ? 'bg-white text-primary shadow' : 'text-gray-500 hover:bg-gray-200']">
