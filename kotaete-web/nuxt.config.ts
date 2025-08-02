@@ -27,16 +27,7 @@ export default defineNuxtConfig({
           type: 'image/png'
         }
       ]
-    },
-    workbox: {
-      navigateFallback: '/',
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
-      navigateFallbackDenylist: [/\/api\//],
-    },
-    devOptions: {
-      enabled: true,
-      type: 'module',
-    },
+    }
   },
   plugins: [
     '~/plugins/persistedstate.client.ts'
@@ -70,7 +61,8 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/icon.png' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined' }
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined' },
+        { rel: 'manifest', href: '/manifest.webmanifest' }
       ],
       script: [
         {
