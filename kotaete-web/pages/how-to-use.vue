@@ -71,6 +71,48 @@
         <p class="text-gray-600 mt-4 text-center">（ここに結果表示のイメージ画像やグラフのアイコンを配置できます）</p>
       </section>
 
+      <section id="pwa-install" class="bg-white p-6 sm:p-8 rounded-xl shadow-md border border-indigo-100">
+        <h2 class="text-2xl font-semibold mb-4 pb-2 border-b-2 border-indigo-300 flex items-center">
+          <span class="material-icons-outlined text-indigo-500 mr-3 text-3xl">install_mobile</span>
+          4. アプリとして利用する (PWA)
+        </h2>
+        <div class="space-y-4 text-lg">
+          <p class="leading-relaxed">KOTAETEは、スマートフォンのホーム画面に追加して、アプリのように素早くアクセスすることができます。ここではiPhone(iOS)での手順を説明します。</p>
+          
+          <div class="space-y-6 mt-6">
+            <div>
+              <h3 class="font-semibold text-xl mb-2">ステップ1: 共有メニューを開く</h3>
+              <p class="mb-2 text-gray-700">SafariでKOTAETEのサイトを開き、画面下部にある共有アイコンをタップします。</p>
+              <img src="/pwa-1.png" alt="共有メニューを開く" class="mx-auto max-w-sm w-full h-auto rounded-lg shadow-md border">
+            </div>
+            
+            <div>
+              <h3 class="font-semibold text-xl mb-2">ステップ2: 「ホーム画面に追加」を選択</h3>
+              <p class="mb-2 text-gray-700">共有メニューの中から「ホーム画面に追加」を探してタップします。</p>
+              <img src="/pwa-2.png" alt="「ホーム画面に追加」を選択" class="mx-auto max-w-sm w-full h-auto rounded-lg shadow-md border">
+            </div>
+
+            <div>
+              <h3 class="font-semibold text-xl mb-2">ステップ3: 追加を確認</h3>
+              <p class="mb-2 text-gray-700">画面右上の「追加」ボタンをタップします。</p>
+              <img src="/pwa-3.png" alt="追加を確認" class="mx-auto max-w-sm w-full h-auto rounded-lg shadow-md border">
+            </div>
+
+            <div>
+              <h3 class="font-semibold text-xl mb-2">ステップ4: ホーム画面にアイコンが追加される</h3>
+              <p class="mb-2 text-gray-700">ホーム画面に戻ると、KOTAETEのアイコンが追加されています。</p>
+              <img src="/pwa-4.png" alt="ホーム画面のアイコン" class="mx-auto max-w-sm w-full h-auto rounded-lg shadow-md border">
+            </div>
+
+            <div>
+              <h3 class="font-semibold text-xl mb-2">ステップ5: アプリとして起動</h3>
+              <p class="mb-2 text-gray-700">アイコンをタップすると、アドレスバーなどが表示されない、アプリのような見た目でKOTAETEが起動します。</p>
+              <img src="/pwa-5.png" alt="アプリとして起動" class="mx-auto max-w-sm w-full h-auto rounded-lg shadow-md border">
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="bg-white p-6 sm:p-8 rounded-xl shadow-md border border-red-100">
         <h2 class="text-2xl font-semibold mb-4 pb-2 border-b-2 border-red-300 flex items-center">
           <span class="material-icons-outlined text-red-500 mr-3 text-3xl">warning</span>

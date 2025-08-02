@@ -87,6 +87,12 @@
           <p class="text-gray-700">集まった回答はリアルタイムでグラフ化。CSVダウンロードで詳細な分析も可能です。</p>
         </div>
       </div>
+      <div class="mt-8 text-center">
+        <NuxtLink to="/how-to-use#pwa-install" class="inline-flex items-center bg-indigo-100 text-indigo-800 font-bold py-3 px-6 rounded-full hover:bg-indigo-200 transition-colors duration-300 transform hover:scale-105">
+          <img src="/pwa-icon.png" alt="PWA Icon" class="w-6 h-6 mr-3 rounded-md">
+          <span>KOTAETEがアプリっぽく使えちゃう！？手順はこちら</span>
+        </NuxtLink>
+      </div>
     </div>
 
     <div class="mt-10 sm:mt-16 text-center animate-section-fade-in delay-spread-section">
