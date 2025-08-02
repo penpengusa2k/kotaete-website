@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
         fontSize: fontSize,
         anchor: 'top center', // 中央揃え
         attributes: {
-          fill: '#9575CD',         // ← ここに好きなパープルコード
+          fill: '#202020ff',         // ← ここに好きなパープルコード
           'fill-opacity': '1.0'    // 薄めたいときは 0.8〜0.9 もOK
         }
       });
