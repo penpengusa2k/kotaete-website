@@ -3,8 +3,8 @@
     <div class="text-center">
       <img src="/site-title.png" alt="KOTAETE" class="h-16 sm:h-20 mb-4 animate-fade-in-down-logo mx-auto block">
       <p class="mt-3 text-lg sm:text-xl text-gray-600 animate-fade-in-up-text">
-        あなたの「知りたい」に、みんなの答えを。<br/>
-        KOTAETEは簡単・無料のアンケート作成サービスです。
+        あなたの「知りたい」に、みんなの「本音」を。<br/>
+        KOTAETEは匿名で本音を引き出すアンケートサービスです。<br/>無料でご利用いただけます。
       </p>
 
       <div class="mt-4 text-center text-gray-500 animate-fade-in-up-text delay-count h-8 flex items-center justify-center">
@@ -162,7 +162,7 @@ useHead({
 const siteUrl = baseUrl;
 
 const shareText = computed(() => {
-  return `正直どう思ってる？🥺\n匿名で答えてもらえるアンケート作ったよ！\n推し・恋・性格なんでも聞ける！\n👇あなたも作ってみて「KOTAETE」\n${siteUrl}`;
+  return `みんなの「本音」が聞ける！\n匿名で回答できる無料アンケートサービス「KOTAETE」\n誰にも言えない質問から、リアルな意見まで、安心して「知りたい」を解決！\n👇あなたも作ってみて「KOTAETE」\n${siteUrl}`;
 });
 
 const fetchTotalCreatedCount = async () => {
