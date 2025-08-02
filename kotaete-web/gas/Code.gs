@@ -5,14 +5,78 @@ const CONTACT_SHEET_NAME = 'contact_messages';
 const CONTACT_SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('CONTACT_SPREADSHEET_ID');
 const NOTIFICATION_EMAIL = PropertiesService.getScriptProperties().getProperty('NOTIFICATION_EMAIL');
 const BACKUP_FOLDER_ID = PropertiesService.getScriptProperties().getProperty('BACKUP_FOLDER_ID');
-const STATS_SHEET_NAME = 'stats'; // 追加: 統計シート名
+const STATS_SHEET_NAME = 'stats';
 const RANKING_DAILY_SHEET_NAME = 'ranking_daily';
 const RANKING_WEEKLY_SHEET_NAME = 'ranking_weekly';
 const COUNT_HISTORY_SHEET_NAME = 'count_history';
 
+// --- GLOBAL SPREADSHEET OBJECTS ---
+let mainSpreadsheet = null;
+let masterSheet = null;
+let statsSheet = null;
+let rankingDailySheet = null;
+let rankingWeeklySheet = null;
+let countHistorySheet = null;
+
+/**
+ * Initializes global spreadsheet and sheet objects.
+ * This function should be called at the beginning of doGet and doPost.
+ */
+function initializeSheets() {
+  if (mainSpreadsheet === null) {
+    mainSpreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  }
+
+  if (masterSheet === null) {
+    masterSheet = mainSpreadsheet.getSheetByName(MASTER_SHEET_NAME);
+    if (!masterSheet) {
+      masterSheet = mainSpreadsheet.insertSheet(MASTER_SHEET_NAME);
+      // Assuming master sheet needs a header row if newly created
+      masterSheet.appendRow(['id', 'title', 'description', 'result_restricted', 'deadline', 'created_at', 'viewing_key', 'anonymous', 'questions', 'creator_name', 'like_count', 'response_count', 'is_protected', 'is_ranking_excluded', 'is_in_ranking']);
+      Logger.log(`Created new master sheet: ${MASTER_SHEET_NAME}`);
+    }
+  }
+
+  if (statsSheet === null) {
+    statsSheet = mainSpreadsheet.getSheetByName(STATS_SHEET_NAME);
+    if (!statsSheet) {
+      statsSheet = mainSpreadsheet.insertSheet(STATS_SHEET_NAME);
+      statsSheet.getRange('A1').setValue(0); // Initialize count
+      Logger.log(`Created new stats sheet: ${STATS_SHEET_NAME} and initialized A1 to 0.`);
+    }
+  }
+
+  if (rankingDailySheet === null) {
+    rankingDailySheet = mainSpreadsheet.getSheetByName(RANKING_DAILY_SHEET_NAME);
+    if (!rankingDailySheet) {
+      rankingDailySheet = mainSpreadsheet.insertSheet(RANKING_DAILY_SHEET_NAME);
+      rankingDailySheet.appendRow(['likes_id', 'likes_title', 'likes_count', 'responses_id', 'responses_title', 'responses_count']);
+      Logger.log(`Created new daily ranking sheet: ${RANKING_DAILY_SHEET_NAME}`);
+    }
+  }
+
+  if (rankingWeeklySheet === null) {
+    rankingWeeklySheet = mainSpreadsheet.getSheetByName(RANKING_WEEKLY_SHEET_NAME);
+    if (!rankingWeeklySheet) {
+      rankingWeeklySheet = mainSpreadsheet.insertSheet(RANKING_WEEKLY_SHEET_NAME);
+      rankingWeeklySheet.appendRow(['likes_id', 'likes_title', 'likes_count', 'responses_id', 'responses_title', 'responses_count']);
+      Logger.log(`Created new weekly ranking sheet: ${RANKING_WEEKLY_SHEET_NAME}`);
+    }
+  }
+
+  if (countHistorySheet === null) {
+    countHistorySheet = mainSpreadsheet.getSheetByName(COUNT_HISTORY_SHEET_NAME);
+    if (!countHistorySheet) {
+      countHistorySheet = mainSpreadsheet.insertSheet(COUNT_HISTORY_SHEET_NAME);
+      countHistorySheet.appendRow(['timestamp', 'survey_id', 'like_count', 'response_count']);
+      Logger.log(`Created new count history sheet: ${COUNT_HISTORY_SHEET_NAME}`);
+    }
+  }
+}
 
 // Main entry point for GET requests
 function doGet(e) {
+  initializeSheets(); // Initialize sheets once per execution
   try {
     const action = e.parameter.action;
     const id = e.parameter.id;
@@ -24,7 +88,7 @@ function doGet(e) {
         return createJsonResponse(handleResultsResponse(id, e.parameter.viewing_key));
       case 'list':
         throw new Error('List action is no longer supported.');
-      case 'getStats': // 追加: 統計取得アクション
+      case 'getStats':
         return createJsonResponse(handleGetStats());
       case 'getRankings':
         return createJsonResponse(handleGetRankings(e));
@@ -38,6 +102,7 @@ function doGet(e) {
 
 // Main entry point for POST requests
 function doPost(e) {
+  initializeSheets(); // Initialize sheets once per execution
   try {
     const requestBody = JSON.parse(e.postData.contents);
     const action = requestBody.action;
@@ -76,8 +141,7 @@ function doPost(e) {
 function handleGetResponse(id) {
   if (!id) throw new Error('Survey ID is required.');
 
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
-  const data = sheet.getDataRange().getValues();
+  const data = masterSheet.getDataRange().getValues();
   const header = data.shift();
   const idCol = header.indexOf('id');
 
@@ -92,8 +156,7 @@ function handleGetResponse(id) {
 function handleResultsResponse(id, viewingKey) {
   if (!id) throw new Error('Survey ID is required.');
 
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
-  const data = sheet.getDataRange().getValues();
+  const data = masterSheet.getDataRange().getValues();
   const header = data.shift();
   const idCol = header.indexOf('id');
 
@@ -113,7 +176,7 @@ function handleResultsResponse(id, viewingKey) {
   }
 
   const responseSheetName = `responses_${id}`;
-  const responseSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(responseSheetName);
+  const responseSheet = mainSpreadsheet.getSheetByName(responseSheetName);
 
   if (!responseSheet) {
     return { result: 'success', data: [] };
@@ -124,35 +187,31 @@ function handleResultsResponse(id, viewingKey) {
 }
 
 function handleListResponse() {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
-  const data = sheet.getDataRange().getValues();
+  const data = masterSheet.getDataRange().getValues();
   const header = data.shift();
   const surveys = data.map(row => rowToObject(row, header));
   return { result: 'success', data: surveys };
 }
 
-// 追加: 統計情報を取得するハンドラ
 function handleGetStats() {
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  let statsSheet = spreadsheet.getSheetByName(STATS_SHEET_NAME);
+  const cache = CacheService.getScriptCache();
+  const cachedCount = cache.get('totalCreatedCount');
 
-  if (!statsSheet) {
-    // statsシートが存在しない場合、作成し、A1セルに0を設定
-    statsSheet = spreadsheet.insertSheet(STATS_SHEET_NAME);
-    statsSheet.getRange('A1').setValue(0);
-    Logger.log(`Created new stats sheet: ${STATS_SHEET_NAME} and initialized A1 to 0.`);
+  if (cachedCount != null) {
+    Logger.log('Returning cached totalCreatedCount.');
+    return { result: 'success', totalCreatedCount: parseInt(cachedCount) };
   }
 
   const totalCount = statsSheet.getRange('A1').getValue();
+  cache.put('totalCreatedCount', totalCount.toString(), 300); // Cache for 5 minutes (300 seconds)
+  Logger.log('Fetched and cached totalCreatedCount.');
   return { result: 'success', totalCreatedCount: totalCount };
 }
 
 function handleGetRankings(e) {
-  const type = e.parameter.type || 'daily'; // Default to daily
-  const sheetName = type === 'weekly' ? RANKING_WEEKLY_SHEET_NAME : RANKING_DAILY_SHEET_NAME;
+  const type = e.parameter.type || 'daily';
+  const rankingSheet = type === 'weekly' ? rankingWeeklySheet : rankingDailySheet;
 
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const rankingSheet = spreadsheet.getSheetByName(sheetName);
   if (!rankingSheet || rankingSheet.getLastRow() < 2) {
     return { result: 'success', data: { likes: [], responses: [] } };
   }
@@ -163,14 +222,14 @@ function handleGetRankings(e) {
   const responses = [];
 
   data.forEach(row => {
-    if (row[0]) { // likes_id が存在すれば
+    if (row[0]) {
       likes.push({
         id: row[0],
         title: row[1],
         like_count: row[2]
       });
     }
-    if (row[3]) { // responses_id が存在すれば
+    if (row[3]) {
       responses.push({
         id: row[3],
         title: row[4],
@@ -193,41 +252,26 @@ function handleCreate(data) {
       }
     }
   }
-  const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
-  const newRow = [data.id, data.title, data.description, data.result_restricted, data.deadline, new Date(), data.viewing_key, data.anonymous, data.questions, data.creator_name, 0, 0, false, data.result_restricted, false]; // like_count, response_count, is_protected, is_ranking_excluded (閲覧制限で除外), is_in_ranking
+  const newRow = [data.id, data.title, data.description, data.result_restricted, data.deadline, new Date(), data.viewing_key, data.anonymous, data.questions, data.creator_name, 0, 0, false, data.result_restricted, false];
   masterSheet.appendRow(newRow);
 
-  // Create a new sheet for responses
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   const responseSheetName = `responses_${data.id}`;
-  // Add respondent_id and timestamp to the headers
   let headers = [];
   if (data.anonymous) {
     headers = ['respondent_id', 'timestamp', ...questions.map((q, i) => `Q${i + 1}. ${q.text}`)];
   } else {
     headers = ['username', 'respondent_id', 'timestamp', ...questions.map((q, i) => `Q${i + 1}. ${q.text}`)];
   }
-  spreadsheet.insertSheet(responseSheetName).getRange(1, 1, 1, headers.length).setValues([headers]);
+  mainSpreadsheet.insertSheet(responseSheetName).getRange(1, 1, 1, headers.length).setValues([headers]);
 
-  // 追加: KOTAETEが作成されるたびにstatsシートのカウントを増やす
-  const statsSheet = spreadsheet.getSheetByName(STATS_SHEET_NAME);
-  if (statsSheet) {
-    const currentCount = statsSheet.getRange('A1').getValue();
-    statsSheet.getRange('A1').setValue(currentCount + 1);
-    Logger.log(`Incremented total created count to ${currentCount + 1}.`);
-  } else {
-    // statsシートがない場合は作成して初期化
-    const newStatsSheet = spreadsheet.insertSheet(STATS_SHEET_NAME);
-    newStatsSheet.getRange('A1').setValue(1); // 最初のKOTAETE
-    Logger.log(`Created new stats sheet and set initial count to 1.`);
-  }
+  const currentCount = statsSheet.getRange('A1').getValue();
+  statsSheet.getRange('A1').setValue(currentCount + 1);
+  Logger.log(`Incremented total created count to ${currentCount + 1}.`);
 
   return { result: 'success', id: data.id };
 }
 
 function handleAnswer(data) {
-  // --- ADDED: Validate deadline ---
-  const masterSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
   const masterData = masterSheet.getDataRange().getValues();
   const masterHeader = masterData.shift();
   const idCol = masterHeader.indexOf('id');
@@ -247,16 +291,15 @@ function handleAnswer(data) {
   }
 
   const responseSheetName = `responses_${data.id}`;
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(responseSheetName);
+  const sheet = mainSpreadsheet.getSheetByName(responseSheetName);
   if (!sheet) throw new Error('Response sheet not found.');
 
-  // Check for duplicate submission from the same respondent_id
   const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const respondentColIndex = headerRow.indexOf('respondent_id');
   if (respondentColIndex === -1) {
     throw new Error('respondent_id column not found in response sheet header.');
   }
-  const respondentCol = respondentColIndex + 1; // 1-indexed for getRange
+  const respondentCol = respondentColIndex + 1;
 
   const lastRow = sheet.getLastRow();
   if (lastRow > 1) {
@@ -266,16 +309,13 @@ function handleAnswer(data) {
     }
   }
 
-  // --- ADDED: Validate answer length ---
   const MAX_ANSWER_LENGTH = 500;
   for (const answer of data.answers) {
     if (typeof answer === 'string' && answer.length > MAX_ANSWER_LENGTH) {
       throw new Error(`One of the answers exceeds the maximum length of ${MAX_ANSWER_LENGTH} characters.`);
     }
   }
-  // --- END: Validate answer length ---
 
-  // Add respondent_id and timestamp to the new row
   let newRow = [];
   if (data.username) {
     newRow = [data.username, data.respondent_id, new Date(), ...data.answers];
@@ -284,7 +324,6 @@ function handleAnswer(data) {
   }
   sheet.appendRow(newRow);
 
-  // Increment response count
   const currentResponseCount = surveyRow[responseCountCol] || 0;
   masterSheet.getRange(surveyRowIndex + 2, responseCountCol + 1).setValue(currentResponseCount + 1);
 
@@ -294,8 +333,7 @@ function handleAnswer(data) {
 function handleLike(id) {
   if (!id) throw new Error('Survey ID is required.');
 
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
-  const data = sheet.getDataRange().getValues();
+  const data = masterSheet.getDataRange().getValues();
   const header = data.shift();
   const idCol = header.indexOf('id');
   const likeCountCol = header.indexOf('like_count');
@@ -307,38 +345,26 @@ function handleLike(id) {
   const currentLikeCount = surveyRow[likeCountCol] || 0;
   const newLikeCount = currentLikeCount + 1;
 
-  sheet.getRange(surveyRowIndex + 2, likeCountCol + 1).setValue(newLikeCount);
+  masterSheet.getRange(surveyRowIndex + 2, likeCountCol + 1).setValue(newLikeCount);
 
   return { result: 'success', like_count: newLikeCount };
 }
 
-// New handler for contact form submissions
 function handleContact(data) {
-  const spreadsheet = SpreadsheetApp.openById(CONTACT_SPREADSHEET_ID); // 変更
-  let sheet = spreadsheet.getSheetByName(CONTACT_SHEET_NAME);
+  const contactSpreadsheet = SpreadsheetApp.openById(CONTACT_SPREADSHEET_ID);
+  let sheet = contactSpreadsheet.getSheetByName(CONTACT_SHEET_NAME);
 
-  // Create sheet if it doesn't exist
   if (!sheet) {
-    sheet = spreadsheet.insertSheet(CONTACT_SHEET_NAME);
-    sheet.appendRow(['timestamp', 'name', 'email', 'message']); // ヘッダー行
+    sheet = contactSpreadsheet.insertSheet(CONTACT_SHEET_NAME);
+    sheet.appendRow(['timestamp', 'name', 'email', 'message']);
   }
 
   const newRow = [new Date(), data.name, data.email, data.message];
   sheet.appendRow(newRow);
 
-  // Send email notification
   if (NOTIFICATION_EMAIL) {
     const subject = 'KOTAETE: 新しいお問い合わせがありました';
-    const body = `
-新しいお問い合わせが届きました。
-
-お名前: ${data.name}
-メールアドレス: ${data.email}
-お問い合わせ内容:
-${data.message}
-
-スプレッドシートで詳細を確認してください: https://docs.google.com/spreadsheets/d/${CONTACT_SPREADSHEET_ID}/
-`;
+    const body = `\n新しいお問い合わせが届きました。\n\nお名前: ${data.name}\nメールアドレス: ${data.email}\nお問い合わせ内容:\n${data.message}\n\nスプレッドシートで詳細を確認してください: https://docs.google.com/spreadsheets/d/${CONTACT_SPREADSHEET_ID}/\n`;
     MailApp.sendEmail(NOTIFICATION_EMAIL, subject, body);
   }
 
@@ -346,19 +372,11 @@ ${data.message}
 }
 
 function recordCountsHistory() {
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const masterSheet = spreadsheet.getSheetByName(MASTER_SHEET_NAME);
   const masterData = masterSheet.getDataRange().getValues();
   const header = masterData.shift();
   const idCol = header.indexOf('id');
   const likeCountCol = header.indexOf('like_count');
   const responseCountCol = header.indexOf('response_count');
-
-  let historySheet = spreadsheet.getSheetByName(COUNT_HISTORY_SHEET_NAME);
-  if (!historySheet) {
-    historySheet = spreadsheet.insertSheet(COUNT_HISTORY_SHEET_NAME);
-    historySheet.appendRow(['timestamp', 'survey_id', 'like_count', 'response_count']);
-  }
 
   const timestamp = new Date();
   const rowsToWrite = masterData.map(row => {
@@ -366,14 +384,12 @@ function recordCountsHistory() {
   });
 
   if (rowsToWrite.length > 0) {
-    historySheet.getRange(historySheet.getLastRow() + 1, 1, rowsToWrite.length, 4).setValues(rowsToWrite);
+    countHistorySheet.getRange(countHistorySheet.getLastRow() + 1, 1, rowsToWrite.length, 4).setValues(rowsToWrite);
   }
   Logger.log(`Recorded counts for ${rowsToWrite.length} surveys in ${COUNT_HISTORY_SHEET_NAME}.`);
 }
 
 function updateRankingsForPeriod(sheetName, days) {
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const masterSheet = spreadsheet.getSheetByName(MASTER_SHEET_NAME);
   const masterData = masterSheet.getDataRange().getValues();
   const masterHeader = masterData.shift();
 
@@ -386,22 +402,18 @@ function updateRankingsForPeriod(sheetName, days) {
   const now = new Date();
   const startDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
 
-  // Get current counts
   const currentSurveys = masterData.filter(row => !row[isRankingExcludedCol])
                                  .map(row => rowToObject(row, masterHeader));
 
-  // Get historical counts
-  const historySheet = spreadsheet.getSheetByName(COUNT_HISTORY_SHEET_NAME);
   let historicalData = {};
-  if (historySheet) {
-    const historyValues = historySheet.getDataRange().getValues();
+  if (countHistorySheet) {
+    const historyValues = countHistorySheet.getDataRange().getValues();
     const historyHeader = historyValues.shift();
     const histIdCol = historyHeader.indexOf('survey_id');
     const histLikeCol = historyHeader.indexOf('like_count');
     const histResponseCol = historyHeader.indexOf('response_count');
     const histTimestampCol = historyHeader.indexOf('timestamp');
 
-    // Find the closest snapshot to the start date
     let closestSnapshot = null;
     let minDiff = Infinity;
 
@@ -425,7 +437,6 @@ function updateRankingsForPeriod(sheetName, days) {
     }
   }
 
-  // Calculate deltas
   const rankedSurveys = currentSurveys.map(survey => {
     const pastData = historicalData[survey.id] || { like_count: 0, response_count: 0 };
     return {
@@ -439,10 +450,15 @@ function updateRankingsForPeriod(sheetName, days) {
   const topLikes = rankedSurveys.sort((a, b) => b.like_delta - a.like_delta).slice(0, 10);
   const topResponses = rankedSurveys.sort((a, b) => b.response_delta - a.response_delta).slice(0, 10);
 
-  let rankingSheet = spreadsheet.getSheetByName(sheetName);
-  if (!rankingSheet) {
-    rankingSheet = spreadsheet.insertSheet(sheetName);
+  let rankingSheet;
+  if (sheetName === RANKING_DAILY_SHEET_NAME) {
+    rankingSheet = rankingDailySheet;
+  } else if (sheetName === RANKING_WEEKLY_SHEET_NAME) {
+    rankingSheet = rankingWeeklySheet;
+  } else {
+    throw new Error('Invalid sheet name for ranking update.');
   }
+
   rankingSheet.clear();
   
   const rankingHeaders = ['likes_id', 'likes_title', 'likes_count', 'responses_id', 'responses_title', 'responses_count'];
@@ -469,26 +485,21 @@ function updateRankingsForPeriod(sheetName, days) {
 }
 
 function updateProtectedStatus() {
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const dailySheet = spreadsheet.getSheetByName(RANKING_DAILY_SHEET_NAME);
-  const weeklySheet = spreadsheet.getSheetByName(RANKING_WEEKLY_SHEET_NAME);
-
   const getRankedIdsFromSheet = (sheet) => {
     if (!sheet || sheet.getLastRow() < 2) return new Set();
     const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).getValues();
     const ids = new Set();
     data.forEach(row => {
-      if (row[0]) ids.add(row[0]); // likes_id
-      if (row[3]) ids.add(row[3]); // responses_id
+      if (row[0]) ids.add(row[0]);
+      if (row[3]) ids.add(row[3]);
     });
     return ids;
   };
 
-  const dailyIds = getRankedIdsFromSheet(dailySheet);
-  const weeklyIds = getRankedIdsFromSheet(weeklySheet);
+  const dailyIds = getRankedIdsFromSheet(rankingDailySheet);
+  const weeklyIds = getRankedIdsFromSheet(rankingWeeklySheet);
   const rankedIds = new Set([...dailyIds, ...weeklyIds]);
 
-  const masterSheet = spreadsheet.getSheetByName(MASTER_SHEET_NAME);
   const masterData = masterSheet.getDataRange().getValues();
   const header = masterData.shift();
   const idCol = header.indexOf('id');
@@ -505,15 +516,13 @@ function updateProtectedStatus() {
 }
 
 function cleanupOldHistory() {
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const historySheet = spreadsheet.getSheetByName(COUNT_HISTORY_SHEET_NAME);
-  if (!historySheet || historySheet.getLastRow() < 2) {
+  if (!countHistorySheet || countHistorySheet.getLastRow() < 2) {
     Logger.log('History sheet is empty or not found. No cleanup needed.');
     return;
   }
 
-  const data = historySheet.getDataRange().getValues();
-  const header = data.shift(); // remove header
+  const data = countHistorySheet.getDataRange().getValues();
+  const header = data.shift();
   const timestampCol = header.indexOf('timestamp');
 
   if (timestampCol === -1) {
@@ -528,14 +537,12 @@ function cleanupOldHistory() {
   for (let i = data.length - 1; i >= 0; i--) {
     const timestamp = new Date(data[i][timestampCol]);
     if (timestamp < tenDaysAgo) {
-      // +2 because of 1-based index and the header row that was shifted
       rowsToDelete.push(i + 2);
     }
   }
 
-  // Delete rows from the bottom up to avoid index shifting issues
   rowsToDelete.sort((a, b) => b - a).forEach(rowIndex => {
-    historySheet.deleteRow(rowIndex);
+    countHistorySheet.deleteRow(rowIndex);
   });
 
   if (rowsToDelete.length > 0) {
@@ -561,14 +568,13 @@ function performWeeklyMaintenance() {
 }
 
 function performDailyMaintenance() {
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const masterSheet = spreadsheet.getSheetByName(MASTER_SHEET_NAME);
+  initializeSheets(); // Ensure sheets are initialized for maintenance tasks
+
   if (!masterSheet) {
     Logger.log('Master sheet not found. Exiting cleanup.');
     return;
   }
 
-  // --- 1. Backup the spreadsheet ---
   let backupSuccessful = false;
   try {
     const backupFolder = DriveApp.getFolderById(BACKUP_FOLDER_ID);
@@ -585,13 +591,10 @@ function performDailyMaintenance() {
       const body = `\nスプレッドシートの自動バックアップ中にエラーが発生しました。\n\nエラーメッセージ: ${e.message}\n\nバックアップが失敗したため、後続のランキング更新および古いアンケートの削除処理は実行されませんでした。\n手動で状況を確認してください。\n`;
       MailApp.sendEmail(NOTIFICATION_EMAIL, subject, body);
     }
-    return; // If backup fails, do NOT proceed.
+    return;
   }
 
-  // --- Subsequent processes only run if backup was successful ---
   if (backupSuccessful) {
-    // --- 2. Update Rankings ---
-    // Daily ranking is always executed
     try {
       Logger.log('Starting daily ranking update...');
       updateRankingsForPeriod(RANKING_DAILY_SHEET_NAME, 1);
@@ -605,13 +608,11 @@ function performDailyMaintenance() {
       }
     }
 
-    // Weekly ranking is executed only on Mondays (day 1)
     const today = new Date();
-    if (today.getDay() === 1) { // 0=Sunday, 1=Monday, ..., 6=Saturday
+    if (today.getDay() === 1) {
       performWeeklyMaintenance();
     }
 
-    // Update protected status after all rankings are done
     try {
       Logger.log('Starting to update protected status...');
       updateProtectedStatus();
@@ -625,12 +626,11 @@ function performDailyMaintenance() {
       }
     }
 
-    // --- 3. Clean up old surveys ---
     Logger.log('Starting cleanup of old surveys...');
     const dataRange = masterSheet.getDataRange();
     const values = dataRange.getValues();
     const header = values[0];
-    const surveys = values.slice(1); // Exclude header row
+    const surveys = values.slice(1);
 
     const idColIndex = header.indexOf('id');
     const deadlineColIndex = header.indexOf('deadline');
@@ -645,7 +645,7 @@ function performDailyMaintenance() {
     sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
     const surveysToDelete = [];
-    const rowsToDelete = []; // Store row indices to delete from master sheet
+    const rowsToDelete = [];
 
     for (let i = surveys.length - 1; i >= 0; i--) {
       const survey = surveys[i];
@@ -655,22 +655,20 @@ function performDailyMaintenance() {
 
       if (deadline < sixtyDaysAgo && !isProtected) {
         surveysToDelete.push(surveyId);
-        rowsToDelete.push(i + 2); // +2 because of header row and 0-indexed array
+        rowsToDelete.push(i + 2);
       }
     }
 
-    // Delete rows from master sheet
     rowsToDelete.forEach(rowIndex => {
       masterSheet.deleteRow(rowIndex);
       Logger.log(`Deleted row ${rowIndex} from master sheet.`);
     });
 
-    // Delete corresponding response sheets
     surveysToDelete.forEach(surveyId => {
       const responseSheetName = `responses_${surveyId}`;
-      const responseSheet = spreadsheet.getSheetByName(responseSheetName);
+      const responseSheet = mainSpreadsheet.getSheetByName(responseSheetName);
       if (responseSheet) {
-        spreadsheet.deleteSheet(responseSheet);
+        mainSpreadsheet.deleteSheet(responseSheet);
         Logger.log(`Deleted response sheet: ${responseSheetName}`);
       } else {
         Logger.log(`Response sheet not found for survey ID: ${surveyId}. Skipping deletion.`);
@@ -683,7 +681,6 @@ function performDailyMaintenance() {
         Logger.log('Cleanup complete. No old surveys to delete.');
     }
 
-    // --- 4. Record today's counts for future ranking calculation ---
     try {
       Logger.log('Starting to record counts history...');
       recordCountsHistory();
@@ -697,7 +694,6 @@ function performDailyMaintenance() {
       }
     }
 
-    // --- 5. Cleanup old history data ---
     try {
       Logger.log('Starting to cleanup old history data...');
       cleanupOldHistory();
@@ -713,17 +709,15 @@ function performDailyMaintenance() {
   }
 }
 
-
 // --- UTILITY FUNCTIONS ---
 function validateViewingKey(surveyId, key) {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(MASTER_SHEET_NAME);
-  const data = sheet.getDataRange().getValues();
+  const data = masterSheet.getDataRange().getValues();
   const header = data.shift();
   const idCol = header.indexOf('id');
   const viewingKeyCol = header.indexOf('viewing_key');
 
   const surveyRow = data.find(row => row[idCol] == surveyId);
-  if (!surveyRow) return false; // Survey not found
+  if (!surveyRow) return false;
 
   return surveyRow[viewingKeyCol] == key;
 }
@@ -739,4 +733,3 @@ function rowToObject(row, header) {
     return obj;
   }, {});
 }
-

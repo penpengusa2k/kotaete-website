@@ -30,7 +30,7 @@
                 <span class="material-icons-outlined text-blue-500 mr-2">question_answer</span>
                 Q. ユーザー登録は必要ですか？
               </h3>
-              <p class="ml-8">A. いいえ、KOTAETEはユーザー登録なしでアンケートの作成・回答が可能です。思い立ったらすぐにアンケートを作成できます。</p>
+              <p class="ml-8">A. いいえ、KOTAETEはユーザー登録なしでアンケートの作成・回答が可能です。無料で匿名で気軽に本音を集めたい、というニーズに応えるため、手軽さを重視しています。</p>
             </div>
 
             <!-- Q&A Item 3 -->

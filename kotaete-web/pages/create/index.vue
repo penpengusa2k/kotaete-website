@@ -19,6 +19,9 @@
         >
           <option value="">テンプレートを選ぶ</option>
           <optgroup label="SNS向けテンプレート">
+            <option :value="templates.snsConfessionFails.id">SNS: 人生最大のやらかし</option>
+            <option :value="templates.snsRealVoices.id">SNS: みんなの悩みと本音</option>
+            <option :value="templates.snsDirtySecrets.id">SNS: あなただけの闇</option>
             <option :value="templates.snsFunnyPersonality.id">SNS: 性格バレアンケート</option>
             <option :value="templates.snsCrushCheck.id">SNS: 気になる人に聞いてみた</option>
             <option :value="templates.snsRatingMe.id">SNS: 私って何点？</option>
@@ -29,6 +32,7 @@
             <option :value="templates.snsDareMe.id">SNS: やってほしいこと募集</option>
           </optgroup>
           <optgroup label="業務用テンプレート">
+            <option :value="templates.bizGenericSatisfactionSurvey.id">業務用: 満足度調査テンプレ</option>
             <option :value="templates.bizCustomer.id">業務用: 顧客満足度</option>
             <option :value="templates.bizEmployee.id">業務用: 従業員アンケート</option>
             <option :value="templates.bizEventFeedback.id">業務用: イベント満足度</option>
@@ -211,8 +215,6 @@ const createStore = useCreateStore()
 const router = useRouter()
 const route = useRoute() // useRoute を追加
 
-console.log('Templates object in create page:', templates); // DEBUG: テンプレートオブジェクトの確認
-
 // --- 定数定義 ---
 const MAX_TITLE_LENGTH = 50;
 const MAX_CREATOR_NAME_LENGTH = 50;
@@ -264,13 +266,11 @@ const selectedTemplateValue = ref('');
 
 const handleTemplateSelect = async (event) => {
   const selectedId = event.target.value;
-  console.log('Selected template ID from dropdown:', selectedId); // DEBUG: プルダウン選択値の確認
   if (!selectedId) {
     return;
   }
   // templates オブジェクトから直接テンプレートを取得
   const template = Object.values(templates).find(t => t.id === selectedId);
-  console.log('Found template from dropdown:', template); // DEBUG: テンプレート検索結果の確認
   if (template) {
     await setTemplate(template);
   }

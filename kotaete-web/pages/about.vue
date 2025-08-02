@@ -33,7 +33,8 @@
         </h2>
         <ul class="list-disc list-inside space-y-3 pl-4 text-lg">
           <li><span class="font-bold text-gray-900">完全無料:</span> 基本機能はすべて無料でご利用いただけます。</li>
-          <li><span class="font-bold text-gray-900">登録不要:</span> 面倒なユーザー登録は一切必要ありません。</li>
+          <li><span class="font-bold text-gray-900">匿名性重視:</span> 回答者のプライバシーを保護し、本音を引き出しやすい設計です。</li>
+          <li><span class="font-bold text-gray-900">手軽に利用:</span> 面倒なユーザー登録は不要。思い立ったらすぐにアンケートを作成できます。</li>
           <li><span class="font-bold text-gray-900">リアルタイム集計:</span> 回答結果は即座にグラフ化され、一目で状況を把握できます。</li>
           <li><span class="font-bold text-gray-900">豊富な質問形式:</span> 記述式、ラジオボタン、チェックボックスなど、用途に合わせて質問タイプを選べます。</li>
           <li><span class="font-bold text-gray-900">OGP対応:</span> SNSで共有した際に、アンケートのタイトルが魅力的に表示されます。</li>

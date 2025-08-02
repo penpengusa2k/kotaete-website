@@ -86,14 +86,14 @@ const sampleSurvey = {
   title: 'サンプル：気軽に答えてみよう！',
   questions: [
     {
-      question_text: '今日のあなたの満足度は何点ですか？',
+      question_text: '今日の自分の評価は？',
       question_type: '5-point',
       options: ['1', '2', '3', '4', '5'],
     },
     {
       question_text: '休日の過ごし方、どちらが好きですか？',
       question_type: 'radio',
-      options: ['家でゆっくり過ごす', '外に出かけてアクティブに過ごす'],
+      options: ['家でゆっくり', '外でアクティブに'],
     },
   ],
 };

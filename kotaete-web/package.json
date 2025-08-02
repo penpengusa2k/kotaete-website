@@ -15,6 +15,7 @@
     "chart.js": "^4.4.3",
     "chartjs-plugin-datalabels": "^2.2.0",
     "confetti-js": "^0.0.18",
+    "html2canvas": "^1.4.1",
     "nuxt": "^3.17.5",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.4.1",

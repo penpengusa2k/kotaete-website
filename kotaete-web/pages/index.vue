@@ -3,8 +3,8 @@
     <div class="text-center">
       <img src="/site-title.png" alt="KOTAETE" class="h-16 sm:h-20 mb-4 animate-fade-in-down-logo mx-auto block">
       <p class="mt-3 text-lg sm:text-xl text-gray-600 animate-fade-in-up-text">
-        あなたの「知りたい」に、みんなの答えを。<br/>
-        KOTAETEは簡単・無料のアンケート作成サービスです。
+        あなたの「知りたい」に、みんなの「本音」を。<br/>
+        KOTAETEは匿名で本音を引き出すアンケートサービスです。<br/>無料でご利用いただけます。
       </p>
 
       <div class="mt-4 text-center text-gray-500 animate-fade-in-up-text delay-count h-8 flex items-center justify-center">
@@ -17,9 +17,17 @@
       </div>
     </div>
 
+    <!-- New Create Button Section -->
+    <div class="mt-8 sm:mt-12 text-center animate-section-fade-in">
+      <NuxtLink to="/create" class="inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-5 border border-transparent text-base sm:text-lg font-bold rounded-full shadow-xl text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 custom-button-width">
+        <span class="material-icons-outlined mr-3 text-2xl">add_circle_outline</span>
+        ＋さっそく作成する
+      </NuxtLink>
+    </div>
+
     <!-- Sample Survey Runner Section -->
     <div class="mt-10 sm:mt-16 text-center animate-section-fade-in">
-      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">まずはお試し</h2>
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">試してみる</h2>
       <div class="max-w-2xl mx-auto">
         <SampleSurveyRunner />
       </div>
@@ -27,7 +35,7 @@
 
     <!-- Template Questions Section -->
     <div class="mt-10 sm:mt-16 animate-section-fade-in">
-      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">テンプレートから作成</h2>
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">テンプレートから始める</h2>
       <div class="max-w-4xl mx-auto relative">
         <swiper
           :modules="modules"
@@ -56,7 +64,7 @@
     <div class="mt-10 sm:mt-16 text-center">
         <NuxtLink to="/create" class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 animate-subtle-bounce custom-button-width">
           <span class="material-icons-outlined mr-2">add_circle_outline</span>
-          自分でも作ってみよう
+          やっぱり自分で作成する
         </NuxtLink>
     </div>
 
@@ -154,7 +162,7 @@ useHead({
 const siteUrl = baseUrl;
 
 const shareText = computed(() => {
-  return `正直どう思ってる？🥺\n匿名で答えてもらえるアンケート作ったよ！\n推し・恋・性格なんでも聞ける！\n👇あなたも作ってみて「KOTAETE」\n${siteUrl}`;
+  return `みんなの「本音」が聞ける！\n匿名で回答できる無料アンケートサービス「KOTAETE」\n誰にも言えない質問から、リアルな意見まで、安心して「知りたい」を解決！\n👇あなたも作ってみて「KOTAETE」\n${siteUrl}`;
 });
 
 const fetchTotalCreatedCount = async () => {
