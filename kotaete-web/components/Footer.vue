@@ -39,7 +39,7 @@
         <div>
           <h3 class="text-sm font-semibold text-gray-300 tracking-wider uppercase">フォロー</h3>
           <ul class="mt-4 space-y-2">
-            <li><a href="https://x.com/kotaete_dev" target="_blank" rel="noopener noreferrer" class="text-base text-gray-400 hover:text-white">X (Twitter)</a></li>
+            <li><a href="https://x.com/kotaete_xyz" target="_blank" rel="noopener noreferrer" class="text-base text-gray-400 hover:text-white">X (Twitter)</a></li>
           </ul>
         </div>
       </div>
