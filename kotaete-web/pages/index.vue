@@ -17,9 +17,17 @@
       </div>
     </div>
 
+    <!-- New Create Button Section -->
+    <div class="mt-8 sm:mt-12 text-center animate-section-fade-in">
+      <NuxtLink to="/create" class="inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-5 border border-transparent text-base sm:text-lg font-bold rounded-full shadow-xl text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 custom-button-width">
+        <span class="material-icons-outlined mr-3 text-2xl">add_circle_outline</span>
+        ＋さっそく作成する
+      </NuxtLink>
+    </div>
+
     <!-- Sample Survey Runner Section -->
     <div class="mt-10 sm:mt-16 text-center animate-section-fade-in">
-      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">まずはお試し</h2>
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">試してみる</h2>
       <div class="max-w-2xl mx-auto">
         <SampleSurveyRunner />
       </div>
@@ -27,7 +35,7 @@
 
     <!-- Template Questions Section -->
     <div class="mt-10 sm:mt-16 animate-section-fade-in">
-      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">テンプレートから作成</h2>
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">テンプレートから始める</h2>
       <div class="max-w-4xl mx-auto relative">
         <swiper
           :modules="modules"
@@ -56,7 +64,7 @@
     <div class="mt-10 sm:mt-16 text-center">
         <NuxtLink to="/create" class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-full shadow-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 animate-subtle-bounce custom-button-width">
           <span class="material-icons-outlined mr-2">add_circle_outline</span>
-          自分でも作ってみよう
+          やっぱり自分で作成する
         </NuxtLink>
     </div>
 

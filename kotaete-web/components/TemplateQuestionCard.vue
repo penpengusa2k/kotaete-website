@@ -21,11 +21,4 @@ const props = defineProps({
   },
 });
 
-// emit は不要になるため削除
-// const emit = defineEmits(['create']);
-
-// handleCreateFromTemplate も不要になるため削除
-// const handleCreateFromTemplate = () => {
-//   emit('create', props.template.id);
-// };
 </script>

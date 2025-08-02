@@ -19,6 +19,9 @@
         >
           <option value="">テンプレートを選ぶ</option>
           <optgroup label="SNS向けテンプレート">
+            <option :value="templates.snsConfessionFails.id">SNS: 人生最大のやらかし</option>
+            <option :value="templates.snsRealVoices.id">SNS: みんなの悩みと本音</option>
+            <option :value="templates.snsDirtySecrets.id">SNS: あなただけの闇</option>
             <option :value="templates.snsFunnyPersonality.id">SNS: 性格バレアンケート</option>
             <option :value="templates.snsCrushCheck.id">SNS: 気になる人に聞いてみた</option>
             <option :value="templates.snsRatingMe.id">SNS: 私って何点？</option>
@@ -29,6 +32,7 @@
             <option :value="templates.snsDareMe.id">SNS: やってほしいこと募集</option>
           </optgroup>
           <optgroup label="業務用テンプレート">
+            <option :value="templates.bizGenericSatisfactionSurvey.id">業務用: 満足度調査テンプレ</option>
             <option :value="templates.bizCustomer.id">業務用: 顧客満足度</option>
             <option :value="templates.bizEmployee.id">業務用: 従業員アンケート</option>
             <option :value="templates.bizEventFeedback.id">業務用: イベント満足度</option>

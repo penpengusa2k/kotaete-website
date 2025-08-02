@@ -1,4 +1,123 @@
 export const templates = {
+  snsConfessionFails: {
+    id: 'snsConfessionFails',
+    title: '【ぶっちゃけ暴露】人生最大のやらかし',
+    description: '恥ずかしい失敗も、匿名なら笑い話になる！共感・ネタ・黒歴史、なんでもどうぞ。',
+    questions: [
+      { text: '今でも思い出すとヒヤッとするやらかしは？', type: 'text', options: [] },
+      { text: 'SNSに書けない人生最大のミス', type: 'text', options: [] },
+      { text: '恋愛・仕事・学校でやった後悔ベスト1', type: 'text', options: [] },
+      { text: 'そのときの自分に一言あるとしたら？', type: 'text', options: [] }
+    ],
+    resultRestricted: true,
+    anonymous: true
+  },
+
+  snsRealVoices: {
+    id: 'snsRealVoices',
+    title: '【他人のリアルが見たい】みんなの悩みと本音',
+    description: 'SNSはキラキラだけど、実際どう？他人の生活・お金・人間関係が気になるあなたへ。',
+    questions: [
+      { text: '今、一番ストレスを感じていることは？', type: 'text', options: [] },
+      { text: '収入と支出、正直やりくりできてる？', type: 'radio', options: [
+        { value: '余裕ある' }, { value: 'なんとかなる' }, { value: '赤字がち' }, { value: '聞かないで…' }
+      ] },
+      { text: '人には言えないコンプレックスがあるとすれば？', type: 'text', options: [] },
+      { text: '「自分だけ？」と思ってたこと、教えてください。', type: 'text', options: [] }
+    ],
+    resultRestricted: false,
+    anonymous: true
+  },
+
+  bizGenericSatisfactionSurvey: {
+    id: 'bizGenericSatisfactionSurvey',
+    title: '【評価テンプレ】5段階ラベルで満足度チェック',
+    description: '「非常に良い」「良い」などの5段階ラベルで評価を統一。業務・サービス・イベントなど幅広く使えます。',
+    questions: [
+      {
+        text: '対応のスピード',
+        type: '5-point',
+        options: [
+          { value: '5: 非常に良い' },
+          { value: '4: 良い' },
+          { value: '3: 普通' },
+          { value: '2: やや悪い' },
+          { value: '1: 非常に悪い' }
+        ]
+      },
+      {
+        text: '対応の丁寧さ',
+        type: '5-point',
+        options: [
+          { value: '5: 非常に良い' },
+          { value: '4: 良い' },
+          { value: '3: 普通' },
+          { value: '2: やや悪い' },
+          { value: '1: 非常に悪い' }
+        ]
+      },
+      {
+        text: '提供内容の質（商品・サービスなど）',
+        type: '5-point',
+        options: [
+          { value: '5: 非常に良い' },
+          { value: '4: 良い' },
+          { value: '3: 普通' },
+          { value: '2: やや悪い' },
+          { value: '1: 非常に悪い' }
+        ]
+      },
+      {
+        text: '価格・コスト感',
+        type: '5-point',
+        options: [
+          { value: '5: 非常に妥当' },
+          { value: '4: 妥当' },
+          { value: '3: 普通' },
+          { value: '2: やや高い' },
+          { value: '1: 非常に高い' }
+        ]
+      },
+      {
+        text: '今後も利用したいか',
+        type: '5-point',
+        options: [
+          { value: '5: 強く思う' },
+          { value: '4: そう思う' },
+          { value: '3: どちらでもない' },
+          { value: '2: あまり思わない' },
+          { value: '1: 全く思わない' }
+        ]
+      },
+      {
+        text: '自由記述：良かった点があればご記入ください。',
+        type: 'text',
+        options: []
+      },
+      {
+        text: '自由記述：改善してほしい点があればご記入ください。',
+        type: 'text',
+        options: []
+      }
+    ],
+    resultRestricted: true,
+    anonymous: false
+  },
+
+  snsDirtySecrets: {
+    id: 'snsDirtySecrets',
+    title: '【誰にも言えない秘密】あなただけの闇',
+    description: 'バレたら終わる…でも、誰かに話したい！そんなあなたの秘密、こっそり打ち明けて。',
+    questions: [
+      { text: 'いまだに隠している秘密があれば教えてください。', type: 'text', options: [] },
+      { text: '他人に言えない趣味・癖・性癖などありますか？', type: 'text', options: [] },
+      { text: '過去にしたことで一番後悔していることは？', type: 'text', options: [] },
+      { text: '秘密を抱えていることで得た教訓は？', type: 'text', options: [] }
+    ],
+    resultRestricted: true,
+    anonymous: true
+  },
+
   snsFunnyPersonality: {
     id: 'snsFunnyPersonality',
     title: '【ぶっちゃけ教えて】私ってどんな人？',
