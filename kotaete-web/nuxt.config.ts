@@ -1,6 +1,7 @@
 export default defineNuxtConfig({
   modules: [
     // @nuxtjs/google-adsense は審査通過後に使用でOK（下で補足）
+    'nuxt-vercel-analytics',
     '@pinia/nuxt',
     '@vite-pwa/nuxt'
   ],
