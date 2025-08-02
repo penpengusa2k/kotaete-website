@@ -1,8 +1,34 @@
 export default defineNuxtConfig({
   modules: [
     // @nuxtjs/google-adsense は審査通過後に使用でOK（下で補足）
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@vite-pwa/nuxt'
   ],
+  pwa: {
+    manifest: {
+      name: 'kotaete',
+      short_name: 'kotaete',
+      description: '簡単なアンケートを作成して、みんなの意見を集めよう',
+      lang: 'ja',
+      theme_color: '#ffffff',
+      background_color: '#ffffff',
+      display: 'standalone',
+      scope: '/',
+      start_url: '/',
+      icons: [
+        {
+          src: '/pwa-icon.png',
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: '/pwa-icon.png',
+          sizes: '512x512',
+          type: 'image/png'
+        }
+      ]
+    }
+  },
   plugins: [
     '~/plugins/persistedstate.client.ts'
   ],
@@ -35,7 +61,8 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/icon.png' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined' }
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined' },
+        { rel: 'manifest', href: '/manifest.webmanifest' }
       ],
       script: [
         {
