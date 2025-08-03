@@ -50,7 +50,7 @@ function initializeSheets() {
     rankingDailySheet = mainSpreadsheet.getSheetByName(RANKING_DAILY_SHEET_NAME);
     if (!rankingDailySheet) {
       rankingDailySheet = mainSpreadsheet.insertSheet(RANKING_DAILY_SHEET_NAME);
-      rankingDailySheet.appendRow(['likes_id', 'likes_title', 'likes_count', 'responses_id', 'responses_title', 'responses_count']);
+      rankingDailySheet.appendRow(['likes_id', 'likes_title', 'likes_count', 'total_likes_count', 'responses_id', 'responses_title', 'responses_count', 'total_responses_count']);
       Logger.log(`Created new daily ranking sheet: ${RANKING_DAILY_SHEET_NAME}`);
     }
   }
@@ -59,7 +59,7 @@ function initializeSheets() {
     rankingWeeklySheet = mainSpreadsheet.getSheetByName(RANKING_WEEKLY_SHEET_NAME);
     if (!rankingWeeklySheet) {
       rankingWeeklySheet = mainSpreadsheet.insertSheet(RANKING_WEEKLY_SHEET_NAME);
-      rankingWeeklySheet.appendRow(['likes_id', 'likes_title', 'likes_count', 'responses_id', 'responses_title', 'responses_count']);
+      rankingWeeklySheet.appendRow(['likes_id', 'likes_title', 'likes_count', 'total_likes_count', 'responses_id', 'responses_title', 'responses_count', 'total_responses_count']);
       Logger.log(`Created new weekly ranking sheet: ${RANKING_WEEKLY_SHEET_NAME}`);
     }
   }
@@ -216,7 +216,7 @@ function handleGetRankings(e) {
     return { result: 'success', data: { likes: [], responses: [] } };
   }
 
-  const data = rankingSheet.getRange(2, 1, rankingSheet.getLastRow() - 1, 6).getValues();
+  const data = rankingSheet.getRange(2, 1, rankingSheet.getLastRow() - 1, 8).getValues();
   
   const likes = [];
   const responses = [];
@@ -226,14 +226,16 @@ function handleGetRankings(e) {
       likes.push({
         id: row[0],
         title: row[1],
-        like_count: row[2]
+        like_count: row[2],
+        total_like_count: row[3]
       });
     }
-    if (row[3]) {
+    if (row[4]) {
       responses.push({
-        id: row[3],
-        title: row[4],
-        response_count: row[5]
+        id: row[4],
+        title: row[5],
+        response_count: row[6],
+        total_response_count: row[7]
       });
     }
   });
@@ -364,7 +366,16 @@ function handleContact(data) {
 
   if (NOTIFICATION_EMAIL) {
     const subject = 'KOTAETE: 新しいお問い合わせがありました';
-    const body = `\n新しいお問い合わせが届きました。\n\nお名前: ${data.name}\nメールアドレス: ${data.email}\nお問い合わせ内容:\n${data.message}\n\nスプレッドシートで詳細を確認してください: https://docs.google.com/spreadsheets/d/${CONTACT_SPREADSHEET_ID}/\n`;
+    const body = `
+新しいお問い合わせが届きました。
+
+お名前: ${data.name}
+メールアドレス: ${data.email}
+お問い合わせ内容:
+${data.message}
+
+スプレッドシートで詳細を確認してください: https://docs.google.com/spreadsheets/d/${CONTACT_SPREADSHEET_ID}/
+`;
     MailApp.sendEmail(NOTIFICATION_EMAIL, subject, body);
   }
 
@@ -443,7 +454,9 @@ function updateRankingsForPeriod(sheetName, days) {
       id: survey.id,
       title: survey.title,
       like_delta: (survey.like_count || 0) - pastData.like_count,
-      response_delta: (survey.response_count || 0) - pastData.response_count
+      response_delta: (survey.response_count || 0) - pastData.response_count,
+      total_like_count: survey.like_count || 0,
+      total_response_count: survey.response_count || 0
     };
   });
 
@@ -461,8 +474,8 @@ function updateRankingsForPeriod(sheetName, days) {
 
   rankingSheet.clear();
   
-  const rankingHeaders = ['likes_id', 'likes_title', 'likes_count', 'responses_id', 'responses_title', 'responses_count'];
-  rankingSheet.getRange(1, 1, 1, 6).setValues([rankingHeaders]);
+  const rankingHeaders = ['likes_id', 'likes_title', 'likes_count', 'total_likes_count', 'responses_id', 'responses_title', 'responses_count', 'total_responses_count'];
+  rankingSheet.getRange(1, 1, 1, 8).setValues([rankingHeaders]);
 
   const numRows = Math.max(topLikes.length, topResponses.length);
   const rowsToWrite = [];
@@ -473,14 +486,16 @@ function updateRankingsForPeriod(sheetName, days) {
       like ? like.id : '',
       like ? like.title : '',
       like ? like.like_delta : '',
+      like ? like.total_like_count : '',
       response ? response.id : '',
       response ? response.title : '',
-      response ? response.response_delta : ''
+      response ? response.response_delta : '',
+      response ? response.total_response_count : ''
     ]);
   }
 
   if (rowsToWrite.length > 0) {
-    rankingSheet.getRange(2, 1, rowsToWrite.length, 6).setValues(rowsToWrite);
+    rankingSheet.getRange(2, 1, rowsToWrite.length, 8).setValues(rowsToWrite);
   }
 }
 
