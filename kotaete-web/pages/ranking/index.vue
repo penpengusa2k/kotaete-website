@@ -60,9 +60,10 @@
                   {{ item.title }}
                 </NuxtLink>
               </h3>
-              <div class="text-sm text-gray-600 flex items-center">
+              <div class="text-sm text-gray-600 flex items-baseline flex-wrap">
                 <span class="material-icons-outlined text-base mr-1 text-pink-500">thumb_up</span>
-                +{{ item.like_count }} いいね
+                <span class="mr-2">+{{ item.like_count }} いいね</span>
+                <span class="text-xs text-gray-500">(累計: {{ item.total_like_count }})</span>
               </div>
             </div>
           </li>
@@ -88,9 +89,10 @@
                   {{ item.title }}
                 </NuxtLink>
               </h3>
-              <div class="text-sm text-gray-600 flex items-center">
+              <div class="text-sm text-gray-600 flex items-baseline flex-wrap">
                 <span class="material-icons-outlined text-base mr-1 text-blue-500">question_answer</span>
-                +{{ item.response_count }} 回答
+                <span class="mr-2">+{{ item.response_count }} 回答</span>
+                <span class="text-xs text-gray-500">(累計: {{ item.total_response_count }})</span>
               </div>
             </div>
           </li>
